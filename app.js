@@ -23,7 +23,8 @@ class BibleApp {
             fontSize: 18,
             showVerseNumbers: true,
             showHeadings: true,
-            showFootnotes: false
+            showFootnotes: false,
+            verseByVerse: false
         };
 
         // Cache for search debouncing
@@ -37,6 +38,7 @@ class BibleApp {
 
         // Initialize app
         this.init();
+
     }
 
     // ================================
@@ -107,6 +109,7 @@ class BibleApp {
         this.verseNumbersToggle = document.getElementById('verseNumbersToggle');
         this.headingsToggle = document.getElementById('headingsToggle');
         this.footnotesToggle = document.getElementById('footnotesToggle');
+        this.verseByVerseToggle = document.getElementById('verseByVerseToggle');
         this.fontSizeSlider = document.getElementById('fontSizeSlider');
         this.fontSizeValue = document.getElementById('fontSizeValue');
 
@@ -165,6 +168,7 @@ class BibleApp {
         this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
         this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
         this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
+        this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse()); 
         this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
         // Theme toggle
@@ -669,6 +673,7 @@ class BibleApp {
         this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
         this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
         this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+        this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
     }
 
     applySettings() {
@@ -676,9 +681,16 @@ class BibleApp {
         this.verseNumbersToggle.checked = this.state.showVerseNumbers;
         this.headingsToggle.checked = this.state.showHeadings;
         this.footnotesToggle.checked = this.state.showFootnotes;
+        this.verseByVerseToggle.checked = this.state.verseByVerse;
         this.fontSizeSlider.value = this.state.fontSize;
         this.fontSizeValue.textContent = `${this.state.fontSize}px`;
         this.passageText.style.fontSize = `${this.state.fontSize}px`;
+        // Apply verse-by-verse class 
+        if (this.state.verseByVerse) {
+            this.passageText.classList.add('verse-by-verse');
+        } else {
+            this.passageText.classList.remove('verse-by-verse');
+        }
     }
 
     async toggleSetting(setting) {
@@ -694,6 +706,25 @@ class BibleApp {
 
         this.loadPassage(this.state.currentBook, this.state.currentChapter);
     }
+
+    async toggleVerseByVerse() {
+    this.state.verseByVerse = this.verseByVerseToggle.checked;
+
+    // Save to Firebase or localStorage
+    if (this.currentUser) {
+        await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(this.state.verseByVerse);
+    } else {
+        localStorage.setItem('verseByVerse', this.state.verseByVerse);
+    }
+
+    // Apply the class
+    if (this.state.verseByVerse) {
+        this.passageText.classList.add('verse-by-verse');
+    } else {
+        this.passageText.classList.remove('verse-by-verse');
+    }
+}
+
 
     async updateFontSize(size) {
         this.state.fontSize = parseInt(size);
@@ -794,7 +825,7 @@ class BibleApp {
         if (isLight) {
             // Sun icon for light mode
             this.themeIcon.innerHTML = `
-                ircle cx="12" cy="12" r="5"/>
+                <circle cx="12" cy="12" r="5"/>
                 <line x1="12" y1="1" x2="12" y2="3"/>
                 <line x1="12" y1="21" x2="12" y2="23"/>
                 <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
@@ -890,7 +921,8 @@ class BibleApp {
                     fontSize: 18,
                     showVerseNumbers: true,
                     showHeadings: true,
-                    showFootnotes: false
+                    showFootnotes: false,
+                    verseByVerse: false,
                 },
                 createdAt: Date.now()
             });
@@ -946,6 +978,7 @@ class BibleApp {
                     this.state.showVerseNumbers = userData.settings.showVerseNumbers !== false;
                     this.state.showHeadings = userData.settings.showHeadings !== false;
                     this.state.showFootnotes = userData.settings.showFootnotes === true;
+                    this.state.verseByVerse = userData.settings.verseByVerse === true;
                 }
             }
         } catch (error) {

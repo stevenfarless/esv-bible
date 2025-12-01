@@ -965,3 +965,19 @@ body.light-mode .passage-text a:hover,
 body.light-mode .passage-text sup a:hover {
     color: var(--alucard-pink);
 }
+
+/* Verse-by-Verse Display */
+.verse-by-verse .verse-num {
+    display: block;
+    font-weight: 600;
+    margin-top: 1rem;
+    color: var(--primary);
+}
+
+.verse-by-verse .verse-num:first-child {
+    margin-top: 0;
+}
+
+.verse-by-verse p {
+    margin: 0;
+}
