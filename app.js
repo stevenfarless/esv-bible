@@ -23,6 +23,12 @@ class BibleApp {
 
         // Cache for search debouncing
         this.searchTimeout = null;
+        
+        // Scroll tracking
+        this.scrollTimeout = null;
+        
+        // Reading position tracking
+        this.lastScrollPosition = 0;
 
         // Initialize app
         this.init();
@@ -33,10 +39,18 @@ class BibleApp {
     // ================================
     init() {
         this.cacheElements();
-        this.loadTheme();  // ADD THIS LINE
+        this.loadTheme();
         this.attachEventListeners();
         this.applySettings();
-        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+        
+        // Load saved reading position or default to Genesis 1
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+            this.loadSavedReadingPosition();
+        } else {
+            this.loadPassage(this.state.currentBook, this.state.currentChapter);
+        }
+        
         this.checkApiKey();
     }
 
@@ -162,7 +176,7 @@ class BibleApp {
             this.openModal(this.loginModal);
         });
 
-        // Auth form submissions (placeholders for now)
+        // Auth form submissions
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
@@ -177,7 +191,6 @@ class BibleApp {
             this.handleLogout();
         });
 
-
         // Close auth modals
         this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
         this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
@@ -187,9 +200,16 @@ class BibleApp {
         [this.bookModal, this.chapterModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) this.closeModal(modal);
-    });
-});
+            });
+        });
 
+        // Track scroll position
+        window.addEventListener('scroll', () => {
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = setTimeout(() => {
+                this.saveReadingPosition();
+            }, 500);
+        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
@@ -314,7 +334,12 @@ class BibleApp {
     // ================================
     // Passage Loading
     // ================================
-    async loadPassage(book, chapter) {
+    async loadPassage(book, chapter, restoreScroll = false) {
+        // Save previous scroll position before changing
+        if (!restoreScroll) {
+            this.saveReadingPosition();
+        }
+        
         this.state.currentBook = book;
         this.state.currentChapter = chapter;
 
@@ -326,19 +351,29 @@ class BibleApp {
         const data = await this.fetchPassage(reference);
 
         if (data && data.passages && data.passages.length > 0) {
-            this.displayPassage(data);
+            this.displayPassage(data, restoreScroll);
         }
     }
 
-    displayPassage(data) {
+    displayPassage(data, restoreScroll = false) {
         const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
 
         this.passageTitle.textContent = canonical;
         this.passageText.innerHTML = data.passages[0];
         this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Restore scroll position or scroll to top
+        if (restoreScroll) {
+            setTimeout(() => {
+                const savedPosition = this.getSavedScrollPosition();
+                window.scrollTo({ top: savedPosition, behavior: 'auto' });
+            }, 100);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Save reading position after loading
+        this.saveReadingPosition();
     }
 
     // ================================
@@ -577,15 +612,14 @@ class BibleApp {
     // Settings
     // ================================
     checkApiKey() {
-    if (!this.API_KEY) {
-        setTimeout(() => {
-            this.showToast('Please sign up or set your ESV API key in Settings.');
-            // Open signup modal instead of settings
-            this.openModal(this.signupModal);
-        }, 500);
+        if (!this.API_KEY) {
+            setTimeout(() => {
+                this.showToast('Please sign up or set your ESV API key in Settings.');
+                // Open signup modal instead of settings
+                this.openModal(this.signupModal);
+            }, 500);
+        }
     }
-}
-
 
     saveApiKey() {
         const apiKey = this.apiKeyInput.value.trim();
@@ -652,7 +686,7 @@ class BibleApp {
         }, 3000);
     }
 
-        handleKeyboardShortcuts(e) {
+    handleKeyboardShortcuts(e) {
         // Ctrl/Cmd + K to open search
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
@@ -710,7 +744,7 @@ class BibleApp {
         if (isLight) {
             // Sun icon for light mode
             this.themeIcon.innerHTML = `
-                <circle cx="12" cy="12" r="5"/>
+                ircle cx="12" cy="12" r="5"/>
                 <line x1="12" y1="1" x2="12" y2="3"/>
                 <line x1="12" y1="21" x2="12" y2="23"/>
                 <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
@@ -727,11 +761,11 @@ class BibleApp {
             `;
         }
     }
+
     // ================================
-    // Authentication (Placeholder)
+    // Authentication
     // ================================
     handleUserButtonClick() {
-        // Check if user is logged in (placeholder)
         const isLoggedIn = localStorage.getItem('userEmail');
         
         if (isLoggedIn) {
@@ -746,93 +780,144 @@ class BibleApp {
         }
     }
 
-handleLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        this.showToast('Please enter valid credentials');
-        return;
-    }
-    
-    // Check if account exists
-    const storedPassword = localStorage.getItem(`user_${email}_password`);
-    
-    if (!storedPassword) {
-        // Account doesn't exist - offer to sign up
-        if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
-            this.closeModal(this.loginModal);
-            this.openModal(this.signupModal);
-            // Pre-fill email in signup form
-            document.getElementById('signupEmail').value = email;
+    handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+            this.showToast('Please enter valid credentials');
+            return;
         }
-        return;
+        
+        // Check if account exists
+        const storedPassword = localStorage.getItem(`user_${email}_password`);
+        
+        if (!storedPassword) {
+            // Account doesn't exist - offer to sign up
+            if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
+                this.closeModal(this.loginModal);
+                this.openModal(this.signupModal);
+                // Pre-fill email in signup form
+                document.getElementById('signupEmail').value = email;
+            }
+            return;
+        }
+        
+        // Validate password
+        if (storedPassword !== password) {
+            this.showToast('Incorrect password');
+            return;
+        }
+        
+        // Login successful
+        localStorage.setItem('userEmail', email);
+        this.showToast('Signed in successfully!');
+        this.closeModal(this.loginModal);
+        
+        // Load user's saved reading position
+        this.loadSavedReadingPosition();
+        
+        // Clear form
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
     }
-    
-    // Validate password
-    if (storedPassword !== password) {
-        this.showToast('Incorrect password');
-        return;
-    }
-    
-    // Login successful
-    localStorage.setItem('userEmail', email);
-    this.showToast('Signed in successfully!');
-    this.closeModal(this.loginModal);
-    
-    // Clear form
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-}
 
-handleSignup() {
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
-    const apiKey = document.getElementById('signupApiKey').value;
-    
-    if (!email || !password || !apiKey) {
-        this.showToast('Please fill in all fields');
-        return;
+    handleSignup() {
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const apiKey = document.getElementById('signupApiKey').value;
+        
+        if (!email || !password || !apiKey) {
+            this.showToast('Please fill in all fields');
+            return;
+        }
+        
+        // Check if account already exists
+        const existingAccount = localStorage.getItem(`user_${email}_password`);
+        if (existingAccount) {
+            this.showToast('Account already exists. Please sign in.');
+            return;
+        }
+        
+        // Validate password length
+        if (password.length < 6) {
+            this.showToast('Password must be at least 6 characters');
+            return;
+        }
+        
+        // Create account
+        localStorage.setItem(`user_${email}_password`, password);
+        localStorage.setItem(`user_${email}_apiKey`, apiKey);
+        localStorage.setItem('esvApiKey', apiKey);
+        localStorage.setItem('userEmail', email);
+        
+        this.API_KEY = apiKey;
+        
+        this.showToast('Account created successfully!');
+        this.closeModal(this.signupModal);
+        
+        // Clear form
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupApiKey').value = '';
+        
+        // Reload passage with new API key
+        this.loadPassage(this.state.currentBook, this.state.currentChapter);
     }
-    
-    // Check if account already exists
-    const existingAccount = localStorage.getItem(`user_${email}_password`);
-    if (existingAccount) {
-        this.showToast('Account already exists. Please sign in.');
-        return;
-    }
-    
-    // Validate password length
-    if (password.length < 6) {
-        this.showToast('Password must be at least 6 characters');
-        return;
-    }
-    
-    // Create account
-    localStorage.setItem(`user_${email}_password`, password);
-    localStorage.setItem(`user_${email}_apiKey`, apiKey);
-    localStorage.setItem('esvApiKey', apiKey);
-    localStorage.setItem('userEmail', email);
-    
-    this.API_KEY = apiKey;
-    
-    this.showToast('Account created successfully!');
-    this.closeModal(this.signupModal);
-    
-    // Clear form
-    document.getElementById('signupEmail').value = '';
-    document.getElementById('signupPassword').value = '';
-    document.getElementById('signupApiKey').value = '';
-    
-    // Reload passage with new API key
-    this.loadPassage(this.state.currentBook, this.state.currentChapter);
-}
 
-handleLogout() {
-    localStorage.removeItem('userEmail');
-    this.showToast('Signed out successfully!');
-    this.closeModal(this.userMenuModal);
-}
+    handleLogout() {
+        localStorage.removeItem('userEmail');
+        this.showToast('Signed out successfully!');
+        this.closeModal(this.userMenuModal);
+    }
+
+    // ================================
+    // Reading Position Persistence
+    // ================================
+    saveReadingPosition() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) return; // Only save for logged-in users
+        
+        const position = {
+            book: this.state.currentBook,
+            chapter: this.state.currentChapter,
+            scrollPosition: window.pageYOffset || document.documentElement.scrollTop
+        };
+        
+        localStorage.setItem(`user_${userEmail}_readingPosition`, JSON.stringify(position));
+    }
+
+    getSavedScrollPosition() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) return 0;
+        
+        const saved = localStorage.getItem(`user_${userEmail}_readingPosition`);
+        if (!saved) return 0;
+        
+        try {
+            const position = JSON.parse(saved);
+            return position.scrollPosition || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    loadSavedReadingPosition() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) return;
+        
+        const saved = localStorage.getItem(`user_${userEmail}_readingPosition`);
+        if (!saved) return;
+        
+        try {
+            const position = JSON.parse(saved);
+            if (position.book && position.chapter) {
+                this.loadPassage(position.book, position.chapter, true);
+            }
+        } catch (e) {
+            console.error('Failed to load reading position:', e);
+        }
+    }
 }
 
 // ================================
