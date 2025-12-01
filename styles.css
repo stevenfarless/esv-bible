@@ -968,16 +968,20 @@ body.light-mode .passage-text sup a:hover {
 
 /* Verse-by-Verse Display */
 .verse-by-verse .verse-num {
-    display: block;
+    display: inline-block;
+    /* Changed from 'block' to 'inline-block' */
     font-weight: 600;
-    margin-top: 1rem;
+    margin-right: 0.5rem;
+    /* Add space between number and text */
     color: var(--primary);
 }
 
-.verse-by-verse .verse-num:first-child {
-    margin-top: 0;
+.verse-by-verse p {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0;
 }
 
-.verse-by-verse p {
-    margin: 0;
+.verse-by-verse p:first-child {
+    margin-top: 0;
 }
