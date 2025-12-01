@@ -969,19 +969,25 @@ body.light-mode .passage-text sup a:hover {
 /* Verse-by-Verse Display */
 .verse-by-verse .verse-num {
     display: inline-block;
-    /* Changed from 'block' to 'inline-block' */
     font-weight: 600;
     margin-right: 0.5rem;
-    /* Add space between number and text */
     color: var(--primary);
 }
 
-.verse-by-verse p {
+/* Force line break before each verse number (except first) */
+.verse-by-verse .verse-num:not(:first-child)::before {
+    content: "";
     display: block;
     margin-top: 1rem;
-    margin-bottom: 0;
 }
 
-.verse-by-verse p:first-child {
-    margin-top: 0;
+/* Remove paragraph spacing in verse-by-verse mode */
+.verse-by-verse p {
+    margin: 0;
+    line-height: 1.8;
+}
+
+.verse-by-verse h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
 }
