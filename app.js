@@ -622,12 +622,12 @@ class BibleApp {
     // Settings
     // ================================
     checkApiKey() {
-        if (!this.API_KEY) {
-            setTimeout(() => {
-                this.showToast('Please sign up or set your ESV API key in Settings.');
-                this.openModal(this.signupModal);
-            }, 500);
-        }
+    if (!this.API_KEY) {
+        setTimeout(() => {
+            this.showToast('Welcome! Please sign in to start reading.');
+            // Open login modal instead of signup
+            this.openModal(this.loginModal);
+        }, 500);
     }
 
     async saveApiKey() {
