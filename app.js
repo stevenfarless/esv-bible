@@ -629,6 +629,7 @@ class BibleApp {
             this.openModal(this.loginModal);
         }, 500);
     }
+}
 
     async saveApiKey() {
         const apiKey = this.apiKeyInput.value.trim();
