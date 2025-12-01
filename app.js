@@ -750,14 +750,39 @@ handleLogin() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     
-    // Placeholder - will integrate with Firebase later
-    if (email && password) {
-        localStorage.setItem('userEmail', email);
-        this.showToast('Signed in successfully!');
-        this.closeModal(this.loginModal);
-    } else {
+    if (!email || !password) {
         this.showToast('Please enter valid credentials');
+        return;
     }
+    
+    // Check if account exists
+    const storedPassword = localStorage.getItem(`user_${email}_password`);
+    
+    if (!storedPassword) {
+        // Account doesn't exist - offer to sign up
+        if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
+            this.closeModal(this.loginModal);
+            this.openModal(this.signupModal);
+            // Pre-fill email in signup form
+            document.getElementById('signupEmail').value = email;
+        }
+        return;
+    }
+    
+    // Validate password
+    if (storedPassword !== password) {
+        this.showToast('Incorrect password');
+        return;
+    }
+    
+    // Login successful
+    localStorage.setItem('userEmail', email);
+    this.showToast('Signed in successfully!');
+    this.closeModal(this.loginModal);
+    
+    // Clear form
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
 }
 
 handleSignup() {
@@ -765,23 +790,42 @@ handleSignup() {
     const password = document.getElementById('signupPassword').value;
     const apiKey = document.getElementById('signupApiKey').value;
     
-    // Placeholder - will integrate with Firebase later
-    if (email && password && apiKey) {
-        // Save API key
-        localStorage.setItem('esvApiKey', apiKey);
-        this.API_KEY = apiKey;
-        
-        // Save user
-        localStorage.setItem('userEmail', email);
-        
-        this.showToast('Account created successfully!');
-        this.closeModal(this.signupModal);
-        
-        // Reload passage with new API key
-        this.loadPassage(this.state.currentBook, this.state.currentChapter);
-    } else {
+    if (!email || !password || !apiKey) {
         this.showToast('Please fill in all fields');
+        return;
     }
+    
+    // Check if account already exists
+    const existingAccount = localStorage.getItem(`user_${email}_password`);
+    if (existingAccount) {
+        this.showToast('Account already exists. Please sign in.');
+        return;
+    }
+    
+    // Validate password length
+    if (password.length < 6) {
+        this.showToast('Password must be at least 6 characters');
+        return;
+    }
+    
+    // Create account
+    localStorage.setItem(`user_${email}_password`, password);
+    localStorage.setItem(`user_${email}_apiKey`, apiKey);
+    localStorage.setItem('esvApiKey', apiKey);
+    localStorage.setItem('userEmail', email);
+    
+    this.API_KEY = apiKey;
+    
+    this.showToast('Account created successfully!');
+    this.closeModal(this.signupModal);
+    
+    // Clear form
+    document.getElementById('signupEmail').value = '';
+    document.getElementById('signupPassword').value = '';
+    document.getElementById('signupApiKey').value = '';
+    
+    // Reload passage with new API key
+    this.loadPassage(this.state.currentBook, this.state.currentChapter);
 }
 
 handleLogout() {
@@ -789,7 +833,6 @@ handleLogout() {
     this.showToast('Signed out successfully!');
     this.closeModal(this.userMenuModal);
 }
-
 }
 
 // ================================
