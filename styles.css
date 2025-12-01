@@ -908,3 +908,60 @@ body {
         border: none;
     }
 }
+
+/* ================================
+   Links & Interactive Text
+   ================================ */
+
+/* All links use Dracula Cyan for excellent contrast */
+a {
+    color: var(--dracula-cyan);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--dracula-purple);
+    text-decoration: underline;
+}
+
+a:visited {
+    color: var(--dracula-purple);
+}
+
+/* Verse numbers and footnote references */
+.passage-text a,
+.passage-text sup a {
+    color: var(--dracula-cyan);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.passage-text a:hover,
+.passage-text sup a:hover {
+    color: var(--dracula-pink);
+    text-decoration: none;
+}
+
+/* Light mode link colors */
+body.light-mode a {
+    color: var(--alucard-cyan);
+}
+
+body.light-mode a:hover {
+    color: var(--alucard-purple);
+}
+
+body.light-mode a:visited {
+    color: var(--alucard-purple);
+}
+
+body.light-mode .passage-text a,
+body.light-mode .passage-text sup a {
+    color: var(--alucard-cyan);
+}
+
+body.light-mode .passage-text a:hover,
+body.light-mode .passage-text sup a:hover {
+    color: var(--alucard-pink);
+}
