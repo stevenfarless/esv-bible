@@ -146,10 +146,37 @@ class BibleApp {
         // Theme toggle
         this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
 
-        // User button (placeholder for now)
-        this.userBtn.addEventListener('click', () => {
-            this.showToast('Authentication coming soon!');
+        // User button
+        this.userBtn.addEventListener('click', () => this.handleUserButtonClick());
+
+        // Auth modal switching
+        document.getElementById('showSignupLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.closeModal(this.loginModal);
+            this.openModal(this.signupModal);
         });
+
+        document.getElementById('showLoginLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.closeModal(this.signupModal);
+            this.openModal(this.loginModal);
+        });
+
+        // Auth form submissions (placeholders for now)
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSignup();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            this.handleLogout();
+        });
+
 
         // Close auth modals
         this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
@@ -550,13 +577,15 @@ class BibleApp {
     // Settings
     // ================================
     checkApiKey() {
-        if (!this.API_KEY) {
-            setTimeout(() => {
-                this.showToast('Please set your ESV API key in Settings to use this app.');
-                this.openModal(this.settingsModal);
-            }, 500);
-        }
+    if (!this.API_KEY) {
+        setTimeout(() => {
+            this.showToast('Please sign up or set your ESV API key in Settings.');
+            // Open signup modal instead of settings
+            this.openModal(this.signupModal);
+        }, 500);
     }
+}
+
 
     saveApiKey() {
         const apiKey = this.apiKeyInput.value.trim();
@@ -681,7 +710,7 @@ class BibleApp {
         if (isLight) {
             // Sun icon for light mode
             this.themeIcon.innerHTML = `
-                ircle cx="12" cy="12" r="5"/>
+                <circle cx="12" cy="12" r="5"/>
                 <line x1="12" y1="1" x2="12" y2="3"/>
                 <line x1="12" y1="21" x2="12" y2="23"/>
                 <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
@@ -698,6 +727,69 @@ class BibleApp {
             `;
         }
     }
+    // ================================
+    // Authentication (Placeholder)
+    // ================================
+    handleUserButtonClick() {
+        // Check if user is logged in (placeholder)
+        const isLoggedIn = localStorage.getItem('userEmail');
+        
+        if (isLoggedIn) {
+            // Show user menu
+            document.getElementById('userEmail').textContent = isLoggedIn;
+            const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
+            document.getElementById('userTheme').textContent = theme;
+            this.openModal(this.userMenuModal);
+        } else {
+            // Show login modal
+            this.openModal(this.loginModal);
+        }
+    }
+
+handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    // Placeholder - will integrate with Firebase later
+    if (email && password) {
+        localStorage.setItem('userEmail', email);
+        this.showToast('Signed in successfully!');
+        this.closeModal(this.loginModal);
+    } else {
+        this.showToast('Please enter valid credentials');
+    }
+}
+
+handleSignup() {
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const apiKey = document.getElementById('signupApiKey').value;
+    
+    // Placeholder - will integrate with Firebase later
+    if (email && password && apiKey) {
+        // Save API key
+        localStorage.setItem('esvApiKey', apiKey);
+        this.API_KEY = apiKey;
+        
+        // Save user
+        localStorage.setItem('userEmail', email);
+        
+        this.showToast('Account created successfully!');
+        this.closeModal(this.signupModal);
+        
+        // Reload passage with new API key
+        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+    } else {
+        this.showToast('Please fill in all fields');
+    }
+}
+
+handleLogout() {
+    localStorage.removeItem('userEmail');
+    this.showToast('Signed out successfully!');
+    this.closeModal(this.userMenuModal);
+}
+
 }
 
 // ================================
