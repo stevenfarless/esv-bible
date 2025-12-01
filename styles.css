@@ -968,28 +968,28 @@ body.light-mode .passage-text sup a:hover {
 
 /* Verse-by-Verse Display */
 .verse-by-verse .verse-num {
-    display: block;
-    /* Force to new line */
-    font-weight: 600;
-    margin-top: 1rem;
-    color: var(--primary);
-}
-
-/* Keep first verse at top without extra margin */
-.verse-by-verse p:first-of-type .verse-num:first-of-type {
-    margin-top: 0;
-}
-
-/* Make the verse number inline with the text that follows */
-.verse-by-verse .verse-num::after {
-    content: " ";
     display: inline;
+    font-weight: 600;
+    color: var(--primary);
+    margin-right: 0.5em;
+}
+
+/* Add line break before each verse number (except first in paragraph) */
+.verse-by-verse .verse-num::before {
+    content: "\A";
+    white-space: pre;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+/* Don't add break before very first verse */
+.verse-by-verse p:first-of-type .verse-num:first-of-type::before {
+    content: none;
 }
 
 /* Remove paragraph margins */
 .verse-by-verse p {
-    margin: 0;
-    display: inline;
+    margin: 0.5rem 0;
 }
 
 .verse-by-verse h3 {
