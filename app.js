@@ -1,12 +1,17 @@
 // ================================
-// ESV Bible Reader App
+// ESV Bible Reader App with Firebase
 // ================================
 
 class BibleApp {
     constructor() {
         // Configuration
         this.API_BASE_URL = 'https://api.esv.org/v3';
-        this.API_KEY = localStorage.getItem('esvApiKey') || '';
+        this.API_KEY = '';
+
+        // Firebase references
+        this.auth = window.firebaseAuth;
+        this.database = window.firebaseDatabase;
+        this.currentUser = null;
 
         // Bible structure data
         this.bibleBooks = this.initializeBibleStructure();
@@ -15,10 +20,10 @@ class BibleApp {
         this.state = {
             currentBook: 'Genesis',
             currentChapter: 1,
-            fontSize: parseInt(localStorage.getItem('fontSize')) || 18,
-            showVerseNumbers: localStorage.getItem('showVerseNumbers') !== 'false',
-            showHeadings: localStorage.getItem('showHeadings') !== 'false',
-            showFootnotes: localStorage.getItem('showFootnotes') === 'true'
+            fontSize: 18,
+            showVerseNumbers: true,
+            showHeadings: true,
+            showFootnotes: false
         };
 
         // Cache for search debouncing
@@ -41,17 +46,22 @@ class BibleApp {
         this.cacheElements();
         this.loadTheme();
         this.attachEventListeners();
-        this.applySettings();
         
-        // Load saved reading position or default to Genesis 1
-        const userEmail = localStorage.getItem('userEmail');
-        if (userEmail) {
-            this.loadSavedReadingPosition();
-        } else {
-            this.loadPassage(this.state.currentBook, this.state.currentChapter);
-        }
-        
-        this.checkApiKey();
+        // Wait for Firebase auth state
+        this.auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                this.currentUser = user;
+                await this.loadUserData();
+                this.applySettings();
+                await this.loadSavedReadingPosition();
+            } else {
+                this.currentUser = null;
+                this.loadLocalSettings();
+                this.applySettings();
+                this.loadPassage(this.state.currentBook, this.state.currentChapter);
+                this.checkApiKey();
+            }
+        });
     }
 
     cacheElements() {
@@ -615,23 +625,48 @@ class BibleApp {
         if (!this.API_KEY) {
             setTimeout(() => {
                 this.showToast('Please sign up or set your ESV API key in Settings.');
-                // Open signup modal instead of settings
                 this.openModal(this.signupModal);
             }, 500);
         }
     }
 
-    saveApiKey() {
+    async saveApiKey() {
         const apiKey = this.apiKeyInput.value.trim();
-        if (apiKey) {
-            localStorage.setItem('esvApiKey', apiKey);
-            this.API_KEY = apiKey;
-            this.showToast('API key saved successfully!');
-            this.closeModal(this.settingsModal);
-            this.loadPassage(this.state.currentBook, this.state.currentChapter);
-        } else {
+        if (!apiKey) {
             this.showToast('Please enter a valid API key');
+            return;
         }
+
+        this.API_KEY = apiKey;
+
+        // Save to Firebase if logged in
+        if (this.currentUser) {
+            try {
+                const encrypted = window.encryptionHelper.encrypt(apiKey);
+                await this.database.ref(`users/${this.currentUser.uid}/apiKey`).set(encrypted);
+                this.showToast('API key saved successfully!');
+            } catch (error) {
+                console.error('Error saving API key:', error);
+                this.showToast('Failed to save API key');
+                return;
+            }
+        } else {
+            // Save locally if not logged in
+            localStorage.setItem('esvApiKey', apiKey);
+            this.showToast('API key saved locally!');
+        }
+
+        this.closeModal(this.settingsModal);
+        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+    }
+
+    loadLocalSettings() {
+        // Load from localStorage for non-logged-in users
+        this.API_KEY = localStorage.getItem('esvApiKey') || '';
+        this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
+        this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
+        this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
+        this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
     }
 
     applySettings() {
@@ -644,18 +679,31 @@ class BibleApp {
         this.passageText.style.fontSize = `${this.state.fontSize}px`;
     }
 
-    toggleSetting(setting) {
+    async toggleSetting(setting) {
         const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
         this.state[setting] = toggle.checked;
-        localStorage.setItem(setting, toggle.checked);
+
+        // Save to Firebase or localStorage
+        if (this.currentUser) {
+            await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggle.checked);
+        } else {
+            localStorage.setItem(setting, toggle.checked);
+        }
+
         this.loadPassage(this.state.currentBook, this.state.currentChapter);
     }
 
-    updateFontSize(size) {
+    async updateFontSize(size) {
         this.state.fontSize = parseInt(size);
         this.fontSizeValue.textContent = `${size}px`;
         this.passageText.style.fontSize = `${size}px`;
-        localStorage.setItem('fontSize', size);
+
+        // Save to Firebase or localStorage
+        if (this.currentUser) {
+            await this.database.ref(`users/${this.currentUser.uid}/settings/fontSize`).set(parseInt(size));
+        } else {
+            localStorage.setItem('fontSize', size);
+        }
     }
 
     // ================================
@@ -763,14 +811,12 @@ class BibleApp {
     }
 
     // ================================
-    // Authentication
+    // Firebase Authentication
     // ================================
     handleUserButtonClick() {
-        const isLoggedIn = localStorage.getItem('userEmail');
-        
-        if (isLoggedIn) {
+        if (this.currentUser) {
             // Show user menu
-            document.getElementById('userEmail').textContent = isLoggedIn;
+            document.getElementById('userEmail').textContent = this.currentUser.email;
             const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
             document.getElementById('userTheme').textContent = theme;
             this.openModal(this.userMenuModal);
@@ -780,7 +826,7 @@ class BibleApp {
         }
     }
 
-    handleLogin() {
+    async handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
@@ -788,41 +834,33 @@ class BibleApp {
             this.showToast('Please enter valid credentials');
             return;
         }
-        
-        // Check if account exists
-        const storedPassword = localStorage.getItem(`user_${email}_password`);
-        
-        if (!storedPassword) {
-            // Account doesn't exist - offer to sign up
-            if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
-                this.closeModal(this.loginModal);
-                this.openModal(this.signupModal);
-                // Pre-fill email in signup form
-                document.getElementById('signupEmail').value = email;
+
+        try {
+            await this.auth.signInWithEmailAndPassword(email, password);
+            this.showToast('Signed in successfully!');
+            this.closeModal(this.loginModal);
+            
+            // Clear form
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        } catch (error) {
+            console.error('Login error:', error);
+            
+            if (error.code === 'auth/user-not-found') {
+                if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
+                    this.closeModal(this.loginModal);
+                    this.openModal(this.signupModal);
+                    document.getElementById('signupEmail').value = email;
+                }
+            } else if (error.code === 'auth/wrong-password') {
+                this.showToast('Incorrect password');
+            } else {
+                this.showToast('Login failed: ' + error.message);
             }
-            return;
         }
-        
-        // Validate password
-        if (storedPassword !== password) {
-            this.showToast('Incorrect password');
-            return;
-        }
-        
-        // Login successful
-        localStorage.setItem('userEmail', email);
-        this.showToast('Signed in successfully!');
-        this.closeModal(this.loginModal);
-        
-        // Load user's saved reading position
-        this.loadSavedReadingPosition();
-        
-        // Clear form
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
     }
 
-    handleSignup() {
+    async handleSignup() {
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
         const apiKey = document.getElementById('signupApiKey').value;
@@ -832,90 +870,128 @@ class BibleApp {
             return;
         }
         
-        // Check if account already exists
-        const existingAccount = localStorage.getItem(`user_${email}_password`);
-        if (existingAccount) {
-            this.showToast('Account already exists. Please sign in.');
-            return;
-        }
-        
-        // Validate password length
         if (password.length < 6) {
             this.showToast('Password must be at least 6 characters');
             return;
         }
-        
-        // Create account
-        localStorage.setItem(`user_${email}_password`, password);
-        localStorage.setItem(`user_${email}_apiKey`, apiKey);
-        localStorage.setItem('esvApiKey', apiKey);
-        localStorage.setItem('userEmail', email);
-        
-        this.API_KEY = apiKey;
-        
-        this.showToast('Account created successfully!');
-        this.closeModal(this.signupModal);
-        
-        // Clear form
-        document.getElementById('signupEmail').value = '';
-        document.getElementById('signupPassword').value = '';
-        document.getElementById('signupApiKey').value = '';
-        
-        // Reload passage with new API key
-        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+
+        try {
+            // Create Firebase user
+            const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+
+            // Save API key (encrypted) and initial settings to database
+            const encrypted = window.encryptionHelper.encrypt(apiKey);
+            await this.database.ref(`users/${user.uid}`).set({
+                apiKey: encrypted,
+                settings: {
+                    fontSize: 18,
+                    showVerseNumbers: true,
+                    showHeadings: true,
+                    showFootnotes: false
+                },
+                createdAt: Date.now()
+            });
+
+            this.showToast('Account created successfully!');
+            this.closeModal(this.signupModal);
+            
+            // Clear form
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('signupApiKey').value = '';
+        } catch (error) {
+            console.error('Signup error:', error);
+            
+            if (error.code === 'auth/email-already-in-use') {
+                this.showToast('Account already exists. Please sign in.');
+            } else {
+                this.showToast('Signup failed: ' + error.message);
+            }
+        }
     }
 
-    handleLogout() {
-        localStorage.removeItem('userEmail');
-        this.showToast('Signed out successfully!');
-        this.closeModal(this.userMenuModal);
+    async handleLogout() {
+        try {
+            await this.auth.signOut();
+            this.showToast('Signed out successfully!');
+            this.closeModal(this.userMenuModal);
+        } catch (error) {
+            console.error('Logout error:', error);
+            this.showToast('Logout failed');
+        }
+    }
+
+    // ================================
+    // Firebase Data Management
+    // ================================
+    async loadUserData() {
+        if (!this.currentUser) return;
+
+        try {
+            const snapshot = await this.database.ref(`users/${this.currentUser.uid}`).once('value');
+            const userData = snapshot.val();
+
+            if (userData) {
+                // Load API key
+                if (userData.apiKey) {
+                    this.API_KEY = window.encryptionHelper.decrypt(userData.apiKey);
+                }
+
+                // Load settings
+                if (userData.settings) {
+                    this.state.fontSize = userData.settings.fontSize || 18;
+                    this.state.showVerseNumbers = userData.settings.showVerseNumbers !== false;
+                    this.state.showHeadings = userData.settings.showHeadings !== false;
+                    this.state.showFootnotes = userData.settings.showFootnotes === true;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
     }
 
     // ================================
     // Reading Position Persistence
     // ================================
-    saveReadingPosition() {
-        const userEmail = localStorage.getItem('userEmail');
-        if (!userEmail) return; // Only save for logged-in users
+    async saveReadingPosition() {
+        if (!this.currentUser) return;
         
         const position = {
             book: this.state.currentBook,
             chapter: this.state.currentChapter,
-            scrollPosition: window.pageYOffset || document.documentElement.scrollTop
+            scrollPosition: window.pageYOffset || document.documentElement.scrollTop,
+            lastUpdated: Date.now()
         };
         
-        localStorage.setItem(`user_${userEmail}_readingPosition`, JSON.stringify(position));
-    }
-
-    getSavedScrollPosition() {
-        const userEmail = localStorage.getItem('userEmail');
-        if (!userEmail) return 0;
-        
-        const saved = localStorage.getItem(`user_${userEmail}_readingPosition`);
-        if (!saved) return 0;
-        
         try {
-            const position = JSON.parse(saved);
-            return position.scrollPosition || 0;
-        } catch (e) {
-            return 0;
+            await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).set(position);
+        } catch (error) {
+            console.error('Error saving reading position:', error);
         }
     }
 
-    loadSavedReadingPosition() {
-        const userEmail = localStorage.getItem('userEmail');
-        if (!userEmail) return;
-        
-        const saved = localStorage.getItem(`user_${userEmail}_readingPosition`);
-        if (!saved) return;
+    getSavedScrollPosition() {
+        // This will be loaded from Firebase in loadSavedReadingPosition
+        return this.lastScrollPosition;
+    }
+
+    async loadSavedReadingPosition() {
+        if (!this.currentUser) return;
         
         try {
-            const position = JSON.parse(saved);
-            if (position.book && position.chapter) {
-                this.loadPassage(position.book, position.chapter, true);
+            const snapshot = await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).once('value');
+            const position = snapshot.val();
+            
+            if (position && position.book && position.chapter) {
+                this.lastScrollPosition = position.scrollPosition || 0;
+                await this.loadPassage(position.book, position.chapter, true);
+            } else {
+                await this.loadPassage(this.state.currentBook, this.state.currentChapter);
             }
-        } catch (e) {
-            console.error('Failed to load reading position:', e);
+        } catch (error) {
+            console.error('Error loading reading position:', error);
+            await this.loadPassage(this.state.currentBook, this.state.currentChapter);
         }
     }
 }

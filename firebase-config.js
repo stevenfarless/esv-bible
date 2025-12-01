@@ -1,6 +1,5 @@
 // ================================
 // Firebase Configuration
-// Replace with your Firebase project credentials
 // ================================
 
 const firebaseConfig = {
@@ -16,17 +15,13 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Firebase services
+// Firebase services (using Realtime Database, not Firestore)
 const auth = firebase.auth();
-const db = firebase.firestore();
+const database = firebase.database();
 
-// Optional: Simple encryption for API keys
-// You can use your own key here
-const ENCRYPTION_KEY = 'your-personal-encryption-key-32chars';
-
+// Simple encryption for API keys
 const EncryptionHelper = {
     encrypt(text) {
-        // Simple Base64 encoding (replace with proper encryption if needed)
         return btoa(text);
     },
 
@@ -41,5 +36,5 @@ const EncryptionHelper = {
 
 // Export for use in app
 window.firebaseAuth = auth;
-window.firebaseDb = db;
+window.firebaseDatabase = database;
 window.encryptionHelper = EncryptionHelper;
