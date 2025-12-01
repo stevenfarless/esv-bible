@@ -6,7 +6,7 @@ class BibleApp {
     constructor() {
         // Configuration
         this.API_BASE_URL = 'https://api.esv.org/v3';
-        this.API_KEY = localStorage.getItem('a0e20f9b94a8084100a8d538c647bf92bda5a7d0') || '';
+        this.API_KEY = localStorage.getItem('esvApiKey') || '';
 
         // Bible structure data
         this.bibleBooks = this.initializeBibleStructure();
