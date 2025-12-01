@@ -366,25 +366,26 @@ class BibleApp {
     }
 
     displayPassage(data, restoreScroll = false) {
-        const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
+    const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
 
-        this.passageTitle.textContent = canonical;
-        this.passageText.innerHTML = data.passages[0];
-        this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+    this.passageTitle.textContent = canonical;
+    this.passageText.innerHTML = data.passages[0];
+    this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
-        // Restore scroll position or scroll to top
-        if (restoreScroll) {
-            setTimeout(() => {
-                const savedPosition = this.getSavedScrollPosition();
-                window.scrollTo({ top: savedPosition, behavior: 'auto' });
-            }, 100);
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        
-        // Save reading position after loading
-        this.saveReadingPosition();
+    // Restore scroll position or scroll to top
+    if (restoreScroll) {
+        setTimeout(() => {
+            const savedPosition = this.getSavedScrollPosition();
+            window.scrollTo({ top: savedPosition, behavior: 'smooth' });  // Changed from 'auto' to 'smooth'
+        }, 100);
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    
+    // Save reading position after loading
+    this.saveReadingPosition();
+}
+
 
     // ================================
     // Navigation
