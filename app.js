@@ -33,6 +33,7 @@ class BibleApp {
     // ================================
     init() {
         this.cacheElements();
+        this.loadTheme();  // ADD THIS LINE
         this.attachEventListeners();
         this.applySettings();
         this.loadPassage(this.state.currentBook, this.state.currentChapter);
@@ -85,6 +86,19 @@ class BibleApp {
         this.fontSizeSlider = document.getElementById('fontSizeSlider');
         this.fontSizeValue = document.getElementById('fontSizeValue');
 
+        // Theme & Auth elements
+        this.themeToggleBtn = document.getElementById('themeToggleBtn');
+        this.themeIcon = document.getElementById('themeIcon');
+        this.userBtn = document.getElementById('userBtn');
+
+        // Auth modals
+        this.loginModal = document.getElementById('loginModal');
+        this.signupModal = document.getElementById('signupModal');
+        this.userMenuModal = document.getElementById('userMenuModal');
+        this.closeLoginModal = document.getElementById('closeLoginModal');
+        this.closeSignupModal = document.getElementById('closeSignupModal');
+        this.closeUserMenuModal = document.getElementById('closeUserMenuModal');
+
         // Toast
         this.toast = document.getElementById('toast');
     }
@@ -128,6 +142,27 @@ class BibleApp {
         this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
         this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
         this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
+
+        // Theme toggle
+        this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+
+        // User button (placeholder for now)
+        this.userBtn.addEventListener('click', () => {
+            this.showToast('Authentication coming soon!');
+        });
+
+        // Close auth modals
+        this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
+        this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
+        this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
+
+        // Add auth modals to close-on-background-click
+        [this.bookModal, this.chapterModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) this.closeModal(modal);
+    });
+});
+
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
@@ -588,7 +623,7 @@ class BibleApp {
         }, 3000);
     }
 
-    handleKeyboardShortcuts(e) {
+        handleKeyboardShortcuts(e) {
         // Ctrl/Cmd + K to open search
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
@@ -600,6 +635,9 @@ class BibleApp {
             if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
             if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
             if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
+            if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
+            if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
+            if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
             if (this.searchContainer.classList.contains('active')) this.closeSearch();
         }
 
@@ -612,6 +650,52 @@ class BibleApp {
                 e.preventDefault();
                 this.navigateChapter(1);
             }
+        }
+    }
+
+    // ================================
+    // Theme Management
+    // ================================
+    loadTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+        }
+        this.updateThemeIcon();
+    }
+
+    toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        const theme = isLight ? 'light' : 'dark';
+        
+        localStorage.setItem('theme', theme);
+        this.updateThemeIcon();
+        
+        this.showToast(isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme');
+    }
+
+    updateThemeIcon() {
+        const isLight = document.body.classList.contains('light-mode');
+        
+        if (isLight) {
+            // Sun icon for light mode
+            this.themeIcon.innerHTML = `
+                ircle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            `;
+        } else {
+            // Moon icon for dark mode
+            this.themeIcon.innerHTML = `
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            `;
         }
     }
 }
