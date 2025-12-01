@@ -102,6 +102,13 @@ class BibleApp {
         this.chapterModalBook = document.getElementById('chapterModalBook');
         this.chapterGrid = document.getElementById('chapterGrid');
 
+        this.verseModal = document.getElementById('verseModal');
+        this.closeVerseModal = document.getElementById('closeVerseModal');
+        this.verseModalBook = document.getElementById('verseModalBook');
+        this.verseGrid = document.getElementById('verseGrid');
+        this.verseSelector = document.getElementById('verseSelector');
+        this.currentVerseSpan = document.getElementById('currentVerse');
+
         this.settingsModal = document.getElementById('settingsModal');
         this.closeSettingsModal = document.getElementById('closeSettingsModal');
         this.apiKeyInput = document.getElementById('apiKeyInput');
@@ -148,6 +155,19 @@ class BibleApp {
         this.bookSelector.addEventListener('click', () => this.openBookModal());
         this.chapterSelector.addEventListener('click', () => this.openChapterModal());
 
+        // After chapterSelector listener
+        this.verseSelector.addEventListener('click', () => this.openVerseModal());
+
+        // After closeChapterModal listener
+        this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
+
+        // Update the modal array to include verseModal
+        [this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+        if (e.target === modal) this.closeModal(modal);
+    });
+});
+
         // Copy button
         this.copyBtn.addEventListener('click', () => this.copyPassage());
 
@@ -155,13 +175,6 @@ class BibleApp {
         this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
         this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
         this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
-
-        // Close modals on background click
-        [this.bookModal, this.chapterModal, this.settingsModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModal(modal);
-            });
-        });
 
         // Settings
         this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
@@ -209,13 +222,6 @@ class BibleApp {
         this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
         this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
         this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
-
-        // Add auth modals to close-on-background-click
-        [this.bookModal, this.chapterModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModal(modal);
-            });
-        });
 
         // Track scroll position
         window.addEventListener('scroll', () => {
@@ -375,6 +381,9 @@ class BibleApp {
     this.passageTitle.textContent = canonical;
     this.passageText.innerHTML = data.passages[0];
     this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+
+     // Reset verse selector
+    this.currentVerseSpan.textContent = ':';
 
     // Restore scroll position or scroll to top
     if (restoreScroll) {
@@ -623,6 +632,56 @@ class BibleApp {
         }
     }
 
+    openVerseModal() {
+    this.populateVerseModal();
+    this.openModal(this.verseModal);
+}
+
+populateVerseModal() {
+    this.verseModalBook.textContent = `${this.state.currentBook} ${this.state.currentChapter}`;
+    this.verseGrid.innerHTML = '';
+
+    // Estimate verses (we'll get actual count from loaded passage)
+    const verseCount = this.getCurrentVerseCount();
+
+    for (let i = 1; i <= verseCount; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'chapter-item';
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+            this.scrollToVerse(i);
+            this.closeModal(this.verseModal);
+        });
+        this.verseGrid.appendChild(btn);
+    }
+}
+
+getCurrentVerseCount() {
+    // Count verse numbers in current passage
+    const verseNums = this.passageText.querySelectorAll('.verse-num');
+    return verseNums.length || 50; // Default to 50 if none found
+}
+
+scrollToVerse(verseNumber) {
+    const verseNums = this.passageText.querySelectorAll('.verse-num');
+    for (const verseNum of verseNums) {
+        if (verseNum.textContent.trim() === verseNumber.toString()) {
+            verseNum.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            this.currentVerseSpan.textContent = `:${verseNumber}`;
+            
+            // Highlight the verse briefly
+            verseNum.style.backgroundColor = 'var(--primary)';
+            verseNum.style.color = 'var(--bg)';
+            setTimeout(() => {
+                verseNum.style.backgroundColor = '';
+                verseNum.style.color = '';
+            }, 2000);
+            break;
+        }
+    }
+}
+
+
     // ================================
     // Settings
     // ================================
@@ -783,6 +842,7 @@ class BibleApp {
             if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
             if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
             if (this.searchContainer.classList.contains('active')) this.closeSearch();
+            if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
         }
 
         // Arrow keys for navigation (when no modal is open)
