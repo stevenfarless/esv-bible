@@ -1,0 +1,624 @@
+// ================================
+// ESV Bible Reader App
+// ================================
+
+class BibleApp {
+    constructor() {
+        // Configuration
+        this.API_BASE_URL = 'https://api.esv.org/v3';
+        this.API_KEY = localStorage.getItem('a0e20f9b94a8084100a8d538c647bf92bda5a7d0') || '';
+
+        // Bible structure data
+        this.bibleBooks = this.initializeBibleStructure();
+
+        // State management
+        this.state = {
+            currentBook: 'Genesis',
+            currentChapter: 1,
+            fontSize: parseInt(localStorage.getItem('fontSize')) || 18,
+            showVerseNumbers: localStorage.getItem('showVerseNumbers') !== 'false',
+            showHeadings: localStorage.getItem('showHeadings') !== 'false',
+            showFootnotes: localStorage.getItem('showFootnotes') === 'true'
+        };
+
+        // Cache for search debouncing
+        this.searchTimeout = null;
+
+        // Initialize app
+        this.init();
+    }
+
+    // ================================
+    // Initialization
+    // ================================
+    init() {
+        this.cacheElements();
+        this.attachEventListeners();
+        this.applySettings();
+        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+        this.checkApiKey();
+    }
+
+    cacheElements() {
+        // Header elements
+        this.searchToggleBtn = document.getElementById('searchToggleBtn');
+        this.settingsBtn = document.getElementById('settingsBtn');
+
+        // Search elements
+        this.searchContainer = document.getElementById('searchContainer');
+        this.searchInput = document.getElementById('searchInput');
+        this.closeSearchBtn = document.getElementById('closeSearchBtn');
+        this.searchResults = document.getElementById('searchResults');
+
+        // Navigation elements
+        this.prevChapterBtn = document.getElementById('prevChapterBtn');
+        this.nextChapterBtn = document.getElementById('nextChapterBtn');
+        this.bookSelector = document.getElementById('bookSelector');
+        this.chapterSelector = document.getElementById('chapterSelector');
+        this.currentBookSpan = document.getElementById('currentBook');
+        this.currentChapterSpan = document.getElementById('currentChapter');
+
+        // Content elements
+        this.passageTitle = document.getElementById('passageTitle');
+        this.passageText = document.getElementById('passageText');
+        this.copyright = document.getElementById('copyright');
+        this.copyBtn = document.getElementById('copyBtn');
+
+        // Modal elements
+        this.bookModal = document.getElementById('bookModal');
+        this.closeBookModal = document.getElementById('closeBookModal');
+        this.oldTestamentBooks = document.getElementById('oldTestamentBooks');
+        this.newTestamentBooks = document.getElementById('newTestamentBooks');
+
+        this.chapterModal = document.getElementById('chapterModal');
+        this.closeChapterModal = document.getElementById('closeChapterModal');
+        this.chapterModalBook = document.getElementById('chapterModalBook');
+        this.chapterGrid = document.getElementById('chapterGrid');
+
+        this.settingsModal = document.getElementById('settingsModal');
+        this.closeSettingsModal = document.getElementById('closeSettingsModal');
+        this.apiKeyInput = document.getElementById('apiKeyInput');
+        this.saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        this.verseNumbersToggle = document.getElementById('verseNumbersToggle');
+        this.headingsToggle = document.getElementById('headingsToggle');
+        this.footnotesToggle = document.getElementById('footnotesToggle');
+        this.fontSizeSlider = document.getElementById('fontSizeSlider');
+        this.fontSizeValue = document.getElementById('fontSizeValue');
+
+        // Toast
+        this.toast = document.getElementById('toast');
+    }
+
+    attachEventListeners() {
+        // Header
+        this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
+        this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+
+        // Search
+        this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
+        this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+        this.searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.closeSearch();
+        });
+
+        // Navigation
+        this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
+        this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
+        this.bookSelector.addEventListener('click', () => this.openBookModal());
+        this.chapterSelector.addEventListener('click', () => this.openChapterModal());
+
+        // Copy button
+        this.copyBtn.addEventListener('click', () => this.copyPassage());
+
+        // Modals
+        this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
+        this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+        this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+
+        // Close modals on background click
+        [this.bookModal, this.chapterModal, this.settingsModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) this.closeModal(modal);
+            });
+        });
+
+        // Settings
+        this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
+        this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
+        this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
+        this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
+        this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+    }
+
+    // ================================
+    // Bible Structure
+    // ================================
+    initializeBibleStructure() {
+        return {
+            'Old Testament': {
+                'Genesis': 50, 'Exodus': 40, 'Leviticus': 27, 'Numbers': 36, 'Deuteronomy': 34,
+                'Joshua': 24, 'Judges': 21, 'Ruth': 4, '1 Samuel': 31, '2 Samuel': 24,
+                '1 Kings': 22, '2 Kings': 25, '1 Chronicles': 29, '2 Chronicles': 36,
+                'Ezra': 10, 'Nehemiah': 13, 'Esther': 10, 'Job': 42, 'Psalms': 150,
+                'Proverbs': 31, 'Ecclesiastes': 12, 'Song of Solomon': 8, 'Isaiah': 66,
+                'Jeremiah': 52, 'Lamentations': 5, 'Ezekiel': 48, 'Daniel': 12,
+                'Hosea': 14, 'Joel': 3, 'Amos': 9, 'Obadiah': 1, 'Jonah': 4, 'Micah': 7,
+                'Nahum': 3, 'Habakkuk': 3, 'Zephaniah': 3, 'Haggai': 2, 'Zechariah': 14,
+                'Malachi': 4
+            },
+            'New Testament': {
+                'Matthew': 28, 'Mark': 16, 'Luke': 24, 'John': 21, 'Acts': 28,
+                'Romans': 16, '1 Corinthians': 16, '2 Corinthians': 13, 'Galatians': 6,
+                'Ephesians': 6, 'Philippians': 4, 'Colossians': 4, '1 Thessalonians': 5,
+                '2 Thessalonians': 3, '1 Timothy': 6, '2 Timothy': 4, 'Titus': 3,
+                'Philemon': 1, 'Hebrews': 13, 'James': 5, '1 Peter': 5, '2 Peter': 3,
+                '1 John': 5, '2 John': 1, '3 John': 1, 'Jude': 1, 'Revelation': 22
+            }
+        };
+    }
+
+    getAllBooks() {
+        return [
+            ...Object.keys(this.bibleBooks['Old Testament']),
+            ...Object.keys(this.bibleBooks['New Testament'])
+        ];
+    }
+
+    getChapterCount(book) {
+        for (const testament in this.bibleBooks) {
+            if (this.bibleBooks[testament][book]) {
+                return this.bibleBooks[testament][book];
+            }
+        }
+        return 0;
+    }
+
+    getTestament(book) {
+        if (this.bibleBooks['Old Testament'][book]) return 'Old Testament';
+        if (this.bibleBooks['New Testament'][book]) return 'New Testament';
+        return null;
+    }
+
+    // ================================
+    // API Methods
+    // ================================
+    async fetchPassage(reference) {
+        if (!this.API_KEY) {
+            this.showError('Please set your ESV API key in Settings.');
+            return null;
+        }
+
+        const params = new URLSearchParams({
+            q: reference,
+            'include-headings': this.state.showHeadings,
+            'include-footnotes': this.state.showFootnotes,
+            'include-verse-numbers': this.state.showVerseNumbers,
+            'include-short-copyright': false,
+            'include-passage-references': false
+        });
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/passage/html/?${params}`, {
+                headers: {
+                    'Authorization': `Token ${this.API_KEY}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching passage:', error);
+            this.showError('Failed to load passage. Please check your internet connection and API key.');
+            return null;
+        }
+    }
+
+    async searchPassages(query) {
+        if (!this.API_KEY || !query.trim()) {
+            return null;
+        }
+
+        const params = new URLSearchParams({
+            q: query,
+            'page-size': 20
+        });
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/passage/search/?${params}`, {
+                headers: {
+                    'Authorization': `Token ${this.API_KEY}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error searching passages:', error);
+            return null;
+        }
+    }
+
+    // ================================
+    // Passage Loading
+    // ================================
+    async loadPassage(book, chapter) {
+        this.state.currentBook = book;
+        this.state.currentChapter = chapter;
+
+        this.updateNavigationState();
+
+        const reference = `${book} ${chapter}`;
+        this.passageText.innerHTML = '<div class="loading">Loading passage...</div>';
+
+        const data = await this.fetchPassage(reference);
+
+        if (data && data.passages && data.passages.length > 0) {
+            this.displayPassage(data);
+        }
+    }
+
+    displayPassage(data) {
+        const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
+
+        this.passageTitle.textContent = canonical;
+        this.passageText.innerHTML = data.passages[0];
+        this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ================================
+    // Navigation
+    // ================================
+    navigateChapter(direction) {
+        let newChapter = this.state.currentChapter + direction;
+        let newBook = this.state.currentBook;
+
+        const chapterCount = this.getChapterCount(this.state.currentBook);
+
+        if (newChapter < 1) {
+            // Go to previous book
+            const books = this.getAllBooks();
+            const currentIndex = books.indexOf(this.state.currentBook);
+            if (currentIndex > 0) {
+                newBook = books[currentIndex - 1];
+                newChapter = this.getChapterCount(newBook);
+            } else {
+                return; // Already at the beginning
+            }
+        } else if (newChapter > chapterCount) {
+            // Go to next book
+            const books = this.getAllBooks();
+            const currentIndex = books.indexOf(this.state.currentBook);
+            if (currentIndex < books.length - 1) {
+                newBook = books[currentIndex + 1];
+                newChapter = 1;
+            } else {
+                return; // Already at the end
+            }
+        }
+
+        this.loadPassage(newBook, newChapter);
+    }
+
+    updateNavigationState() {
+        this.currentBookSpan.textContent = this.state.currentBook;
+        this.currentChapterSpan.textContent = this.state.currentChapter;
+
+        // Update button states
+        const books = this.getAllBooks();
+        const currentBookIndex = books.indexOf(this.state.currentBook);
+        const isFirstChapter = this.state.currentChapter === 1;
+        const isLastChapter = this.state.currentChapter === this.getChapterCount(this.state.currentBook);
+
+        this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
+        this.nextChapterBtn.disabled = currentBookIndex === books.length - 1 && isLastChapter;
+    }
+
+    // ================================
+    // Search
+    // ================================
+    toggleSearch() {
+        this.searchContainer.classList.toggle('active');
+        if (this.searchContainer.classList.contains('active')) {
+            this.searchInput.focus();
+        } else {
+            this.searchInput.value = '';
+            this.searchResults.innerHTML = '';
+        }
+    }
+
+    closeSearch() {
+        this.searchContainer.classList.remove('active');
+        this.searchInput.value = '';
+        this.searchResults.innerHTML = '';
+    }
+
+    handleSearch(query) {
+        clearTimeout(this.searchTimeout);
+
+        if (!query.trim()) {
+            this.searchResults.innerHTML = '';
+            return;
+        }
+
+        this.searchTimeout = setTimeout(async () => {
+            // Check if it's a passage reference first
+            if (this.isPassageReference(query)) {
+                await this.handlePassageReference(query);
+            } else {
+                // Perform keyword search
+                await this.performKeywordSearch(query);
+            }
+        }, 300);
+    }
+
+    isPassageReference(query) {
+        // Simple check for passage reference patterns
+        const patterns = [
+            /^[1-3]?\s*[a-z]+\s+\d+/i,  // Book Chapter
+            /^[1-3]?\s*[a-z]+\s+\d+:\d+/i  // Book Chapter:Verse
+        ];
+        return patterns.some(pattern => pattern.test(query.trim()));
+    }
+
+    async handlePassageReference(reference) {
+        const data = await this.fetchPassage(reference);
+        if (data && data.passages && data.passages.length > 0) {
+            // Display as single result
+            this.searchResults.innerHTML = `
+                <div class="search-result-item" data-reference="${data.canonical}">
+                    <div class="search-result-reference">${data.canonical}</div>
+                    <div class="search-result-content">${this.stripHTML(data.passages[0]).substring(0, 200)}...</div>
+                </div>
+            `;
+
+            this.searchResults.querySelector('.search-result-item').addEventListener('click', () => {
+                this.loadPassageFromReference(data.canonical);
+                this.closeSearch();
+            });
+        } else {
+            this.searchResults.innerHTML = '<div class="search-no-results">No passage found</div>';
+        }
+    }
+
+    async performKeywordSearch(query) {
+        this.searchResults.innerHTML = '<div class="loading" style="min-height: 100px;">Searching...</div>';
+
+        const data = await this.searchPassages(query);
+
+        if (data && data.results && data.results.length > 0) {
+            this.displaySearchResults(data.results, query);
+        } else {
+            this.searchResults.innerHTML = '<div class="search-no-results">No results found</div>';
+        }
+    }
+
+    displaySearchResults(results, query) {
+        const html = results.map(result => `
+            <div class="search-result-item" data-reference="${result.reference}">
+                <div class="search-result-reference">${result.reference}</div>
+                <div class="search-result-content">${this.highlightSearchTerm(result.content, query)}</div>
+            </div>
+        `).join('');
+
+        this.searchResults.innerHTML = html;
+
+        // Add click handlers
+        this.searchResults.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const reference = item.dataset.reference;
+                this.loadPassageFromReference(reference);
+                this.closeSearch();
+            });
+        });
+    }
+
+    loadPassageFromReference(reference) {
+        // Parse reference to extract book and chapter
+        const match = reference.match(/^([1-3]?\s*[A-Za-z\s]+)\s+(\d+)/);
+        if (match) {
+            const book = match[1].trim();
+            const chapter = parseInt(match[2]);
+            this.loadPassage(book, chapter);
+        }
+    }
+
+    highlightSearchTerm(text, term) {
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    }
+
+    stripHTML(html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+    }
+
+    // ================================
+    // Modals
+    // ================================
+    openModal(modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeModal(modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    openBookModal() {
+        this.populateBookModal();
+        this.openModal(this.bookModal);
+    }
+
+    populateBookModal() {
+        const createBookButton = (book) => {
+            const btn = document.createElement('button');
+            btn.className = 'book-item';
+            btn.textContent = book;
+            btn.addEventListener('click', () => {
+                this.loadPassage(book, 1);
+                this.closeModal(this.bookModal);
+            });
+            return btn;
+        };
+
+        this.oldTestamentBooks.innerHTML = '';
+        Object.keys(this.bibleBooks['Old Testament']).forEach(book => {
+            this.oldTestamentBooks.appendChild(createBookButton(book));
+        });
+
+        this.newTestamentBooks.innerHTML = '';
+        Object.keys(this.bibleBooks['New Testament']).forEach(book => {
+            this.newTestamentBooks.appendChild(createBookButton(book));
+        });
+    }
+
+    openChapterModal() {
+        this.populateChapterModal();
+        this.openModal(this.chapterModal);
+    }
+
+    populateChapterModal() {
+        this.chapterModalBook.textContent = this.state.currentBook;
+        this.chapterGrid.innerHTML = '';
+
+        const chapterCount = this.getChapterCount(this.state.currentBook);
+
+        for (let i = 1; i <= chapterCount; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'chapter-item';
+            btn.textContent = i;
+            btn.addEventListener('click', () => {
+                this.loadPassage(this.state.currentBook, i);
+                this.closeModal(this.chapterModal);
+            });
+            this.chapterGrid.appendChild(btn);
+        }
+    }
+
+    // ================================
+    // Settings
+    // ================================
+    checkApiKey() {
+        if (!this.API_KEY) {
+            setTimeout(() => {
+                this.showToast('Please set your ESV API key in Settings to use this app.');
+                this.openModal(this.settingsModal);
+            }, 500);
+        }
+    }
+
+    saveApiKey() {
+        const apiKey = this.apiKeyInput.value.trim();
+        if (apiKey) {
+            localStorage.setItem('esvApiKey', apiKey);
+            this.API_KEY = apiKey;
+            this.showToast('API key saved successfully!');
+            this.closeModal(this.settingsModal);
+            this.loadPassage(this.state.currentBook, this.state.currentChapter);
+        } else {
+            this.showToast('Please enter a valid API key');
+        }
+    }
+
+    applySettings() {
+        this.apiKeyInput.value = this.API_KEY;
+        this.verseNumbersToggle.checked = this.state.showVerseNumbers;
+        this.headingsToggle.checked = this.state.showHeadings;
+        this.footnotesToggle.checked = this.state.showFootnotes;
+        this.fontSizeSlider.value = this.state.fontSize;
+        this.fontSizeValue.textContent = `${this.state.fontSize}px`;
+        this.passageText.style.fontSize = `${this.state.fontSize}px`;
+    }
+
+    toggleSetting(setting) {
+        const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
+        this.state[setting] = toggle.checked;
+        localStorage.setItem(setting, toggle.checked);
+        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+    }
+
+    updateFontSize(size) {
+        this.state.fontSize = parseInt(size);
+        this.fontSizeValue.textContent = `${size}px`;
+        this.passageText.style.fontSize = `${size}px`;
+        localStorage.setItem('fontSize', size);
+    }
+
+    // ================================
+    // Utilities
+    // ================================
+    copyPassage() {
+        const textContent = this.stripHTML(this.passageText.innerHTML);
+        const reference = this.passageTitle.textContent;
+        const fullText = `${reference}\n\n${textContent}\n\n${this.copyright.textContent}`;
+
+        navigator.clipboard.writeText(fullText).then(() => {
+            this.showToast('Passage copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            this.showToast('Failed to copy passage');
+        });
+    }
+
+    showError(message) {
+        this.passageText.innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    showToast(message) {
+        this.toast.textContent = message;
+        this.toast.classList.add('show');
+        setTimeout(() => {
+            this.toast.classList.remove('show');
+        }, 3000);
+    }
+
+    handleKeyboardShortcuts(e) {
+        // Ctrl/Cmd + K to open search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            this.toggleSearch();
+        }
+
+        // Escape to close modals
+        if (e.key === 'Escape') {
+            if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
+            if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
+            if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
+            if (this.searchContainer.classList.contains('active')) this.closeSearch();
+        }
+
+        // Arrow keys for navigation (when no modal is open)
+        if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.navigateChapter(-1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.navigateChapter(1);
+            }
+        }
+    }
+}
+
+// ================================
+// Initialize App
+// ================================
+document.addEventListener('DOMContentLoaded', () => {
+    const app = new BibleApp();
+});
