@@ -1,31 +1,63 @@
 /* ================================
-   Reset & Base Styles
+   ESV Bible Reader - Enhanced with Dracula/Alucard Themes
    ================================ */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ================================
+   Theme Variables - Dracula & Alucard
+   Official colors from https://spec.draculatheme.com
+   ================================ */
+
 :root {
-    /* Color Palette */
-    --primary-color: #2c5282;
-    --primary-dark: #1a365d;
-    --primary-light: #4a7bad;
-    --secondary-color: #744210;
-    --accent-color: #d97706;
+    /* Dracula Theme Colors (Dark Mode - Default) */
+    --dracula-bg: #282A36;
+    --dracula-current-line: #44475A;
+    --dracula-fg: #F8F8F2;
+    --dracula-comment: #6272A4;
+    --dracula-cyan: #8BE9FD;
+    --dracula-green: #50FA7B;
+    --dracula-orange: #FFB86C;
+    --dracula-pink: #FF79C6;
+    --dracula-purple: #BD93F9;
+    --dracula-red: #FF5555;
+    --dracula-yellow: #F1FA8C;
+
+    /* Dracula UI Shades */
+    --dracula-bg-dark: #21222C;
+    --dracula-bg-darker: #191A21;
+    --dracula-bg-light: #343746;
+    --dracula-bg-lighter: #424450;
+
+    /* Active Theme (Dracula by default) */
+    --primary-color: var(--dracula-purple);
+    --primary-dark: #9D75D6;
+    --primary-light: var(--dracula-pink);
+    --secondary-color: var(--dracula-orange);
+    --accent-color: var(--dracula-cyan);
 
     /* Neutral Colors */
-    --text-primary: #1a202c;
-    --text-secondary: #4a5568;
-    --text-muted: #718096;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f7fafc;
-    --bg-tertiary: #edf2f7;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --text-primary: var(--dracula-fg);
+    --text-secondary: var(--dracula-comment);
+    --text-muted: var(--dracula-comment);
+    --bg-primary: var(--dracula-bg-dark);
+    --bg-secondary: var(--dracula-bg);
+    --bg-tertiary: var(--dracula-bg-light);
+    --border-color: var(--dracula-current-line);
+
+    /* Functional Colors */
+    --success-color: var(--dracula-green);
+    --warning-color: var(--dracula-yellow);
+    --error-color: var(--dracula-red);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
 
     /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -50,21 +82,79 @@
     --transition-normal: 250ms ease;
 }
 
+/* ================================
+   Alucard Theme (Light Mode)
+   ================================ */
+
+body.light-mode {
+    /* Alucard Colors */
+    --alucard-bg: #F8F8F2;
+    --alucard-fg: #282A36;
+    --alucard-comment: #6272A4;
+    --alucard-cyan: #0D7D8C;
+    --alucard-green: #14710A;
+    --alucard-orange: #D3740D;
+    --alucard-pink: #C3356C;
+    --alucard-purple: #5B3599;
+    --alucard-red: #CB3A2A;
+    --alucard-yellow: #B89205;
+
+    /* Alucard UI Shades */
+    --alucard-bg-light: #FFFFFF;
+    --alucard-bg-dark: #E8E8E3;
+    --alucard-bg-darker: #D8D8D3;
+
+    /* Override theme variables for light mode */
+    --primary-color: var(--alucard-purple);
+    --primary-dark: #4A2A7A;
+    --primary-light: var(--alucard-pink);
+    --secondary-color: var(--alucard-orange);
+    --accent-color: var(--alucard-cyan);
+
+    --text-primary: var(--alucard-fg);
+    --text-secondary: var(--alucard-comment);
+    --text-muted: var(--alucard-comment);
+    --bg-primary: var(--alucard-bg-light);
+    --bg-secondary: var(--alucard-bg);
+    --bg-tertiary: var(--alucard-bg-dark);
+    --border-color: var(--alucard-bg-darker);
+
+    --success-color: var(--alucard-green);
+    --warning-color: var(--alucard-yellow);
+    --error-color: var(--alucard-red);
+
+    /* Lighter shadows for light mode */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   Base Styles
+   ================================ */
+
 body {
     font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.6;
     color: var(--text-primary);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+::selection {
+    background-color: var(--primary-color);
+    color: var(--bg-primary);
 }
 
 /* ================================
    Header
    ================================ */
+
 .header {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -97,8 +187,9 @@ body {
 /* ================================
    Navigation
    ================================ */
+
 .navigation {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: var(--header-height);
@@ -172,7 +263,7 @@ body {
 .nav-btn:hover:not(:disabled) {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--bg-primary);
 }
 
 .nav-btn:disabled {
@@ -183,6 +274,7 @@ body {
 /* ================================
    Main Content
    ================================ */
+
 .main-content {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -190,7 +282,7 @@ body {
 }
 
 .passage-container {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border-radius: 12px;
     padding: var(--spacing-xl);
     box-shadow: var(--shadow-md);
@@ -270,18 +362,19 @@ body {
 
 .error {
     padding: var(--spacing-lg);
-    background-color: #fee;
-    border: 1px solid #fcc;
+    background-color: var(--error-color);
+    border: 1px solid var(--error-color);
     border-radius: 8px;
-    color: #c33;
+    color: var(--bg-primary);
     text-align: center;
 }
 
 /* ================================
    Search
    ================================ */
+
 .search-container {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: var(--header-height);
@@ -311,12 +404,18 @@ body {
     border-radius: 8px;
     font-family: var(--font-sans);
     font-size: 1rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     transition: border-color var(--transition-fast);
 }
 
 .search-input:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
 }
 
 .search-results {
@@ -330,7 +429,7 @@ body {
 .search-result-item {
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     cursor: pointer;
@@ -338,7 +437,7 @@ body {
 }
 
 .search-result-item:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     border-color: var(--primary-color);
 }
 
@@ -363,6 +462,7 @@ body {
 /* ================================
    Buttons
    ================================ */
+
 .icon-btn {
     display: flex;
     align-items: center;
@@ -409,7 +509,7 @@ body {
     font-family: var(--font-sans);
     font-size: 0.95rem;
     font-weight: 500;
-    color: white;
+    color: var(--bg-primary);
     cursor: pointer;
     transition: background-color var(--transition-fast);
 }
@@ -421,6 +521,7 @@ body {
 /* ================================
    Modals
    ================================ */
+
 .modal {
     display: none;
     position: fixed;
@@ -428,7 +529,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 1000;
     backdrop-filter: blur(4px);
 }
@@ -451,7 +552,7 @@ body {
 }
 
 .modal-content {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     border-radius: 12px;
     width: 90%;
     max-width: 700px;
@@ -460,6 +561,7 @@ body {
     flex-direction: column;
     box-shadow: var(--shadow-lg);
     animation: slideUp var(--transition-normal);
+    border: 1px solid var(--border-color);
 }
 
 @keyframes slideUp {
@@ -485,7 +587,7 @@ body {
 .modal-header h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-color);
 }
 
 .modal-body {
@@ -515,7 +617,7 @@ body {
 
 .book-item {
     padding: var(--spacing-md);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.9rem;
@@ -529,7 +631,7 @@ body {
 .book-item:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--bg-primary);
     transform: translateY(-2px);
 }
 
@@ -541,7 +643,7 @@ body {
 
 .chapter-item {
     padding: var(--spacing-md);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.95rem;
@@ -555,13 +657,14 @@ body {
 .chapter-item:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: var(--bg-primary);
     transform: scale(1.05);
 }
 
 /* ================================
    Settings
    ================================ */
+
 .settings-group {
     margin-bottom: var(--spacing-xl);
 }
@@ -592,6 +695,8 @@ body {
     border-radius: 6px;
     font-family: var(--font-sans);
     font-size: 0.95rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     transition: border-color var(--transition-fast);
 }
 
@@ -638,13 +743,14 @@ body {
 /* ================================
    Toast
    ================================ */
+
 .toast {
     position: fixed;
     bottom: -100px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--text-primary);
-    color: white;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
     padding: var(--spacing-md) var(--spacing-xl);
     border-radius: 8px;
     box-shadow: var(--shadow-lg);
@@ -652,6 +758,7 @@ body {
     font-weight: 500;
     transition: bottom var(--transition-normal);
     z-index: 2000;
+    border: 1px solid var(--border-color);
 }
 
 .toast.show {
@@ -659,8 +766,57 @@ body {
 }
 
 /* ================================
+   Auth Forms
+   ================================ */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.auth-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+.user-info-box {
+    background-color: var(--bg-tertiary);
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+}
+
+.user-info-box p {
+    margin: var(--spacing-sm) 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.user-info-box strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ================================
    Responsive Design
    ================================ */
+
 @media (max-width: 768px) {
     :root {
         --font-size-base: 16px;
@@ -733,6 +889,7 @@ body {
 /* ================================
    Print Styles
    ================================ */
+
 @media print {
 
     .header,
