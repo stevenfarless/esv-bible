@@ -821,9 +821,7 @@ class BibleApp {
     }, 100);
 }
 
-
     if (!targetVerseNum) return;
-
     const paragraph = targetVerseNum.closest('p');
     if (!paragraph) return;
 
