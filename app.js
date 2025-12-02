@@ -324,12 +324,12 @@ class BibleApp {
 }
 
 	displayPassage(data, restoreScroll = false) {
-		const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
-
-		this.passageTitle.textContent = canonical;
-		this.passageText.innerHTML = data.passages[0];
-	    // Cache original HTML for this chapter
-		// this.originalPassageHtml = this.passageText.innerHTML;
+	  const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
+	  this.passageTitle.textContent = canonical;
+	  this.passageText.innerHTML = data.passages[0];
+		
+	  // Cache original HTML for highlight logic
+	  this.originalPassageHtml = this.passageText.innerHTML;
 
 		// Wrap each verse number and its text in a container span
 		const verseNums = this.passageText.querySelectorAll('.verse-num');
