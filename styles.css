@@ -376,13 +376,18 @@ body {
 .search-container {
 	background-color: var(--bg-secondary);
 	border-bottom: 1px solid var(--border-color);
-	position: sticky;
+	position: fixed;
 	top: var(--header-height);
-	z-index: 98;
+	/* right under the header */
+	left: 0;
+	right: 0;
+	z-index: 101;
+	/* above nav (99) and header (100) */
 	max-height: 0;
 	overflow: hidden;
 	transition: max-height var(--transition-normal);
 }
+
 
 .search-container.active {
 	max-height: 600px;
