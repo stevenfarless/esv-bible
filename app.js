@@ -295,39 +295,31 @@ class BibleApp {
 	// ================================
 
 	async loadPassage(book, chapter, restoreScroll = false) {
-    if (!restoreScroll) {
-        this.saveReadingPosition();
-    }
-
-    this.state.currentBook = book;
-    this.state.currentChapter = chapter;
-    this.updateNavigationState();
-
-    const reference = `${book} ${chapter}`;
-
-    this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
-
-    const data = await this.bibleApi.fetchPassage(reference);
-    if (!data) return;
-
-    this.passageTitle.textContent = reference;
-    this.passageText.innerHTML = data.passages[0];
-
-    // cache original HTML for highlight logic
-    this.originalPassageHtml = this.passageText.innerHTML;
-
-    if (restoreScroll) {
-        window.scrollTo(0, this.lastScrollPosition || 0);
-    } else {
-        window.scrollTo(0, 0);
-    }
-}
+	  if (!restoreScroll) {
+	    this.saveReadingPosition();
+	  }
+  
+	  this.state.currentBook = book;
+	  this.state.currentChapter = chapter;
+	  this.updateNavigationState();
+  
+	  const reference = `${book} ${chapter}`;
+  
+	  this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
+  
+	  const data = await this.bibleApi.fetchPassage(reference);
+	  if (!data) return;
+  
+	  // Use displayPassage so wrapping + originalPassageHtml are consistent
+	  this.displayPassage(data, restoreScroll);
+	}
+	
 
 	displayPassage(data, restoreScroll = false) {
 	  const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
 	  this.passageTitle.textContent = canonical;
 	  this.passageText.innerHTML = data.passages[0];
-		
+
 	  // Cache original HTML for highlight logic
 	  this.originalPassageHtml = this.passageText.innerHTML;
 
