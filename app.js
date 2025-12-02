@@ -31,12 +31,12 @@ class BibleApp {
 		  'Joshua': 'Josh',
 		  'Judges': 'Judg',
 		  'Ruth': 'Ruth',
-		  '1 Samuel': '1 Sam',
-		  '2 Samuel': '2 Sam',
-		  '1 Kings': '1 Kgs',
-		  '2 Kings': '2 Kgs',
-		  '1 Chronicles': '1 Chr',
-		  '2 Chronicles': '2 Chr',
+		  '1 Samuel': '1Sam',
+		  '2 Samuel': '2Sam',
+		  '1 Kings': '1Kgs',
+		  '2 Kings': '2Kgs',
+		  '1 Chronicles': '1Chr',
+		  '2 Chronicles': '2Chr',
 		  'Ezra': 'Ezra',
 		  'Nehemiah': 'Neh',
 		  'Esther': 'Esth',
@@ -68,25 +68,25 @@ class BibleApp {
 		  'John': 'John',
 		  'Acts': 'Acts',
 		  'Romans': 'Rom',
-		  '1 Corinthians': '1 Cor',
-		  '2 Corinthians': '2 Cor',
+		  '1 Corinthians': '1Cor',
+		  '2 Corinthians': '2Cor',
 		  'Galatians': 'Gal',
 		  'Ephesians': 'Eph',
 		  'Philippians': 'Phil',
 		  'Colossians': 'Col',
-		  '1 Thessalonians': '1 Thess',
-		  '2 Thessalonians': '2 Thess',
-		  '1 Timothy': '1 Tim',
-		  '2 Timothy': '2 Tim',
+		  '1 Thessalonians': '1Thes',
+		  '2 Thessalonians': '2Thes',
+		  '1 Timothy': '1Tim',
+		  '2 Timothy': '2Tim',
 		  'Titus': 'Titus',
 		  'Philemon': 'Phlm',
 		  'Hebrews': 'Heb',
 		  'James': 'Jas',
-		  '1 Peter': '1 Pet',
-		  '2 Peter': '2 Pet',
-		  '1 John': '1 John',
-		  '2 John': '2 John',
-		  '3 John': '3 John',
+		  '1 Peter': '1Pet',
+		  '2 Peter': '2Pet',
+		  '1 John': '1John',
+		  '2 John': '2John',
+		  '3 John': '3John',
 		  'Jude': 'Jude',
 		  'Revelation': 'Rev',
 		};
@@ -387,17 +387,17 @@ class BibleApp {
     updateNavigationState() {
 	  const book = this.state.currentBook;
 	  const abbr = this.bookAbbreviations[book] || book;
-		
+
 	  this.currentBookSpan.textContent = abbr;
 	  this.currentChapterSpan.textContent = this.state.currentChapter;
-		
+
 	  // Update button states
 	  const books = this.getAllBooks();
 	  const currentBookIndex = books.indexOf(book);
 	  const isFirstChapter = this.state.currentChapter === 1;
 	  const isLastChapter =
 	    this.state.currentChapter === this.getChapterCount(book);
-		
+
 	  this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
 	  this.nextChapterBtn.disabled =
 	    currentBookIndex === books.length - 1 && isLastChapter;
