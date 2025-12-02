@@ -852,6 +852,7 @@ body {
 
 	.main-content {
 		/* padding: var(--spacing-lg) var(--spacing-md); */
+		padding: 0%;
 	}
 
 	.passage-container {
