@@ -384,7 +384,7 @@ class BibleApp {
         this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
         // Reset verse selector
-        this.currentVerseSpan.textContent = ':';
+        this.currentVerseSpan.textContent = '1';
 
         // Restore scroll position or scroll to top
         if (restoreScroll) {
@@ -696,7 +696,7 @@ class BibleApp {
         for (const verseNum of verseNums) {
             if (verseNum.textContent.trim() === verseNumber.toString()) {
                 verseNum.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                this.currentVerseSpan.textContent = `:${verseNumber}`;
+                this.currentVerseSpan.textContent = `${verseNumber}`;
 
                 // Highlight the verse briefly
                 verseNum.style.backgroundColor = 'var(--primary)';
