@@ -1003,14 +1003,19 @@ body.light-mode .passage-text sup a:hover {
    ================================ */
 
 .selected-verse-glow {
+	display: inline-block;
 	box-shadow: 0 0 12px rgba(255, 215, 0, 0.35),
 		0 0 24px rgba(255, 215, 0, 0.15);
 	background-color: rgba(255, 215, 0, 0.05);
 	border-left: 3px solid rgba(255, 215, 0, 0.6);
 	border-right: 3px solid rgba(255, 215, 0, 0.6);
-	border-radius: 6px;
-	padding: 4px 8px
-	margin: 0.5rem 0;
+	border-radius: 4px;
+	padding: 2px 10px;
+	/* small, equal top/bottom, comfy left/right */
+	margin: 0.35rem 0;
+	/* slightly less gap above/below */
+	line-height: 1.6;
+	/* match your paragraph line-height */
 	transition: all 0.3s ease;
 	animation: verse-highlight 0.6s ease;
 }
