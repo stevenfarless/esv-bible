@@ -1005,9 +1005,9 @@ body.light-mode .passage-text sup a:hover {
 	box-shadow: 0 0 12px rgba(255, 215, 0, 0.35),
 		0 0 24px rgba(255, 215, 0, 0.15);
 	background-color: rgba(255, 215, 0, 0.05);
-	border: 3px solid rgba(255, 215, 0, 0.6);
-	/* border-left: 3px solid rgba(255, 215, 0, 0.6);
-	border-right: 3px solid rgba(255, 215, 0, 0.6); */
+	/* border: 3px solid rgba(255, 215, 0, 0.6); */
+	border-left: 3px solid rgba(255, 215, 0, 0.6);
+	border-right: 3px solid rgba(255, 215, 0, 0.6);
 	border-radius: 6px;
 	padding: 8px 12px;
 	margin: 4px 0;
