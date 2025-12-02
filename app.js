@@ -694,7 +694,7 @@ class BibleApp {
     scrollToVerse(verseNumber) {
         // Set selected verse in state
         this.state.selectedVerse = verseNumber;
-        this.currentVerseSpan.textContent = `:${verseNumber}`;
+        this.currentVerseSpan.textContent = `${verseNumber}`;
 
         // Apply the glow effect
         this.applyVerseGlow();
