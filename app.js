@@ -761,24 +761,24 @@ class BibleApp {
 
     if (!targetVerseNum) return;
 
-	// Verse‑by‑verse mode: glow only this verse's container
-	if (this.state.verseByVerse) {
-	    const container = targetVerseNum.closest('.verse-container');
-	    if (!container) return;
-	
-	    // Remove any previous glow
-	    this.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
-	        el.classList.remove('selected-verse-glow');
-	    });
-	
-	    container.classList.add('selected-verse-glow');
-	
-	    setTimeout(() => {
-	        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-	    }, 100);
-	
-	    return; // Skip the paragraph-splitting logic below
-	}
+// Verse‑by‑verse mode: glow only this verse's container
+if (this.state.verseByVerse) {
+    const container = targetVerseNum.closest('.verse-container');
+    if (!container) return;
+
+    // Remove any previous glow
+    this.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
+        el.classList.remove('selected-verse-glow');
+    });
+
+    container.classList.add('selected-verse-glow');
+
+    setTimeout(() => {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
+    return; // Skip the paragraph-splitting logic below
+}
 
     const paragraph = targetVerseNum.closest('p');
     if (!paragraph) return;
