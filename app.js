@@ -1,6 +1,6 @@
-// ================================
-// ESV Bible Reader App with Firebase
-// ================================
+// ====================
+// ESV Bible Reader App
+// ====================
 
 import { BibleApi } from './bible-api.js';
 import { cacheElements, loadTheme, toggleTheme, updateThemeIcon } from './ui.js';
@@ -21,6 +21,76 @@ class BibleApp {
         // Bible structure data
         this.bibleBooks = this.initializeBibleStructure();
 
+		// Book abbreviations for UI
+		this.bookAbbreviations = {
+		  'Genesis': 'Gen',
+		  'Exodus': 'Exod',
+		  'Leviticus': 'Lev',
+		  'Numbers': 'Num',
+		  'Deuteronomy': 'Deut',
+		  'Joshua': 'Josh',
+		  'Judges': 'Judg',
+		  'Ruth': 'Ruth',
+		  '1 Samuel': '1 Sam',
+		  '2 Samuel': '2 Sam',
+		  '1 Kings': '1 Kgs',
+		  '2 Kings': '2 Kgs',
+		  '1 Chronicles': '1 Chr',
+		  '2 Chronicles': '2 Chr',
+		  'Ezra': 'Ezra',
+		  'Nehemiah': 'Neh',
+		  'Esther': 'Esth',
+		  'Job': 'Job',
+		  'Psalms': 'Ps',
+		  'Proverbs': 'Prov',
+		  'Ecclesiastes': 'Eccl',
+		  'Song of Solomon': 'Song',
+		  'Isaiah': 'Isa',
+		  'Jeremiah': 'Jer',
+		  'Lamentations': 'Lam',
+		  'Ezekiel': 'Ezek',
+		  'Daniel': 'Dan',
+		  'Hosea': 'Hos',
+		  'Joel': 'Joel',
+		  'Amos': 'Amos',
+		  'Obadiah': 'Obad',
+		  'Jonah': 'Jonah',
+		  'Micah': 'Mic',
+		  'Nahum': 'Nah',
+		  'Habakkuk': 'Hab',
+		  'Zephaniah': 'Zeph',
+		  'Haggai': 'Hag',
+		  'Zechariah': 'Zech',
+		  'Malachi': 'Mal',
+		  'Matthew': 'Matt',
+		  'Mark': 'Mark',
+		  'Luke': 'Luke',
+		  'John': 'John',
+		  'Acts': 'Acts',
+		  'Romans': 'Rom',
+		  '1 Corinthians': '1 Cor',
+		  '2 Corinthians': '2 Cor',
+		  'Galatians': 'Gal',
+		  'Ephesians': 'Eph',
+		  'Philippians': 'Phil',
+		  'Colossians': 'Col',
+		  '1 Thessalonians': '1 Thess',
+		  '2 Thessalonians': '2 Thess',
+		  '1 Timothy': '1 Tim',
+		  '2 Timothy': '2 Tim',
+		  'Titus': 'Titus',
+		  'Philemon': 'Phlm',
+		  'Hebrews': 'Heb',
+		  'James': 'Jas',
+		  '1 Peter': '1 Pet',
+		  '2 Peter': '2 Pet',
+		  '1 John': '1 John',
+		  '2 John': '2 John',
+		  '3 John': '3 John',
+		  'Jude': 'Jude',
+		  'Revelation': 'Rev',
+		};
+  
         // State management (use helper now)
         this.state = initializeState();
 
@@ -84,7 +154,6 @@ class BibleApp {
 			if (e.key === 'Escape') this.closeSearch();
 		});
 
-		// Navigation
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
 		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
@@ -316,18 +385,24 @@ class BibleApp {
     }
 
     updateNavigationState() {
-		this.currentBookSpan.textContent = this.state.currentBook;
-		this.currentChapterSpan.textContent = this.state.currentChapter;
-
-		// Update button states
-		const books = this.getAllBooks();
-		const currentBookIndex = books.indexOf(this.state.currentBook);
-		const isFirstChapter = this.state.currentChapter === 1;
-		const isLastChapter = this.state.currentChapter === this.getChapterCount(this.state.currentBook);
-
-		this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
-		this.nextChapterBtn.disabled = currentBookIndex === books.length - 1 && isLastChapter;
+	  const book = this.state.currentBook;
+	  const abbr = this.bookAbbreviations[book] || book;
+		
+	  this.currentBookSpan.textContent = abbr;
+	  this.currentChapterSpan.textContent = this.state.currentChapter;
+		
+	  // Update button states
+	  const books = this.getAllBooks();
+	  const currentBookIndex = books.indexOf(book);
+	  const isFirstChapter = this.state.currentChapter === 1;
+	  const isLastChapter =
+	    this.state.currentChapter === this.getChapterCount(book);
+		
+	  this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
+	  this.nextChapterBtn.disabled =
+	    currentBookIndex === books.length - 1 && isLastChapter;
 	}
+
 
 	// ================================
 	// Search
@@ -367,16 +442,6 @@ class BibleApp {
 			}
 		}, 300);
 	}
-
-	// CHUNK1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	isPassageReference(query) {
 		// Simple check for passage reference patterns
@@ -479,32 +544,10 @@ class BibleApp {
 	}
 
 	populateBookModal() {
-		const abbreviations = {
-			'Genesis': 'Gen', 'Exodus': 'Exod', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deut',
-			'Joshua': 'Josh', 'Judges': 'Judg', 'Ruth': 'Ruth', '1 Samuel': '1 Sam', '2 Samuel': '2 Sam',
-			'1 Kings': '1 Kgs', '2 Kings': '2 Kgs', '1 Chronicles': '1 Chr', '2 Chronicles': '2 Chr',
-			'Ezra': 'Ezra', 'Nehemiah': 'Neh', 'Esther': 'Esth', 'Job': 'Job', 'Psalms': 'Ps',
-			'Proverbs': 'Prov', 'Ecclesiastes': 'Eccl', 'Song of Solomon': 'Song', 'Isaiah': 'Isa',
-			'Jeremiah': 'Jer', 'Lamentations': 'Lam', 'Ezekiel': 'Ezek', 'Daniel': 'Dan',
-			'Hosea': 'Hos', 'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obad', 'Jonah': 'Jonah',
-			'Micah': 'Mic', 'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zeph',
-			'Haggai': 'Hag', 'Zechariah': 'Zech', 'Malachi': 'Mal',
-
-			'Matthew': 'Matt', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts',
-			'Romans': 'Rom', '1 Corinthians': '1 Cor', '2 Corinthians': '2 Cor', 'Galatians': 'Gal',
-			'Ephesians': 'Eph', 'Philippians': 'Phil', 'Colossians': 'Col',
-			'1 Thessalonians': '1 Thess', '2 Thessalonians': '2 Thess',
-			'1 Timothy': '1 Tim', '2 Timothy': '2 Tim', 'Titus': 'Titus',
-			'Philemon': 'Phlm', 'Hebrews': 'Heb', 'James': 'Jas',
-			'1 Peter': '1 Pet', '2 Peter': '2 Pet',
-			'1 John': '1 John', '2 John': '2 John', '3 John': '3 John',
-			'Jude': 'Jude', 'Revelation': 'Rev'
-		};
-
 		const createBookButton = (book) => {
 			const btn = document.createElement('button');
 			btn.className = 'book-item';
-			btn.textContent = abbreviations[book] || book; // display abbreviation only
+			btn.textContent = this.bookAbbreviations[book] || book;  // use shared map
 			btn.addEventListener('click', () => {
 				this.state.selectedVerse = null; // Clear verse selection
 				this.loadPassage(book, 1);
@@ -761,25 +804,6 @@ class BibleApp {
 			}
 		}
 	}
-
-	// CHUNK2^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
 
 	// ================================
 	// Firebase Authentication
