@@ -692,228 +692,219 @@ class BibleApp {
     }
 
     scrollToVerse(verseNumber) {
-        const verseNums = this.passageText.querySelectorAll('.verse-num');
-        for (const verseNum of verseNums) {
-            if (verseNum.textContent.trim() === verseNumber.toString()) {
-                verseNum.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                this.currentVerseSpan.textContent = `${verseNumber}`;
+        // Set selected verse in state
+        this.state.selectedVerse = verseNumber;
+        this.currentVerseSpan.textContent = `:${verseNumber}`;
 
-                // Highlight the verse briefly
-                verseNum.style.backgroundColor = 'var(--primary)';
-                verseNum.style.color = 'var(--bg)';
-                setTimeout(() => {
-                    verseNum.style.backgroundColor = '';
-                    verseNum.style.color = '';
-                }, 2000);
-                break;
-            }
-        }
+        // Apply the glow effect
+        this.applyVerseGlow();
     }
 
+}
 
-    // ================================
-    // Settings
-    // ================================
-    checkApiKey() {
-        if (!this.API_KEY) {
-            setTimeout(() => {
-                this.showToast('Welcome! Please sign in to start reading.');
-                // Open login modal instead of signup
-                this.openModal(this.loginModal);
-            }, 500);
-        }
+// ================================
+// Settings
+// ================================
+checkApiKey() {
+    if (!this.API_KEY) {
+        setTimeout(() => {
+            this.showToast('Welcome! Please sign in to start reading.');
+            // Open login modal instead of signup
+            this.openModal(this.loginModal);
+        }, 500);
     }
+}
 
     async saveApiKey() {
-        const apiKey = this.apiKeyInput.value.trim();
-        if (!apiKey) {
-            this.showToast('Please enter a valid API key');
+    const apiKey = this.apiKeyInput.value.trim();
+    if (!apiKey) {
+        this.showToast('Please enter a valid API key');
+        return;
+    }
+
+    this.API_KEY = apiKey;
+
+    // Save to Firebase if logged in
+    if (this.currentUser) {
+        try {
+            const encrypted = window.encryptionHelper.encrypt(apiKey);
+            await this.database.ref(`users/${this.currentUser.uid}/apiKey`).set(encrypted);
+            this.showToast('API key saved successfully!');
+        } catch (error) {
+            console.error('Error saving API key:', error);
+            this.showToast('Failed to save API key');
             return;
         }
-
-        this.API_KEY = apiKey;
-
-        // Save to Firebase if logged in
-        if (this.currentUser) {
-            try {
-                const encrypted = window.encryptionHelper.encrypt(apiKey);
-                await this.database.ref(`users/${this.currentUser.uid}/apiKey`).set(encrypted);
-                this.showToast('API key saved successfully!');
-            } catch (error) {
-                console.error('Error saving API key:', error);
-                this.showToast('Failed to save API key');
-                return;
-            }
-        } else {
-            // Save locally if not logged in
-            localStorage.setItem('esvApiKey', apiKey);
-            this.showToast('API key saved locally!');
-        }
-
-        this.closeModal(this.settingsModal);
-        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+    } else {
+        // Save locally if not logged in
+        localStorage.setItem('esvApiKey', apiKey);
+        this.showToast('API key saved locally!');
     }
 
-    loadLocalSettings() {
-        // Load from localStorage for non-logged-in users
-        this.API_KEY = localStorage.getItem('esvApiKey') || '';
-        this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
-        this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
-        this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
-        this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
-        this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
-    }
+    this.closeModal(this.settingsModal);
+    this.loadPassage(this.state.currentBook, this.state.currentChapter);
+}
 
-    applySettings() {
-        this.apiKeyInput.value = this.API_KEY;
-        this.verseNumbersToggle.checked = this.state.showVerseNumbers;
-        this.headingsToggle.checked = this.state.showHeadings;
-        this.footnotesToggle.checked = this.state.showFootnotes;
-        this.verseByVerseToggle.checked = this.state.verseByVerse;
-        this.fontSizeSlider.value = this.state.fontSize;
-        this.fontSizeValue.textContent = `${this.state.fontSize}px`;
-        this.passageText.style.fontSize = `${this.state.fontSize}px`;
-        // Apply verse-by-verse class 
-        if (this.state.verseByVerse) {
-            this.passageText.classList.add('verse-by-verse');
-        } else {
-            this.passageText.classList.remove('verse-by-verse');
-        }
+loadLocalSettings() {
+    // Load from localStorage for non-logged-in users
+    this.API_KEY = localStorage.getItem('esvApiKey') || '';
+    this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
+    this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
+    this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
+    this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+    this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+}
+
+applySettings() {
+    this.apiKeyInput.value = this.API_KEY;
+    this.verseNumbersToggle.checked = this.state.showVerseNumbers;
+    this.headingsToggle.checked = this.state.showHeadings;
+    this.footnotesToggle.checked = this.state.showFootnotes;
+    this.verseByVerseToggle.checked = this.state.verseByVerse;
+    this.fontSizeSlider.value = this.state.fontSize;
+    this.fontSizeValue.textContent = `${this.state.fontSize}px`;
+    this.passageText.style.fontSize = `${this.state.fontSize}px`;
+    // Apply verse-by-verse class 
+    if (this.state.verseByVerse) {
+        this.passageText.classList.add('verse-by-verse');
+    } else {
+        this.passageText.classList.remove('verse-by-verse');
     }
+}
 
     async toggleSetting(setting) {
-        const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
-        this.state[setting] = toggle.checked;
+    const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
+    this.state[setting] = toggle.checked;
 
-        // Save to Firebase or localStorage
-        if (this.currentUser) {
-            await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggle.checked);
-        } else {
-            localStorage.setItem(setting, toggle.checked);
-        }
-
-        this.loadPassage(this.state.currentBook, this.state.currentChapter);
+    // Save to Firebase or localStorage
+    if (this.currentUser) {
+        await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggle.checked);
+    } else {
+        localStorage.setItem(setting, toggle.checked);
     }
+
+    this.loadPassage(this.state.currentBook, this.state.currentChapter);
+}
 
     async toggleVerseByVerse() {
-        this.state.verseByVerse = this.verseByVerseToggle.checked;
+    this.state.verseByVerse = this.verseByVerseToggle.checked;
 
-        // Save to Firebase or localStorage
-        if (this.currentUser) {
-            await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(this.state.verseByVerse);
-        } else {
-            localStorage.setItem('verseByVerse', this.state.verseByVerse);
-        }
-
-        // Apply the class
-        if (this.state.verseByVerse) {
-            this.passageText.classList.add('verse-by-verse');
-        } else {
-            this.passageText.classList.remove('verse-by-verse');
-        }
+    // Save to Firebase or localStorage
+    if (this.currentUser) {
+        await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(this.state.verseByVerse);
+    } else {
+        localStorage.setItem('verseByVerse', this.state.verseByVerse);
     }
+
+    // Apply the class
+    if (this.state.verseByVerse) {
+        this.passageText.classList.add('verse-by-verse');
+    } else {
+        this.passageText.classList.remove('verse-by-verse');
+    }
+}
 
 
     async updateFontSize(size) {
-        this.state.fontSize = parseInt(size);
-        this.fontSizeValue.textContent = `${size}px`;
-        this.passageText.style.fontSize = `${size}px`;
+    this.state.fontSize = parseInt(size);
+    this.fontSizeValue.textContent = `${size}px`;
+    this.passageText.style.fontSize = `${size}px`;
 
-        // Save to Firebase or localStorage
-        if (this.currentUser) {
-            await this.database.ref(`users/${this.currentUser.uid}/settings/fontSize`).set(parseInt(size));
-        } else {
-            localStorage.setItem('fontSize', size);
-        }
+    // Save to Firebase or localStorage
+    if (this.currentUser) {
+        await this.database.ref(`users/${this.currentUser.uid}/settings/fontSize`).set(parseInt(size));
+    } else {
+        localStorage.setItem('fontSize', size);
+    }
+}
+
+// ================================
+// Utilities
+// ================================
+copyPassage() {
+    const textContent = this.stripHTML(this.passageText.innerHTML);
+    const reference = this.passageTitle.textContent;
+    const fullText = `${reference}\n\n${textContent}\n\n${this.copyright.textContent}`;
+
+    navigator.clipboard.writeText(fullText).then(() => {
+        this.showToast('Passage copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        this.showToast('Failed to copy passage');
+    });
+}
+
+showError(message) {
+    this.passageText.innerHTML = `<div class="error">${message}</div>`;
+}
+
+showToast(message) {
+    this.toast.textContent = message;
+    this.toast.classList.add('show');
+    setTimeout(() => {
+        this.toast.classList.remove('show');
+    }, 3000);
+}
+
+handleKeyboardShortcuts(e) {
+    // Ctrl/Cmd + K to open search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        this.toggleSearch();
     }
 
-    // ================================
-    // Utilities
-    // ================================
-    copyPassage() {
-        const textContent = this.stripHTML(this.passageText.innerHTML);
-        const reference = this.passageTitle.textContent;
-        const fullText = `${reference}\n\n${textContent}\n\n${this.copyright.textContent}`;
-
-        navigator.clipboard.writeText(fullText).then(() => {
-            this.showToast('Passage copied to clipboard!');
-        }).catch(err => {
-            console.error('Failed to copy:', err);
-            this.showToast('Failed to copy passage');
-        });
+    // Escape to close modals
+    if (e.key === 'Escape') {
+        if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
+        if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
+        if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
+        if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
+        if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
+        if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
+        if (this.searchContainer.classList.contains('active')) this.closeSearch();
+        if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
     }
 
-    showError(message) {
-        this.passageText.innerHTML = `<div class="error">${message}</div>`;
-    }
-
-    showToast(message) {
-        this.toast.textContent = message;
-        this.toast.classList.add('show');
-        setTimeout(() => {
-            this.toast.classList.remove('show');
-        }, 3000);
-    }
-
-    handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + K to open search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    // Arrow keys for navigation (when no modal is open)
+    if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            this.toggleSearch();
-        }
-
-        // Escape to close modals
-        if (e.key === 'Escape') {
-            if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
-            if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
-            if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
-            if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
-            if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
-            if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
-            if (this.searchContainer.classList.contains('active')) this.closeSearch();
-            if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
-        }
-
-        // Arrow keys for navigation (when no modal is open)
-        if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
-            if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                this.navigateChapter(-1);
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                this.navigateChapter(1);
-            }
+            this.navigateChapter(-1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            this.navigateChapter(1);
         }
     }
+}
 
-    // ================================
-    // Theme Management
-    // ================================
-    loadTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-        }
-        this.updateThemeIcon();
+// ================================
+// Theme Management
+// ================================
+loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
     }
+    this.updateThemeIcon();
+}
 
-    toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        const theme = isLight ? 'light' : 'dark';
+toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    const theme = isLight ? 'light' : 'dark';
 
-        localStorage.setItem('theme', theme);
-        this.updateThemeIcon();
+    localStorage.setItem('theme', theme);
+    this.updateThemeIcon();
 
-        this.showToast(isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme');
-    }
+    this.showToast(isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme');
+}
 
-    updateThemeIcon() {
-        const isLight = document.body.classList.contains('light-mode');
+updateThemeIcon() {
+    const isLight = document.body.classList.contains('light-mode');
 
-        if (isLight) {
-            // Sun icon for light mode
-            this.themeIcon.innerHTML = `
+    if (isLight) {
+        // Sun icon for light mode
+        this.themeIcon.innerHTML = `
                 <circle cx="12" cy="12" r="5"/>
                 <line x1="12" y1="1" x2="12" y2="3"/>
                 <line x1="12" y1="21" x2="12" y2="23"/>
@@ -924,200 +915,200 @@ class BibleApp {
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
             `;
-        } else {
-            // Moon icon for dark mode
-            this.themeIcon.innerHTML = `
+    } else {
+        // Moon icon for dark mode
+        this.themeIcon.innerHTML = `
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             `;
-        }
     }
+}
 
-    // ================================
-    // Firebase Authentication
-    // ================================
-    handleUserButtonClick() {
-        if (this.currentUser) {
-            // Show user menu
-            document.getElementById('userEmail').textContent = this.currentUser.email;
-            const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
-            document.getElementById('userTheme').textContent = theme;
-            this.openModal(this.userMenuModal);
-        } else {
-            // Show login modal
-            this.openModal(this.loginModal);
-        }
+// ================================
+// Firebase Authentication
+// ================================
+handleUserButtonClick() {
+    if (this.currentUser) {
+        // Show user menu
+        document.getElementById('userEmail').textContent = this.currentUser.email;
+        const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
+        document.getElementById('userTheme').textContent = theme;
+        this.openModal(this.userMenuModal);
+    } else {
+        // Show login modal
+        this.openModal(this.loginModal);
     }
+}
 
     async handleLogin() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-        if (!email || !password) {
-            this.showToast('Please enter valid credentials');
-            return;
-        }
+    if (!email || !password) {
+        this.showToast('Please enter valid credentials');
+        return;
+    }
 
-        try {
-            await this.auth.signInWithEmailAndPassword(email, password);
-            this.showToast('Signed in successfully!');
-            this.closeModal(this.loginModal);
+    try {
+        await this.auth.signInWithEmailAndPassword(email, password);
+        this.showToast('Signed in successfully!');
+        this.closeModal(this.loginModal);
 
-            // Clear form
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        } catch (error) {
-            console.error('Login error:', error);
+        // Clear form
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    } catch (error) {
+        console.error('Login error:', error);
 
-            if (error.code === 'auth/user-not-found') {
-                if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
-                    this.closeModal(this.loginModal);
-                    this.openModal(this.signupModal);
-                    document.getElementById('signupEmail').value = email;
-                }
-            } else if (error.code === 'auth/wrong-password') {
-                this.showToast('Incorrect password');
-            } else {
-                this.showToast('Login failed: ' + error.message);
+        if (error.code === 'auth/user-not-found') {
+            if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
+                this.closeModal(this.loginModal);
+                this.openModal(this.signupModal);
+                document.getElementById('signupEmail').value = email;
             }
+        } else if (error.code === 'auth/wrong-password') {
+            this.showToast('Incorrect password');
+        } else {
+            this.showToast('Login failed: ' + error.message);
         }
     }
+}
 
     async handleSignup() {
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const apiKey = document.getElementById('signupApiKey').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const apiKey = document.getElementById('signupApiKey').value;
 
-        if (!email || !password || !apiKey) {
-            this.showToast('Please fill in all fields');
-            return;
-        }
+    if (!email || !password || !apiKey) {
+        this.showToast('Please fill in all fields');
+        return;
+    }
 
-        if (password.length < 6) {
-            this.showToast('Password must be at least 6 characters');
-            return;
-        }
+    if (password.length < 6) {
+        this.showToast('Password must be at least 6 characters');
+        return;
+    }
 
-        try {
-            // Create Firebase user
-            const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
+    try {
+        // Create Firebase user
+        const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-            // Save API key (encrypted) and initial settings to database
-            const encrypted = window.encryptionHelper.encrypt(apiKey);
-            await this.database.ref(`users/${user.uid}`).set({
-                apiKey: encrypted,
-                settings: {
-                    fontSize: 18,
-                    showVerseNumbers: true,
-                    showHeadings: true,
-                    showFootnotes: false,
-                    verseByVerse: false,
-                },
-                createdAt: Date.now()
-            });
+        // Save API key (encrypted) and initial settings to database
+        const encrypted = window.encryptionHelper.encrypt(apiKey);
+        await this.database.ref(`users/${user.uid}`).set({
+            apiKey: encrypted,
+            settings: {
+                fontSize: 18,
+                showVerseNumbers: true,
+                showHeadings: true,
+                showFootnotes: false,
+                verseByVerse: false,
+            },
+            createdAt: Date.now()
+        });
 
-            this.showToast('Account created successfully!');
-            this.closeModal(this.signupModal);
+        this.showToast('Account created successfully!');
+        this.closeModal(this.signupModal);
 
-            // Clear form
-            document.getElementById('signupEmail').value = '';
-            document.getElementById('signupPassword').value = '';
-            document.getElementById('signupApiKey').value = '';
-        } catch (error) {
-            console.error('Signup error:', error);
+        // Clear form
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupApiKey').value = '';
+    } catch (error) {
+        console.error('Signup error:', error);
 
-            if (error.code === 'auth/email-already-in-use') {
-                this.showToast('Account already exists. Please sign in.');
-            } else {
-                this.showToast('Signup failed: ' + error.message);
-            }
+        if (error.code === 'auth/email-already-in-use') {
+            this.showToast('Account already exists. Please sign in.');
+        } else {
+            this.showToast('Signup failed: ' + error.message);
         }
     }
+}
 
     async handleLogout() {
-        try {
-            await this.auth.signOut();
-            this.showToast('Signed out successfully!');
-            this.closeModal(this.userMenuModal);
-        } catch (error) {
-            console.error('Logout error:', error);
-            this.showToast('Logout failed');
-        }
+    try {
+        await this.auth.signOut();
+        this.showToast('Signed out successfully!');
+        this.closeModal(this.userMenuModal);
+    } catch (error) {
+        console.error('Logout error:', error);
+        this.showToast('Logout failed');
     }
+}
 
     // ================================
     // Firebase Data Management
     // ================================
     async loadUserData() {
-        if (!this.currentUser) return;
+    if (!this.currentUser) return;
 
-        try {
-            const snapshot = await this.database.ref(`users/${this.currentUser.uid}`).once('value');
-            const userData = snapshot.val();
+    try {
+        const snapshot = await this.database.ref(`users/${this.currentUser.uid}`).once('value');
+        const userData = snapshot.val();
 
-            if (userData) {
-                // Load API key
-                if (userData.apiKey) {
-                    this.API_KEY = window.encryptionHelper.decrypt(userData.apiKey);
-                }
-
-                // Load settings
-                if (userData.settings) {
-                    this.state.fontSize = userData.settings.fontSize || 18;
-                    this.state.showVerseNumbers = userData.settings.showVerseNumbers !== false;
-                    this.state.showHeadings = userData.settings.showHeadings !== false;
-                    this.state.showFootnotes = userData.settings.showFootnotes === true;
-                    this.state.verseByVerse = userData.settings.verseByVerse === true;
-                }
+        if (userData) {
+            // Load API key
+            if (userData.apiKey) {
+                this.API_KEY = window.encryptionHelper.decrypt(userData.apiKey);
             }
-        } catch (error) {
-            console.error('Error loading user data:', error);
+
+            // Load settings
+            if (userData.settings) {
+                this.state.fontSize = userData.settings.fontSize || 18;
+                this.state.showVerseNumbers = userData.settings.showVerseNumbers !== false;
+                this.state.showHeadings = userData.settings.showHeadings !== false;
+                this.state.showFootnotes = userData.settings.showFootnotes === true;
+                this.state.verseByVerse = userData.settings.verseByVerse === true;
+            }
         }
+    } catch (error) {
+        console.error('Error loading user data:', error);
     }
+}
 
     // ================================
     // Reading Position Persistence
     // ================================
     async saveReadingPosition() {
-        if (!this.currentUser) return;
+    if (!this.currentUser) return;
 
-        const position = {
-            book: this.state.currentBook,
-            chapter: this.state.currentChapter,
-            scrollPosition: window.pageYOffset || document.documentElement.scrollTop,
-            lastUpdated: Date.now()
-        };
+    const position = {
+        book: this.state.currentBook,
+        chapter: this.state.currentChapter,
+        scrollPosition: window.pageYOffset || document.documentElement.scrollTop,
+        lastUpdated: Date.now()
+    };
 
-        try {
-            await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).set(position);
-        } catch (error) {
-            console.error('Error saving reading position:', error);
-        }
+    try {
+        await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).set(position);
+    } catch (error) {
+        console.error('Error saving reading position:', error);
     }
+}
 
-    getSavedScrollPosition() {
-        // This will be loaded from Firebase in loadSavedReadingPosition
-        return this.lastScrollPosition;
-    }
+getSavedScrollPosition() {
+    // This will be loaded from Firebase in loadSavedReadingPosition
+    return this.lastScrollPosition;
+}
 
     async loadSavedReadingPosition() {
-        if (!this.currentUser) return;
+    if (!this.currentUser) return;
 
-        try {
-            const snapshot = await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).once('value');
-            const position = snapshot.val();
+    try {
+        const snapshot = await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).once('value');
+        const position = snapshot.val();
 
-            if (position && position.book && position.chapter) {
-                this.lastScrollPosition = position.scrollPosition || 0;
-                await this.loadPassage(position.book, position.chapter, true);
-            } else {
-                await this.loadPassage(this.state.currentBook, this.state.currentChapter);
-            }
-        } catch (error) {
-            console.error('Error loading reading position:', error);
+        if (position && position.book && position.chapter) {
+            this.lastScrollPosition = position.scrollPosition || 0;
+            await this.loadPassage(position.book, position.chapter, true);
+        } else {
             await this.loadPassage(this.state.currentBook, this.state.currentChapter);
         }
+    } catch (error) {
+        console.error('Error loading reading position:', error);
+        await this.loadPassage(this.state.currentBook, this.state.currentChapter);
     }
+}
 }
 
 // ================================
