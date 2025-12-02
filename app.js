@@ -762,7 +762,6 @@ class BibleApp {
     }
 
     if (!targetVerseNum) return;
-
     const paragraph = targetVerseNum.closest('p');
     if (!paragraph) return;
 
@@ -777,14 +776,12 @@ class BibleApp {
     const nodes = Array.from(paragraph.childNodes);
 
     nodes.forEach(node => {
-        // When we hit the selected verse number, switch to 'selected'
         if (node === targetVerseNum) {
             mode = 'selected';
             selectedBlock.appendChild(node);
             return;
         }
 
-        // If this is another verse number after the selected one, switch to 'after'
         if (
             mode === 'selected' &&
             node.nodeType === 1 &&
@@ -795,7 +792,6 @@ class BibleApp {
             return;
         }
 
-        // Append node based on current mode
         if (mode === 'before') {
             beforeP.appendChild(node);
         } else if (mode === 'selected') {
@@ -807,7 +803,6 @@ class BibleApp {
 
     const parent = paragraph.parentNode;
 
-    // Insert in order: before, selected, after (only if they have content)
     if (beforeP.childNodes.length > 0) {
         parent.insertBefore(beforeP, paragraph);
     }
@@ -818,80 +813,12 @@ class BibleApp {
         parent.insertBefore(afterP, paragraph);
     }
 
-    // Remove original paragraph
     parent.removeChild(paragraph);
 
-    // Scroll selected verse into view
     setTimeout(() => {
         selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 }
-
-    if (!targetVerseNum) return;
-    const paragraph = targetVerseNum.closest('p');
-    if (!paragraph) return;
-
-    // Create containers for before / selected / after
-    const beforeP = document.createElement('p');
-    const selectedBlock = document.createElement('div');
-    const afterP = document.createElement('p');
-
-    selectedBlock.classList.add('selected-verse-glow');
-
-    let mode = 'before'; // 'before' | 'selected' | 'after'
-    const nodes = Array.from(paragraph.childNodes);
-
-    nodes.forEach(node => {
-        // When we hit the selected verse number, switch to 'selected'
-        if (node === targetVerseNum) {
-            mode = 'selected';
-            selectedBlock.appendChild(node);
-            return;
-        }
-
-        // If this is another verse number after the selected one, switch to 'after'
-        if (
-            mode === 'selected' &&
-            node.nodeType === 1 &&
-            node.classList.contains('verse-num')
-        ) {
-            mode = 'after';
-            afterP.appendChild(node);
-            return;
-        }
-
-        // Append node based on current mode
-        if (mode === 'before') {
-            beforeP.appendChild(node);
-        } else if (mode === 'selected') {
-            selectedBlock.appendChild(node);
-        } else {
-            afterP.appendChild(node);
-        }
-    });
-
-    const parent = paragraph.parentNode;
-
-    // Insert in order: before, selected, after (only if they have content)
-    if (beforeP.childNodes.length > 0) {
-        parent.insertBefore(beforeP, paragraph);
-    }
-
-    parent.insertBefore(selectedBlock, paragraph);
-
-    if (afterP.childNodes.length > 0) {
-        parent.insertBefore(afterP, paragraph);
-    }
-
-    // Remove original paragraph
-    parent.removeChild(paragraph);
-
-    // Scroll selected verse into view
-    setTimeout(() => {
-        selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-}
-
 
 	// ================================
 	// Settings
