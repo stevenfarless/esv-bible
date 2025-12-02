@@ -381,6 +381,32 @@ class BibleApp {
 
         this.passageTitle.textContent = canonical;
         this.passageText.innerHTML = data.passages[0];
+        // Wrap each verse number and its text in a container span
+        const verseNums = this.passageText.querySelectorAll('.verse-num');
+        verseNums.forEach((verseNum, index) => {
+            const container = document.createElement('span');
+            container.classList.add('verse-container');
+
+            const parent = verseNum.parentNode;
+            parent.insertBefore(container, verseNum);
+
+            // Move this verse number and its following text nodes into the container
+            let node = verseNum;
+            while (node) {
+                const next = node.nextSibling;
+                // Stop when hitting another verse number or a heading/paragraph break
+                if (
+                    next &&
+                    next.nodeType === 1 &&
+                    next.classList.contains('verse-num')
+                ) {
+                    break;
+                }
+                container.appendChild(node);
+                node = next;
+            }
+        });
+
         this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
         // Reset verse selector
@@ -701,27 +727,18 @@ class BibleApp {
     }
 
     applyVerseGlow() {
-        // Remove previous glow
         const previousGlow = this.passageText.querySelector('.selected-verse-glow');
-        if (previousGlow) {
-            previousGlow.classList.remove('selected-verse-glow');
-        }
+        if (previousGlow) previousGlow.classList.remove('selected-verse-glow');
 
-        // Apply new glow if verse is selected
         if (this.state.selectedVerse !== null) {
             const verseNums = this.passageText.querySelectorAll('.verse-num');
             for (const verseNum of verseNums) {
                 if (verseNum.textContent.trim() === this.state.selectedVerse.toString()) {
-                    // Add glow to the parent element (usually a <p>)
-                    const verseContainer = verseNum.parentElement;
-                    if (verseContainer) {
-                        verseContainer.classList.add('selected-verse-glow');
-
-                        // Scroll to the verse smoothly
-                        setTimeout(() => {
-                            verseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 100);
-                    }
+                    const verseContainer = verseNum.closest('.verse-container') || verseNum.parentElement;
+                    verseContainer.classList.add('selected-verse-glow');
+                    setTimeout(() => {
+                        verseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
                     break;
                 }
             }
