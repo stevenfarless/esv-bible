@@ -700,6 +700,34 @@ class BibleApp {
         this.applyVerseGlow();
     }
 
+    applyVerseGlow() {
+        // Remove previous glow
+        const previousGlow = this.passageText.querySelector('.selected-verse-glow');
+        if (previousGlow) {
+            previousGlow.classList.remove('selected-verse-glow');
+        }
+
+        // Apply new glow if verse is selected
+        if (this.state.selectedVerse !== null) {
+            const verseNums = this.passageText.querySelectorAll('.verse-num');
+            for (const verseNum of verseNums) {
+                if (verseNum.textContent.trim() === this.state.selectedVerse.toString()) {
+                    // Add glow to the parent element (usually a <p>)
+                    const verseContainer = verseNum.parentElement;
+                    if (verseContainer) {
+                        verseContainer.classList.add('selected-verse-glow');
+
+                        // Scroll to the verse smoothly
+                        setTimeout(() => {
+                            verseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     // ================================
     // Settings
     // ================================
