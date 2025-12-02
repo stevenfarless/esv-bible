@@ -727,71 +727,32 @@ class BibleApp {
 	}
 
 	applyVerseGlow() {
-		// Remove any previous highlight blocks
-		this.passageText.querySelectorAll('.selected-verse-glow-block').forEach(el => {
-			el.classList.remove('selected-verse-glow-block');
-		});
+		// Remove previous glow
+		const previousGlow = this.passageText.querySelector('.selected-verse-glow');
+		if (previousGlow) {
+			previousGlow.classList.remove('selected-verse-glow');
+		}
 
-		if (this.state.selectedVerse === null) return;
+		// Apply new glow if a verse is selected
+		if (this.state.selectedVerse !== null) {
+			const verseNums = this.passageText.querySelectorAll('.verse-num');
+			for (const verseNum of verseNums) {
+				if (verseNum.textContent.trim() === this.state.selectedVerse.toString()) {
+					// Glow the whole paragraph (or div) that contains the verse
+					const paragraph = verseNum.closest('p, div');
+					if (paragraph) {
+						paragraph.classList.add('selected-verse-glow');
 
-		const verseNums = this.passageText.querySelectorAll('.verse-num');
-		for (const verseNum of verseNums) {
-			if (verseNum.textContent.trim() === this.state.selectedVerse.toString()) {
-				const p = verseNum.closest('p');
-				if (!p) break;
-
-				// Build a wrapper div for the whole verse text
-				const wrapper = document.createElement('div');
-				wrapper.classList.add('selected-verse-glow-block');
-
-				// Insert wrapper before the paragraph, then move verse content into it
-				p.parentNode.insertBefore(wrapper, p);
-
-				const fragment = document.createDocumentFragment();
-				let node = verseNum;
-				let current = node;
-
-				// Move from the verse number until just before the next verse-num or heading
-				while (current) {
-					const next = current.nextSibling;
-
-					fragment.appendChild(current);
-
-					if (
-						next &&
-						next.nodeType === 1 &&
-						next.classList.contains('verse-num')
-					) {
-						break;
+						// Scroll into view
+						setTimeout(() => {
+							paragraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+						}, 100);
 					}
-
-					// Stop if we hit a block-level break (e.g., heading or new paragraph)
-					if (
-						next &&
-						next.nodeType === 1 &&
-						(next.tagName === 'H2' || next.tagName === 'H3' || next.tagName === 'P')
-					) {
-						break;
-					}
-
-					current = next;
+					break;
 				}
-
-				// Put the verse text inside the wrapper (as a block)
-				const innerP = document.createElement('p');
-				innerP.appendChild(fragment);
-				wrapper.appendChild(innerP);
-
-				// Scroll into view
-				setTimeout(() => {
-					wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				}, 100);
-
-				break;
 			}
 		}
 	}
-
 
 	// ================================
 	// Settings
