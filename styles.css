@@ -74,7 +74,7 @@
 
 	/* Layout */
 	--max-width: 800px;
-	--header-height: 64px;
+	--header-height: 45px; /* changed from 64px */
 	--nav-height: 56px;
 
 	/* Transitions */
