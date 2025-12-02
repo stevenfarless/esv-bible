@@ -298,75 +298,75 @@ class BibleApp {
 	  if (!restoreScroll) {
 	    this.saveReadingPosition();
 	  }
-  
+
 	  this.state.currentBook = book;
 	  this.state.currentChapter = chapter;
 	  this.updateNavigationState();
-  
+
 	  const reference = `${book} ${chapter}`;
-  
+
 	  this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
-  
+
 	  const data = await this.bibleApi.fetchPassage(reference);
 	  if (!data) return;
-  
+
 	  // Use displayPassage so wrapping + originalPassageHtml are consistent
 	  this.displayPassage(data, restoreScroll);
 	}
 	
+displayPassage(data, restoreScroll = false) {
+  const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
+  this.passageTitle.textContent = canonical;
+  this.passageText.innerHTML = data.passages[0];
 
-	displayPassage(data, restoreScroll = false) {
-	  const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
-	  this.passageTitle.textContent = canonical;
-	  this.passageText.innerHTML = data.passages[0];
+  // Wrap each verse number and its text in a container span
+  const verseNums = this.passageText.querySelectorAll('.verse-num');
+  verseNums.forEach((verseNum) => {
+    const container = document.createElement('span');
+    container.classList.add('verse-container');
 
-	  // Cache original HTML for highlight logic
-	  this.originalPassageHtml = this.passageText.innerHTML;
+    const parent = verseNum.parentNode;
+    parent.insertBefore(container, verseNum);
 
-		// Wrap each verse number and its text in a container span
-		const verseNums = this.passageText.querySelectorAll('.verse-num');
-		verseNums.forEach((verseNum, index) => {
-			const container = document.createElement('span');
-			container.classList.add('verse-container');
+    // Move this verse number and its following text nodes into the container
+    let node = verseNum;
+    while (node) {
+      const next = node.nextSibling;
+      // Stop when hitting another verse number or a heading/paragraph break
+      if (
+        next &&
+        next.nodeType === 1 &&
+        next.classList.contains('verse-num')
+      ) {
+        break;
+      }
+      container.appendChild(node);
+      node = next;
+    }
+  });
 
-			const parent = verseNum.parentNode;
-			parent.insertBefore(container, verseNum);
+  // Cache original HTML for highlight logic (after wrapping)
+  this.originalPassageHtml = this.passageText.innerHTML;
 
-			// Move this verse number and its following text nodes into the container
-			let node = verseNum;
-			while (node) {
-				const next = node.nextSibling;
-				// Stop when hitting another verse number or a heading/paragraph break
-				if (
-					next &&
-					next.nodeType === 1 &&
-					next.classList.contains('verse-num')
-				) {
-					break;
-				}
-				container.appendChild(node);
-				node = next;
-			}
-		});
+  this.copyright.textContent =
+    'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
-		this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+  // Reset verse selector
+  this.currentVerseSpan.textContent = '1';
 
-		// Reset verse selector
-		this.currentVerseSpan.textContent = '1';
+  // Restore scroll position or scroll to top
+  if (restoreScroll) {
+    setTimeout(() => {
+      const savedPosition = this.getSavedScrollPosition();
+      window.scrollTo({ top: savedPosition, behavior: 'smooth' });
+    }, 100);
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-		// Restore scroll position or scroll to top
-		if (restoreScroll) {
-			setTimeout(() => {
-				const savedPosition = this.getSavedScrollPosition();
-				window.scrollTo({ top: savedPosition, behavior: 'smooth' });  // Changed from 'auto' to 'smooth'
-			}, 100);
-		} else {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		}
-
-		// Save reading position after loading
-		this.saveReadingPosition();
-	}
+  // Save reading position after loading
+  this.saveReadingPosition();
+}
 
 	// ================================
 	// Navigation
