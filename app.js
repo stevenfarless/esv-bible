@@ -763,15 +763,20 @@ class BibleApp {
 
 	// Verse‑by‑verse mode: glow only this verse's container
 	if (this.state.verseByVerse) {
-	    const container = targetVerseNum.closest('.verse-container') || targetVerseNum.parentElement;
+	    const container = targetVerseNum.closest('.verse-container');
 	    if (!container) return;
-
+	
+	    // Remove any previous glow
+	    this.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
+	        el.classList.remove('selected-verse-glow');
+	    });
+	
 	    container.classList.add('selected-verse-glow');
-
+	
 	    setTimeout(() => {
 	        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	    }, 100);
-
+	
 	    return; // Skip the paragraph-splitting logic below
 	}
 
