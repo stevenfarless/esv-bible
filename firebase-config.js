@@ -38,3 +38,38 @@ const EncryptionHelper = {
 window.firebaseAuth = auth;
 window.firebaseDatabase = database;
 window.encryptionHelper = EncryptionHelper;
+
+export async function loadUserData(userId) {
+  try {
+    const snapshot = await database.ref(`users/${userId}`).once('value');
+    const userData = snapshot.val();
+    if (!userData) return null;
+
+    // Decrypt API key if present
+    let apiKey = '';
+    if (userData.apiKey) {
+      apiKey = window.encryptionHelper.decrypt(userData.apiKey);
+    }
+
+    // Extract settings or default values
+    const settings = {
+      fontSize: (userData.settings && userData.settings.fontSize) || 18,
+      showVerseNumbers:
+        userData.settings ? userData.settings.showVerseNumbers !== false : true,
+      showHeadings:
+        userData.settings ? userData.settings.showHeadings !== false : true,
+      showFootnotes:
+        userData.settings ? userData.settings.showFootnotes === true : false,
+      verseByVerse:
+        userData.settings ? userData.settings.verseByVerse === true : false,
+    };
+
+    return {
+      apiKey,
+      settings,
+    };
+  } catch (error) {
+    console.error('Error loading user data:', error);
+    return null;
+  }
+}

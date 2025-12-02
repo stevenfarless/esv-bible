@@ -2,54 +2,57 @@
 // ESV Bible Reader App with Firebase
 // ================================
 
+import { BibleApi } from './bible-api.js';
+import { cacheElements, loadTheme, toggleTheme, updateThemeIcon } from './ui.js';
+import { initializeState, navigateChapter as navChapter, scrollToVerse as scrollVerse, applyVerseGlow as glowVerse } from './reading-state.js';
+import { loadUserData as loadUserDataFromFirebase } from './firebase-config.js';
+
 class BibleApp {
-	constructor() {
-		// Configuration
-		this.API_BASE_URL = 'https://api.esv.org/v3';
-		this.API_KEY = '';
+    constructor() {
+        // Configuration
+        this.API_BASE_URL = 'https://api.esv.org/v3';
+        this.API_KEY = '';
 
-		// Firebase references
-		this.auth = window.firebaseAuth;
-		this.database = window.firebaseDatabase;
-		this.currentUser = null;
+        // Firebase references
+        this.auth = window.firebaseAuth;
+        this.database = window.firebaseDatabase;
+        this.currentUser = null;
 
-		// Bible structure data
-		this.bibleBooks = this.initializeBibleStructure();
+        // Bible structure data
+        this.bibleBooks = this.initializeBibleStructure();
 
-		// State management
-		this.state = {
-			currentBook: 'Genesis',
-			currentChapter: 1,
-			selectedVerse: null,
-			fontSize: 18,
-			showVerseNumbers: true,
-			showHeadings: true,
-			showFootnotes: false,
-			verseByVerse: false
-		};
+        // State management (use helper now)
+        this.state = initializeState();
 
-		// Cache for search debouncing
-		this.searchTimeout = null;
+        // Cache for search debouncing
+        this.searchTimeout = null;
 
-		// Scroll tracking
-		this.scrollTimeout = null;
+        // Scroll tracking
+        this.scrollTimeout = null;
 
-		// Reading position tracking
-		this.lastScrollPosition = 0;
+        // Reading position tracking
+        this.lastScrollPosition = 0;
 
-		// Initialize app
-		this.init();
+        // Initialize app
+        this.init();
 
-		// stores untouched HTML for current chapter
-		this.originalPassageHtml = null;
-	}
+        // stores untouched HTML for current chapter
+        this.originalPassageHtml = null;
+
+        // ESV API client
+        this.bibleApi = new BibleApi(
+            this.API_BASE_URL,
+            () => this.API_KEY,
+            () => this.state
+        );
+    }
 
 	// ================================
 	// Initialization
 	// ================================
 	init() {
-		this.cacheElements();
-		this.loadTheme();
+		cacheElements(this);
+		loadTheme(this);
 		this.attachEventListeners();
 
 		// Wait for Firebase auth state
@@ -69,77 +72,6 @@ class BibleApp {
 		});
 	}
 
-	cacheElements() {
-		// Header elements
-		this.searchToggleBtn = document.getElementById('searchToggleBtn');
-		this.settingsBtn = document.getElementById('settingsBtn');
-
-		// Search elements
-		this.searchContainer = document.getElementById('searchContainer');
-		this.searchInput = document.getElementById('searchInput');
-		this.closeSearchBtn = document.getElementById('closeSearchBtn');
-		this.searchResults = document.getElementById('searchResults');
-
-		// Navigation elements
-		this.prevChapterBtn = document.getElementById('prevChapterBtn');
-		this.nextChapterBtn = document.getElementById('nextChapterBtn');
-		this.bookSelector = document.getElementById('bookSelector');
-		this.chapterSelector = document.getElementById('chapterSelector');
-		this.currentBookSpan = document.getElementById('currentBook');
-		this.currentChapterSpan = document.getElementById('currentChapter');
-
-		// Content elements
-		this.passageTitle = document.getElementById('passageTitle');
-		this.passageText = document.getElementById('passageText');
-		this.copyright = document.getElementById('copyright');
-		this.copyBtn = document.getElementById('copyBtn');
-
-		// Modal elements
-		this.bookModal = document.getElementById('bookModal');
-		this.closeBookModal = document.getElementById('closeBookModal');
-		this.oldTestamentBooks = document.getElementById('oldTestamentBooks');
-		this.newTestamentBooks = document.getElementById('newTestamentBooks');
-
-		this.chapterModal = document.getElementById('chapterModal');
-		this.closeChapterModal = document.getElementById('closeChapterModal');
-		this.chapterModalBook = document.getElementById('chapterModalBook');
-		this.chapterGrid = document.getElementById('chapterGrid');
-
-		this.verseModal = document.getElementById('verseModal');
-		this.closeVerseModal = document.getElementById('closeVerseModal');
-		this.verseModalBook = document.getElementById('verseModalBook');
-		this.verseGrid = document.getElementById('verseGrid');
-		this.verseSelector = document.getElementById('verseSelector');
-		this.currentVerseSpan = document.getElementById('currentVerse');
-
-		this.settingsModal = document.getElementById('settingsModal');
-		this.closeSettingsModal = document.getElementById('closeSettingsModal');
-		this.apiKeyInput = document.getElementById('apiKeyInput');
-		this.saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-		this.verseNumbersToggle = document.getElementById('verseNumbersToggle');
-		this.headingsToggle = document.getElementById('headingsToggle');
-		this.footnotesToggle = document.getElementById('footnotesToggle');
-		this.verseByVerseToggle = document.getElementById('verseByVerseToggle');
-		this.fontSizeSlider = document.getElementById('fontSizeSlider');
-		this.fontSizeValue = document.getElementById('fontSizeValue');
-
-		// Theme & Auth elements
-		this.themeToggleBtn = document.getElementById('themeToggleBtn');
-		this.themeIcon = document.getElementById('themeIcon');
-		this.userBtn = document.getElementById('userBtn');
-
-		// Auth modals
-		this.loginModal = document.getElementById('loginModal');
-		this.signupModal = document.getElementById('signupModal');
-		this.userMenuModal = document.getElementById('userMenuModal');
-		this.closeLoginModal = document.getElementById('closeLoginModal');
-		this.closeSignupModal = document.getElementById('closeSignupModal');
-		this.closeUserMenuModal = document.getElementById('closeUserMenuModal');
-
-		// Toast
-		this.toast = document.getElementById('toast');
-	}
-
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
@@ -152,6 +84,7 @@ class BibleApp {
 			if (e.key === 'Escape') this.closeSearch();
 		});
 
+		// Navigation
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
 		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
@@ -188,7 +121,7 @@ class BibleApp {
 		this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
 		// Theme toggle
-		this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this));
 
 		// User button
 		this.userBtn.addEventListener('click', () => this.handleUserButtonClick());
@@ -241,6 +174,7 @@ class BibleApp {
 	// ================================
 	// Bible Structure
 	// ================================
+
 	initializeBibleStructure() {
 		return {
 			'Old Testament': {
@@ -288,75 +222,9 @@ class BibleApp {
 	}
 
 	// ================================
-	// API Methods
-	// ================================
-	async fetchPassage(reference) {
-		if (!this.API_KEY) {
-			this.showError('Please set your ESV API key in Settings.');
-			return null;
-		}
-
-		const params = new URLSearchParams({
-			q: reference,
-			'include-headings': this.state.showHeadings,
-			'include-footnotes': this.state.showFootnotes,
-			'include-verse-numbers': this.state.showVerseNumbers,
-			'include-short-copyright': false,
-			'include-passage-references': false
-		});
-
-		try {
-			const response = await fetch(`${this.API_BASE_URL}/passage/html/?${params}`, {
-				headers: {
-					'Authorization': `Token ${this.API_KEY}`
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			const data = await response.json();
-			return data;
-		} catch (error) {
-			console.error('Error fetching passage:', error);
-			this.showError('Failed to load passage. Please check your internet connection and API key.');
-			return null;
-		}
-	}
-
-	async searchPassages(query) {
-		if (!this.API_KEY || !query.trim()) {
-			return null;
-		}
-
-		const params = new URLSearchParams({
-			q: query,
-			'page-size': 20
-		});
-
-		try {
-			const response = await fetch(`${this.API_BASE_URL}/passage/search/?${params}`, {
-				headers: {
-					'Authorization': `Token ${this.API_KEY}`
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			const data = await response.json();
-			return data;
-		} catch (error) {
-			console.error('Error searching passages:', error);
-			return null;
-		}
-	}
-
-	// ================================
 	// Passage Loading
 	// ================================
+
 	async loadPassage(book, chapter, restoreScroll = false) {
     if (!restoreScroll) {
         this.saveReadingPosition();
@@ -370,7 +238,7 @@ class BibleApp {
 
     this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
 
-    const data = await this.fetchPassage(reference);
+    const data = await this.bibleApi.fetchPassage(reference);
     if (!data) return;
 
     this.passageTitle.textContent = reference;
@@ -439,45 +307,15 @@ class BibleApp {
 		this.saveReadingPosition();
 	}
 
-
 	// ================================
 	// Navigation
 	// ================================
+
 	navigateChapter(direction) {
-		let newChapter = this.state.currentChapter + direction;
-		let newBook = this.state.currentBook;
+        navChapter(this, direction);
+    }
 
-		const chapterCount = this.getChapterCount(this.state.currentBook);
-
-		if (newChapter < 1) {
-			// Go to previous book
-			const books = this.getAllBooks();
-			const currentIndex = books.indexOf(this.state.currentBook);
-			if (currentIndex > 0) {
-				newBook = books[currentIndex - 1];
-				newChapter = this.getChapterCount(newBook);
-			} else {
-				return; // Already at the beginning
-			}
-		} else if (newChapter > chapterCount) {
-			// Go to next book
-			const books = this.getAllBooks();
-			const currentIndex = books.indexOf(this.state.currentBook);
-			if (currentIndex < books.length - 1) {
-				newBook = books[currentIndex + 1];
-				newChapter = 1;
-			} else {
-				return; // Already at the end
-			}
-		}
-
-		// Clear selected verse when navigating by chapter
-		this.state.selectedVerse = null;
-
-		this.loadPassage(newBook, newChapter);
-	}
-
-	updateNavigationState() {
+    updateNavigationState() {
 		this.currentBookSpan.textContent = this.state.currentBook;
 		this.currentChapterSpan.textContent = this.state.currentChapter;
 
@@ -494,6 +332,7 @@ class BibleApp {
 	// ================================
 	// Search
 	// ================================
+
 	toggleSearch() {
 		this.searchContainer.classList.toggle('active');
 		if (this.searchContainer.classList.contains('active')) {
@@ -529,6 +368,16 @@ class BibleApp {
 		}, 300);
 	}
 
+	// CHUNK1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 	isPassageReference(query) {
 		// Simple check for passage reference patterns
 		const patterns = [
@@ -539,7 +388,7 @@ class BibleApp {
 	}
 
 	async handlePassageReference(reference) {
-		const data = await this.fetchPassage(reference);
+		const data = await this.bibleApi.fetchPassage(reference);
 		if (data && data.passages && data.passages.length > 0) {
 			// Display as single result
 			this.searchResults.innerHTML = `
@@ -561,7 +410,7 @@ class BibleApp {
 	async performKeywordSearch(query) {
 		this.searchResults.innerHTML = '<div class="loading" style="min-height: 100px;">Searching...</div>';
 
-		const data = await this.searchPassages(query);
+		const data = await this.bibleApi.searchPassages(query);
 
 		if (data && data.results && data.results.length > 0) {
 			this.displaySearchResults(data.results, query);
@@ -731,112 +580,12 @@ class BibleApp {
 	}
 
 	scrollToVerse(verseNumber) {
-		// Set selected verse in state
-		this.state.selectedVerse = verseNumber;
-		this.currentVerseSpan.textContent = `${verseNumber}`;
-
-		// Apply the glow effect
-		this.applyVerseGlow();
+	  scrollVerse(this, verseNumber);
 	}
 
 	applyVerseGlow() {
-    // If we don't have a cached original HTML yet, nothing to do
-    if (!this.originalPassageHtml) return;
-
-    // Reset passage to original HTML every time
-    this.passageText.innerHTML = this.originalPassageHtml;
-
-    // No verse selected: just show original text
-    if (this.state.selectedVerse === null) return;
-
-    const verseNums = this.passageText.querySelectorAll('.verse-num');
-    let targetVerseNum = null;
-
-    for (const vn of verseNums) {
-        if (vn.textContent.trim() === this.state.selectedVerse.toString()) {
-            targetVerseNum = vn;
-            break;
-        }
-    }
-
-    if (!targetVerseNum) return;
-
-// Verse‑by‑verse mode: glow only this verse's container
-if (this.state.verseByVerse) {
-    const container = targetVerseNum.closest('.verse-container');
-    if (!container) return;
-
-    // Remove any previous glow
-    this.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
-        el.classList.remove('selected-verse-glow');
-    });
-
-    container.classList.add('selected-verse-glow');
-
-    setTimeout(() => {
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-
-    return; // Skip the paragraph-splitting logic below
-}
-
-    const paragraph = targetVerseNum.closest('p');
-    if (!paragraph) return;
-
-    // Create containers for before / selected / after
-    const beforeP = document.createElement('p');
-    const selectedBlock = document.createElement('div');
-    const afterP = document.createElement('p');
-
-    selectedBlock.classList.add('selected-verse-glow');
-
-    let mode = 'before'; // 'before' | 'selected' | 'after'
-    const nodes = Array.from(paragraph.childNodes);
-
-    nodes.forEach(node => {
-        if (node === targetVerseNum) {
-            mode = 'selected';
-            selectedBlock.appendChild(node);
-            return;
-        }
-
-        if (
-            mode === 'selected' &&
-            node.nodeType === 1 &&
-            node.classList.contains('verse-num')
-        ) {
-            mode = 'after';
-            afterP.appendChild(node);
-            return;
-        }
-
-        if (mode === 'before') {
-            beforeP.appendChild(node);
-        } else if (mode === 'selected') {
-            selectedBlock.appendChild(node);
-        } else {
-            afterP.appendChild(node);
-        }
-    });
-
-    const parent = paragraph.parentNode;
-
-    if (beforeP.childNodes.length > 0) {
-        parent.insertBefore(beforeP, paragraph);
-    }
-
-    parent.insertBefore(selectedBlock, paragraph);
-
-    if (afterP.childNodes.length > 0) {
-        parent.insertBefore(afterP, paragraph);
-    }
-
-    parent.removeChild(paragraph);
-
-    setTimeout(() => {
-        selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-}
+	  glowVerse(this);
+	}
 
 	// ================================
 	// Settings
@@ -1013,51 +762,24 @@ if (this.state.verseByVerse) {
 		}
 	}
 
-	// ================================
-	// Theme Management
-	// ================================
-	loadTheme() {
-		const savedTheme = localStorage.getItem('theme') || 'dark';
-		if (savedTheme === 'light') {
-			document.body.classList.add('light-mode');
-		}
-		this.updateThemeIcon();
-	}
-
-	toggleTheme() {
-		document.body.classList.toggle('light-mode');
-		const isLight = document.body.classList.contains('light-mode');
-		const theme = isLight ? 'light' : 'dark';
-
-		localStorage.setItem('theme', theme);
-		this.updateThemeIcon();
-
-		this.showToast(isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme');
-	}
-
-	updateThemeIcon() {
-		const isLight = document.body.classList.contains('light-mode');
-
-		if (isLight) {
-			// Sun icon for light mode
-			this.themeIcon.innerHTML = `
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/>
-                <line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/>
-                <line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            `;
-		} else {
-			// Moon icon for dark mode
-			this.themeIcon.innerHTML = `
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            `;
-		}
-	}
+	// CHUNK2^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
 
 	// ================================
 	// Firebase Authentication
@@ -1176,30 +898,19 @@ if (this.state.verseByVerse) {
 	// Firebase Data Management
 	// ================================
 	async loadUserData() {
-		if (!this.currentUser) return;
+	if (!this.currentUser) return;
 
-		try {
-			const snapshot = await this.database.ref(`users/${this.currentUser.uid}`).once('value');
-			const userData = snapshot.val();
-
-			if (userData) {
-				// Load API key
-				if (userData.apiKey) {
-					this.API_KEY = window.encryptionHelper.decrypt(userData.apiKey);
-				}
-
-				// Load settings
-				if (userData.settings) {
-					this.state.fontSize = userData.settings.fontSize || 18;
-					this.state.showVerseNumbers = userData.settings.showVerseNumbers !== false;
-					this.state.showHeadings = userData.settings.showHeadings !== false;
-					this.state.showFootnotes = userData.settings.showFootnotes === true;
-					this.state.verseByVerse = userData.settings.verseByVerse === true;
-				}
-			}
-		} catch (error) {
-			console.error('Error loading user data:', error);
-		}
+	const data = await loadUserDataFromFirebase(this.currentUser.uid);
+	if (!data) return;
+	
+	this.API_KEY = data.apiKey;
+	
+	const s = data.settings;
+	this.state.fontSize = s.fontSize;
+	this.state.showVerseNumbers = s.showVerseNumbers;
+	this.state.showHeadings = s.showHeadings;
+	this.state.showFootnotes = s.showFootnotes;
+	this.state.verseByVerse = s.verseByVerse;
 	}
 
 	// ================================
