@@ -74,7 +74,8 @@
 
 	/* Layout */
 	--max-width: 800px;
-	--header-height: 45px; /* changed from 64px */
+	--header-height: 45px;
+	/* changed from 64px */
 	--nav-height: 56px;
 
 	/* Transitions */
@@ -835,28 +836,36 @@ body {
 		font-size: 1.25rem;
 	}
 
+	.selector-btn {
+		padding: 0.25rem 0.5rem;
+		min-width: 56px;
+		/* still a good tap size */
+		font-size: 0.8rem;
+	}
+
 	.nav-content {
-		padding: var(--spacing-sm) var(--spacing-md);
-		flex-wrap: wrap;
+		gap: var(--spacing-xs);
 	}
 
 	.passage-selector {
-		order: -1;
-		width: 100%;
-		margin-bottom: var(--spacing-sm);
+		flex: 1;
+		justify-content: center;
+		gap: var(--spacing-xs);
 	}
 
 	.nav-btn {
-		font-size: 0.85rem;
-		padding: var(--spacing-xs) var(--spacing-sm);
+		padding: 0.35rem 0.7rem;
+		min-width: 44px;
+		/* good thumb target */
+		justify-content: center;
 	}
 
 	.nav-btn span {
 		display: none;
+		/* hide “Previous” / “Next” label */
 	}
 
 	.main-content {
-		/* padding: var(--spacing-lg) var(--spacing-md); */
 		padding: 0%;
 	}
 
