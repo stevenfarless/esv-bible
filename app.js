@@ -20,6 +20,7 @@ class BibleApp {
         this.state = {
             currentBook: 'Genesis',
             currentChapter: 1,
+            selectedVerse: null,
             fontSize: 18,
             showVerseNumbers: true,
             showHeadings: true,
@@ -29,10 +30,10 @@ class BibleApp {
 
         // Cache for search debouncing
         this.searchTimeout = null;
-        
+
         // Scroll tracking
         this.scrollTimeout = null;
-        
+
         // Reading position tracking
         this.lastScrollPosition = 0;
 
@@ -48,7 +49,7 @@ class BibleApp {
         this.cacheElements();
         this.loadTheme();
         this.attachEventListeners();
-        
+
         // Wait for Firebase auth state
         this.auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -163,10 +164,10 @@ class BibleApp {
 
         // Update the modal array to include verseModal
         [this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-        if (e.target === modal) this.closeModal(modal);
-    });
-});
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) this.closeModal(modal);
+            });
+        });
 
         // Copy button
         this.copyBtn.addEventListener('click', () => this.copyPassage());
@@ -181,7 +182,7 @@ class BibleApp {
         this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
         this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
         this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
-        this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse()); 
+        this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse());
         this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
         // Theme toggle
@@ -359,7 +360,7 @@ class BibleApp {
         if (!restoreScroll) {
             this.saveReadingPosition();
         }
-        
+
         this.state.currentBook = book;
         this.state.currentChapter = chapter;
 
@@ -376,28 +377,28 @@ class BibleApp {
     }
 
     displayPassage(data, restoreScroll = false) {
-    const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
+        const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
 
-    this.passageTitle.textContent = canonical;
-    this.passageText.innerHTML = data.passages[0];
-    this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+        this.passageTitle.textContent = canonical;
+        this.passageText.innerHTML = data.passages[0];
+        this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
-     // Reset verse selector
-    this.currentVerseSpan.textContent = ':';
+        // Reset verse selector
+        this.currentVerseSpan.textContent = ':';
 
-    // Restore scroll position or scroll to top
-    if (restoreScroll) {
-        setTimeout(() => {
-            const savedPosition = this.getSavedScrollPosition();
-            window.scrollTo({ top: savedPosition, behavior: 'smooth' });  // Changed from 'auto' to 'smooth'
-        }, 100);
-    } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Restore scroll position or scroll to top
+        if (restoreScroll) {
+            setTimeout(() => {
+                const savedPosition = this.getSavedScrollPosition();
+                window.scrollTo({ top: savedPosition, behavior: 'smooth' });  // Changed from 'auto' to 'smooth'
+            }, 100);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Save reading position after loading
+        this.saveReadingPosition();
     }
-    
-    // Save reading position after loading
-    this.saveReadingPosition();
-}
 
 
     // ================================
@@ -430,6 +431,9 @@ class BibleApp {
                 return; // Already at the end
             }
         }
+
+        // Clear selected verse when navigating by chapter
+        this.state.selectedVerse = null;
 
         this.loadPassage(newBook, newChapter);
     }
@@ -587,49 +591,50 @@ class BibleApp {
     }
 
     populateBookModal() {
-    const abbreviations = {
-        'Genesis': 'Gen', 'Exodus': 'Exod', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deut',
-        'Joshua': 'Josh', 'Judges': 'Judg', 'Ruth': 'Ruth', '1 Samuel': '1 Sam', '2 Samuel': '2 Sam',
-        '1 Kings': '1 Kgs', '2 Kings': '2 Kgs', '1 Chronicles': '1 Chr', '2 Chronicles': '2 Chr',
-        'Ezra': 'Ezra', 'Nehemiah': 'Neh', 'Esther': 'Esth', 'Job': 'Job', 'Psalms': 'Ps',
-        'Proverbs': 'Prov', 'Ecclesiastes': 'Eccl', 'Song of Solomon': 'Song', 'Isaiah': 'Isa',
-        'Jeremiah': 'Jer', 'Lamentations': 'Lam', 'Ezekiel': 'Ezek', 'Daniel': 'Dan',
-        'Hosea': 'Hos', 'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obad', 'Jonah': 'Jonah',
-        'Micah': 'Mic', 'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zeph',
-        'Haggai': 'Hag', 'Zechariah': 'Zech', 'Malachi': 'Mal',
+        const abbreviations = {
+            'Genesis': 'Gen', 'Exodus': 'Exod', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deut',
+            'Joshua': 'Josh', 'Judges': 'Judg', 'Ruth': 'Ruth', '1 Samuel': '1 Sam', '2 Samuel': '2 Sam',
+            '1 Kings': '1 Kgs', '2 Kings': '2 Kgs', '1 Chronicles': '1 Chr', '2 Chronicles': '2 Chr',
+            'Ezra': 'Ezra', 'Nehemiah': 'Neh', 'Esther': 'Esth', 'Job': 'Job', 'Psalms': 'Ps',
+            'Proverbs': 'Prov', 'Ecclesiastes': 'Eccl', 'Song of Solomon': 'Song', 'Isaiah': 'Isa',
+            'Jeremiah': 'Jer', 'Lamentations': 'Lam', 'Ezekiel': 'Ezek', 'Daniel': 'Dan',
+            'Hosea': 'Hos', 'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obad', 'Jonah': 'Jonah',
+            'Micah': 'Mic', 'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zeph',
+            'Haggai': 'Hag', 'Zechariah': 'Zech', 'Malachi': 'Mal',
 
-        'Matthew': 'Matt', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts',
-        'Romans': 'Rom', '1 Corinthians': '1 Cor', '2 Corinthians': '2 Cor', 'Galatians': 'Gal',
-        'Ephesians': 'Eph', 'Philippians': 'Phil', 'Colossians': 'Col',
-        '1 Thessalonians': '1 Thess', '2 Thessalonians': '2 Thess',
-        '1 Timothy': '1 Tim', '2 Timothy': '2 Tim', 'Titus': 'Titus',
-        'Philemon': 'Phlm', 'Hebrews': 'Heb', 'James': 'Jas',
-        '1 Peter': '1 Pet', '2 Peter': '2 Pet',
-        '1 John': '1 John', '2 John': '2 John', '3 John': '3 John',
-        'Jude': 'Jude', 'Revelation': 'Rev'
-    };
+            'Matthew': 'Matt', 'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts',
+            'Romans': 'Rom', '1 Corinthians': '1 Cor', '2 Corinthians': '2 Cor', 'Galatians': 'Gal',
+            'Ephesians': 'Eph', 'Philippians': 'Phil', 'Colossians': 'Col',
+            '1 Thessalonians': '1 Thess', '2 Thessalonians': '2 Thess',
+            '1 Timothy': '1 Tim', '2 Timothy': '2 Tim', 'Titus': 'Titus',
+            'Philemon': 'Phlm', 'Hebrews': 'Heb', 'James': 'Jas',
+            '1 Peter': '1 Pet', '2 Peter': '2 Pet',
+            '1 John': '1 John', '2 John': '2 John', '3 John': '3 John',
+            'Jude': 'Jude', 'Revelation': 'Rev'
+        };
 
-    const createBookButton = (book) => {
-        const btn = document.createElement('button');
-        btn.className = 'book-item';
-        btn.textContent = abbreviations[book] || book; // display abbreviation only
-        btn.addEventListener('click', () => {
-            this.loadPassage(book, 1);                  // still use full name
-            this.closeModal(this.bookModal);
+        const createBookButton = (book) => {
+            const btn = document.createElement('button');
+            btn.className = 'book-item';
+            btn.textContent = abbreviations[book] || book; // display abbreviation only
+            btn.addEventListener('click', () => {
+                this.state.selectedVerse = null; // Clear verse selection
+                this.loadPassage(book, 1);
+                this.closeModal(this.bookModal);
+            });
+            return btn;
+        };
+
+        this.oldTestamentBooks.innerHTML = '';
+        Object.keys(this.bibleBooks['Old Testament']).forEach(book => {
+            this.oldTestamentBooks.appendChild(createBookButton(book));
         });
-        return btn;
-    };
 
-    this.oldTestamentBooks.innerHTML = '';
-    Object.keys(this.bibleBooks['Old Testament']).forEach(book => {
-        this.oldTestamentBooks.appendChild(createBookButton(book));
-    });
-
-    this.newTestamentBooks.innerHTML = '';
-    Object.keys(this.bibleBooks['New Testament']).forEach(book => {
-        this.newTestamentBooks.appendChild(createBookButton(book));
-    });
-}
+        this.newTestamentBooks.innerHTML = '';
+        Object.keys(this.bibleBooks['New Testament']).forEach(book => {
+            this.newTestamentBooks.appendChild(createBookButton(book));
+        });
+    }
 
 
     openChapterModal() {
@@ -648,6 +653,7 @@ class BibleApp {
             btn.className = 'chapter-item';
             btn.textContent = i;
             btn.addEventListener('click', () => {
+                this.state.selectedVerse = null; // Clear verse selection
                 this.loadPassage(this.state.currentBook, i);
                 this.closeModal(this.chapterModal);
             });
@@ -656,67 +662,67 @@ class BibleApp {
     }
 
     openVerseModal() {
-    this.populateVerseModal();
-    this.openModal(this.verseModal);
-}
-
-populateVerseModal() {
-    this.verseModalBook.textContent = `${this.state.currentBook} ${this.state.currentChapter}`;
-    this.verseGrid.innerHTML = '';
-
-    // Estimate verses (we'll get actual count from loaded passage)
-    const verseCount = this.getCurrentVerseCount();
-
-    for (let i = 1; i <= verseCount; i++) {
-        const btn = document.createElement('button');
-        btn.className = 'chapter-item';
-        btn.textContent = i;
-        btn.addEventListener('click', () => {
-            this.scrollToVerse(i);
-            this.closeModal(this.verseModal);
-        });
-        this.verseGrid.appendChild(btn);
+        this.populateVerseModal();
+        this.openModal(this.verseModal);
     }
-}
 
-getCurrentVerseCount() {
-    // Count verse numbers in current passage
-    const verseNums = this.passageText.querySelectorAll('.verse-num');
-    return verseNums.length || 50; // Default to 50 if none found
-}
+    populateVerseModal() {
+        this.verseModalBook.textContent = `${this.state.currentBook} ${this.state.currentChapter}`;
+        this.verseGrid.innerHTML = '';
 
-scrollToVerse(verseNumber) {
-    const verseNums = this.passageText.querySelectorAll('.verse-num');
-    for (const verseNum of verseNums) {
-        if (verseNum.textContent.trim() === verseNumber.toString()) {
-            verseNum.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            this.currentVerseSpan.textContent = `:${verseNumber}`;
-            
-            // Highlight the verse briefly
-            verseNum.style.backgroundColor = 'var(--primary)';
-            verseNum.style.color = 'var(--bg)';
-            setTimeout(() => {
-                verseNum.style.backgroundColor = '';
-                verseNum.style.color = '';
-            }, 2000);
-            break;
+        // Estimate verses (we'll get actual count from loaded passage)
+        const verseCount = this.getCurrentVerseCount();
+
+        for (let i = 1; i <= verseCount; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'chapter-item';
+            btn.textContent = i;
+            btn.addEventListener('click', () => {
+                this.scrollToVerse(i);
+                this.closeModal(this.verseModal);
+            });
+            this.verseGrid.appendChild(btn);
         }
     }
-}
+
+    getCurrentVerseCount() {
+        // Count verse numbers in current passage
+        const verseNums = this.passageText.querySelectorAll('.verse-num');
+        return verseNums.length || 50; // Default to 50 if none found
+    }
+
+    scrollToVerse(verseNumber) {
+        const verseNums = this.passageText.querySelectorAll('.verse-num');
+        for (const verseNum of verseNums) {
+            if (verseNum.textContent.trim() === verseNumber.toString()) {
+                verseNum.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                this.currentVerseSpan.textContent = `:${verseNumber}`;
+
+                // Highlight the verse briefly
+                verseNum.style.backgroundColor = 'var(--primary)';
+                verseNum.style.color = 'var(--bg)';
+                setTimeout(() => {
+                    verseNum.style.backgroundColor = '';
+                    verseNum.style.color = '';
+                }, 2000);
+                break;
+            }
+        }
+    }
 
 
     // ================================
     // Settings
     // ================================
     checkApiKey() {
-    if (!this.API_KEY) {
-        setTimeout(() => {
-            this.showToast('Welcome! Please sign in to start reading.');
-            // Open login modal instead of signup
-            this.openModal(this.loginModal);
-        }, 500);
+        if (!this.API_KEY) {
+            setTimeout(() => {
+                this.showToast('Welcome! Please sign in to start reading.');
+                // Open login modal instead of signup
+                this.openModal(this.loginModal);
+            }, 500);
+        }
     }
-}
 
     async saveApiKey() {
         const apiKey = this.apiKeyInput.value.trim();
@@ -790,22 +796,22 @@ scrollToVerse(verseNumber) {
     }
 
     async toggleVerseByVerse() {
-    this.state.verseByVerse = this.verseByVerseToggle.checked;
+        this.state.verseByVerse = this.verseByVerseToggle.checked;
 
-    // Save to Firebase or localStorage
-    if (this.currentUser) {
-        await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(this.state.verseByVerse);
-    } else {
-        localStorage.setItem('verseByVerse', this.state.verseByVerse);
-    }
+        // Save to Firebase or localStorage
+        if (this.currentUser) {
+            await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(this.state.verseByVerse);
+        } else {
+            localStorage.setItem('verseByVerse', this.state.verseByVerse);
+        }
 
-    // Apply the class
-    if (this.state.verseByVerse) {
-        this.passageText.classList.add('verse-by-verse');
-    } else {
-        this.passageText.classList.remove('verse-by-verse');
+        // Apply the class
+        if (this.state.verseByVerse) {
+            this.passageText.classList.add('verse-by-verse');
+        } else {
+            this.passageText.classList.remove('verse-by-verse');
+        }
     }
-}
 
 
     async updateFontSize(size) {
@@ -895,16 +901,16 @@ scrollToVerse(verseNumber) {
         document.body.classList.toggle('light-mode');
         const isLight = document.body.classList.contains('light-mode');
         const theme = isLight ? 'light' : 'dark';
-        
+
         localStorage.setItem('theme', theme);
         this.updateThemeIcon();
-        
+
         this.showToast(isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme');
     }
 
     updateThemeIcon() {
         const isLight = document.body.classList.contains('light-mode');
-        
+
         if (isLight) {
             // Sun icon for light mode
             this.themeIcon.innerHTML = `
@@ -945,7 +951,7 @@ scrollToVerse(verseNumber) {
     async handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
-        
+
         if (!email || !password) {
             this.showToast('Please enter valid credentials');
             return;
@@ -955,13 +961,13 @@ scrollToVerse(verseNumber) {
             await this.auth.signInWithEmailAndPassword(email, password);
             this.showToast('Signed in successfully!');
             this.closeModal(this.loginModal);
-            
+
             // Clear form
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
         } catch (error) {
             console.error('Login error:', error);
-            
+
             if (error.code === 'auth/user-not-found') {
                 if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
                     this.closeModal(this.loginModal);
@@ -980,12 +986,12 @@ scrollToVerse(verseNumber) {
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
         const apiKey = document.getElementById('signupApiKey').value;
-        
+
         if (!email || !password || !apiKey) {
             this.showToast('Please fill in all fields');
             return;
         }
-        
+
         if (password.length < 6) {
             this.showToast('Password must be at least 6 characters');
             return;
@@ -1012,14 +1018,14 @@ scrollToVerse(verseNumber) {
 
             this.showToast('Account created successfully!');
             this.closeModal(this.signupModal);
-            
+
             // Clear form
             document.getElementById('signupEmail').value = '';
             document.getElementById('signupPassword').value = '';
             document.getElementById('signupApiKey').value = '';
         } catch (error) {
             console.error('Signup error:', error);
-            
+
             if (error.code === 'auth/email-already-in-use') {
                 this.showToast('Account already exists. Please sign in.');
             } else {
@@ -1074,14 +1080,14 @@ scrollToVerse(verseNumber) {
     // ================================
     async saveReadingPosition() {
         if (!this.currentUser) return;
-        
+
         const position = {
             book: this.state.currentBook,
             chapter: this.state.currentChapter,
             scrollPosition: window.pageYOffset || document.documentElement.scrollTop,
             lastUpdated: Date.now()
         };
-        
+
         try {
             await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).set(position);
         } catch (error) {
@@ -1096,11 +1102,11 @@ scrollToVerse(verseNumber) {
 
     async loadSavedReadingPosition() {
         if (!this.currentUser) return;
-        
+
         try {
             const snapshot = await this.database.ref(`users/${this.currentUser.uid}/readingPosition`).once('value');
             const position = snapshot.val();
-            
+
             if (position && position.book && position.chapter) {
                 this.lastScrollPosition = position.scrollPosition || 0;
                 await this.loadPassage(position.book, position.chapter, true);
