@@ -40,6 +40,8 @@ class BibleApp {
 		// Initialize app
 		this.init();
 
+		// stores untouched HTML for current chapter
+		this.originalPassageHtml = null;
 	}
 
 	// ================================
@@ -368,6 +370,9 @@ class BibleApp {
 
 		const reference = `${book} ${chapter}`;
 		this.passageText.innerHTML = '<div class="loading">Loading passage...</div>';
+	    // Cache the original passage HTML for this chapter
+	    this.originalPassageHtml = this.passageText.innerHTML;
+
 
 		const data = await this.fetchPassage(reference);
 
@@ -381,6 +386,10 @@ class BibleApp {
 
 		this.passageTitle.textContent = canonical;
 		this.passageText.innerHTML = data.passages[0];
+	    // Cache original HTML for this chapter
+		this.originalPassageHtml = this.passageText.innerHTML;
+
+
 		// Wrap each verse number and its text in a container span
 		const verseNums = this.passageText.querySelectorAll('.verse-num');
 		verseNums.forEach((verseNum, index) => {
@@ -727,32 +736,158 @@ class BibleApp {
 	}
 
 	applyVerseGlow() {
-		// Remove previous glow
-		const previousGlow = this.passageText.querySelector('.selected-verse-glow');
-		if (previousGlow) {
-			previousGlow.classList.remove('selected-verse-glow');
-		}
+    // If we don't have a cached original HTML yet, nothing to do
+    if (!this.originalPassageHtml) return;
 
-		// Apply new glow if a verse is selected
-		if (this.state.selectedVerse !== null) {
-			const verseNums = this.passageText.querySelectorAll('.verse-num');
-			for (const verseNum of verseNums) {
-				if (verseNum.textContent.trim() === this.state.selectedVerse.toString()) {
-					// Glow the whole paragraph (or div) that contains the verse
-					const paragraph = verseNum.closest('p, div');
-					if (paragraph) {
-						paragraph.classList.add('selected-verse-glow');
+    // Reset passage to original HTML every time
+    this.passageText.innerHTML = this.originalPassageHtml;
 
-						// Scroll into view
-						setTimeout(() => {
-							paragraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
-						}, 100);
-					}
-					break;
-				}
-			}
-		}
-	}
+    // No verse selected: just show original text
+    if (this.state.selectedVerse === null) return;
+
+    const verseNums = this.passageText.querySelectorAll('.verse-num');
+    let targetVerseNum = null;
+
+    for (const vn of verseNums) {
+        if (vn.textContent.trim() === this.state.selectedVerse.toString()) {
+            targetVerseNum = vn;
+            break;
+        }
+    }
+
+    if (!targetVerseNum) return;
+
+    const paragraph = targetVerseNum.closest('p');
+    if (!paragraph) return;
+
+    // Create containers for before / selected / after
+    const beforeP = document.createElement('p');
+    const selectedBlock = document.createElement('div');
+    const afterP = document.createElement('p');
+
+    selectedBlock.classList.add('selected-verse-glow');
+
+    let mode = 'before'; // 'before' | 'selected' | 'after'
+    const nodes = Array.from(paragraph.childNodes);
+
+    nodes.forEach(node => {
+        // When we hit the selected verse number, switch to 'selected'
+        if (node === targetVerseNum) {
+            mode = 'selected';
+            selectedBlock.appendChild(node);
+            return;
+        }
+
+        // If this is another verse number after the selected one, switch to 'after'
+        if (
+            mode === 'selected' &&
+            node.nodeType === 1 &&
+            node.classList.contains('verse-num')
+        ) {
+            mode = 'after';
+            afterP.appendChild(node);
+            return;
+        }
+
+        // Append node based on current mode
+        if (mode === 'before') {
+            beforeP.appendChild(node);
+        } else if (mode === 'selected') {
+            selectedBlock.appendChild(node);
+        } else {
+            afterP.appendChild(node);
+        }
+    });
+
+    const parent = paragraph.parentNode;
+
+    // Insert in order: before, selected, after (only if they have content)
+    if (beforeP.childNodes.length > 0) {
+        parent.insertBefore(beforeP, paragraph);
+    }
+
+    parent.insertBefore(selectedBlock, paragraph);
+
+    if (afterP.childNodes.length > 0) {
+        parent.insertBefore(afterP, paragraph);
+    }
+
+    // Remove original paragraph
+    parent.removeChild(paragraph);
+
+    // Scroll selected verse into view
+    setTimeout(() => {
+        selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+}
+
+
+    if (!targetVerseNum) return;
+
+    const paragraph = targetVerseNum.closest('p');
+    if (!paragraph) return;
+
+    // Create containers for before / selected / after
+    const beforeP = document.createElement('p');
+    const selectedBlock = document.createElement('div');
+    const afterP = document.createElement('p');
+
+    selectedBlock.classList.add('selected-verse-glow');
+
+    let mode = 'before'; // 'before' | 'selected' | 'after'
+    const nodes = Array.from(paragraph.childNodes);
+
+    nodes.forEach(node => {
+        // When we hit the selected verse number, switch to 'selected'
+        if (node === targetVerseNum) {
+            mode = 'selected';
+            selectedBlock.appendChild(node);
+            return;
+        }
+
+        // If this is another verse number after the selected one, switch to 'after'
+        if (
+            mode === 'selected' &&
+            node.nodeType === 1 &&
+            node.classList.contains('verse-num')
+        ) {
+            mode = 'after';
+            afterP.appendChild(node);
+            return;
+        }
+
+        // Append node based on current mode
+        if (mode === 'before') {
+            beforeP.appendChild(node);
+        } else if (mode === 'selected') {
+            selectedBlock.appendChild(node);
+        } else {
+            afterP.appendChild(node);
+        }
+    });
+
+    const parent = paragraph.parentNode;
+
+    // Insert in order: before, selected, after (only if they have content)
+    if (beforeP.childNodes.length > 0) {
+        parent.insertBefore(beforeP, paragraph);
+    }
+
+    parent.insertBefore(selectedBlock, paragraph);
+
+    if (afterP.childNodes.length > 0) {
+        parent.insertBefore(afterP, paragraph);
+    }
+
+    // Remove original paragraph
+    parent.removeChild(paragraph);
+
+    // Scroll selected verse into view
+    setTimeout(() => {
+        selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+}
+
 
 	// ================================
 	// Settings
