@@ -1045,7 +1045,7 @@ body.light-mode .selected-verse-glow {
 	margin: 0.5rem 0;
 	transition: all 0.3s ease;
 	animation: verse-highlight 0.6s ease; */
-}
+/* } */
 
 /* Reduce glow spacing when a heading follows immediately */
 /* .selected-verse-glow+h2,
