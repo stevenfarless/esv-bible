@@ -45,25 +45,26 @@ export function navigateChapter(app, direction) {
 }
 
 export function scrollToVerse(app, verseNumber) {
-    app.state.selectedVerse = verseNumber;
-    app.currentVerseSpan.textContent = `${verseNumber}`;
-    app.applyVerseGlow();
+  app.state.selectedVerse = verseNumber;
+  app.currentVerseSpan.textContent = `${verseNumber}`;
+  app.applyVerseGlow();
 }
 
+
 export function applyVerseGlow(app) {
-  if (!app.originalPassageHtml) return;
-
-  // Restore original HTML (so we start clean each time)
-  app.passageText.innerHTML = app.originalPassageHtml;
-
+  if (!app.passageText) return;
   if (app.state.selectedVerse === null) return;
 
-  // Find the .verse-num for the selected verse
+  // Clear any previous glow
+  app.passageText.querySelectorAll('.selected-verse-glow')
+    .forEach(el => el.classList.remove('selected-verse-glow'));
+
+  // Find the verse number span
   const verseNums = app.passageText.querySelectorAll('.verse-num');
   let targetVerseNum = null;
 
   for (const vn of verseNums) {
-    if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
+    if (vn.textContent.trim() === String(app.state.selectedVerse)) {
       targetVerseNum = vn;
       break;
     }
@@ -71,19 +72,13 @@ export function applyVerseGlow(app) {
 
   if (!targetVerseNum) return;
 
-  // Find its .verse-container (created in displayPassage)
+  // If you have verse-container wrapping, prefer the container; otherwise use the verse-num itself
   const container = targetVerseNum.closest('.verse-container') || targetVerseNum;
-  if (!container) return;
 
-  // Clear any previous glow
-  app.passageText.querySelectorAll('.selected-verse-glow')
-    .forEach(el => el.classList.remove('selected-verse-glow'));
-
-  // Apply glow to the container (inline in CSS)
   container.classList.add('selected-verse-glow');
 
-  // Scroll to the verse
   setTimeout(() => {
     container.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 100);
 }
+
