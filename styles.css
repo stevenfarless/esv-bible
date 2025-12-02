@@ -278,7 +278,7 @@ body {
 .main-content {
 	max-width: var(--max-width);
 	margin: 0 auto;
-	/* padding: var(--spacing-xl) var(--spacing-lg); */
+	padding: var(--spacing-xl) var(--spacing-lg);
 }
 
 .passage-container {
@@ -851,7 +851,7 @@ body {
 	}
 
 	.main-content {
-		padding: var(--spacing-lg) var(--spacing-md);
+		/* padding: var(--spacing-lg) var(--spacing-md); */
 	}
 
 	.passage-container {
