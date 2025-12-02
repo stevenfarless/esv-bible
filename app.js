@@ -358,28 +358,34 @@ class BibleApp {
 	// Passage Loading
 	// ================================
 	async loadPassage(book, chapter, restoreScroll = false) {
-		// Save previous scroll position before changing
-		if (!restoreScroll) {
-			this.saveReadingPosition();
-		}
+    if (!restoreScroll) {
+        this.saveReadingPosition();
+    }
 
-		this.state.currentBook = book;
-		this.state.currentChapter = chapter;
+    this.state.currentBook = book;
+    this.state.currentChapter = chapter;
+    this.updateNavigationState();
 
-		this.updateNavigationState();
+    const reference = `${book} ${chapter}`;
 
-		const reference = `${book} ${chapter}`;
-		this.passageText.innerHTML = '<div class="loading">Loading passage...</div>';
-	    // Cache the original passage HTML for this chapter
-	    this.originalPassageHtml = this.passageText.innerHTML;
+    this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
 
+    const data = await this.fetchPassage(reference);
+    if (!data) return;
 
-		const data = await this.fetchPassage(reference);
+    this.passageTitle.textContent = reference;
+    this.passageText.innerHTML = data.passages[0];
 
-		if (data && data.passages && data.passages.length > 0) {
-			this.displayPassage(data, restoreScroll);
-		}
-	}
+    // cache original HTML for highlight logic
+    this.originalPassageHtml = this.passageText.innerHTML;
+
+    if (restoreScroll) {
+        window.scrollTo(0, this.lastScrollPosition || 0);
+    } else {
+        window.scrollTo(0, 0);
+    }
+}
+
 
 	displayPassage(data, restoreScroll = false) {
 		const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
