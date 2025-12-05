@@ -54,8 +54,13 @@ export function applyVerseGlow(app) {
     if (!app.originalPassageHtml) return;
 
     app.passageText.innerHTML = app.originalPassageHtml;
-
     if (app.state.selectedVerse === null) return;
+
+    // Special handling for verse 1 - just scroll to top
+    if (app.state.selectedVerse === 1) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
 
     const verseNums = app.passageText.querySelectorAll('.verse-num');
     let targetVerseNum = null;
@@ -69,6 +74,7 @@ export function applyVerseGlow(app) {
 
     if (!targetVerseNum) return;
 
+    // Rest of the existing code...
     if (app.state.verseByVerse) {
         const container = targetVerseNum.closest('.verse-container');
         if (!container) return;
@@ -76,13 +82,10 @@ export function applyVerseGlow(app) {
         app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
             el.classList.remove('selected-verse-glow');
         });
-
         container.classList.add('selected-verse-glow');
-
         setTimeout(() => {
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
-
         return;
     }
 
@@ -92,7 +95,6 @@ export function applyVerseGlow(app) {
     const beforeP = document.createElement('p');
     const selectedBlock = document.createElement('div');
     const afterP = document.createElement('p');
-
     selectedBlock.classList.add('selected-verse-glow');
 
     let mode = 'before';
@@ -105,14 +107,12 @@ export function applyVerseGlow(app) {
             return;
         }
 
-        if (
-            mode === 'selected' &&
-            node.nodeType === 1 &&
-            node.classList.contains('verse-num')
-        ) {
-            mode = 'after';
-            afterP.appendChild(node);
-            return;
+        if (mode === 'selected') {
+            if (node.nodeType === 1 && node.classList.contains('verse-num')) {
+                mode = 'after';
+                afterP.appendChild(node);
+                return;
+            }
         }
 
         if (mode === 'before') {
@@ -125,20 +125,17 @@ export function applyVerseGlow(app) {
     });
 
     const parent = paragraph.parentNode;
-
     if (beforeP.childNodes.length > 0) {
         parent.insertBefore(beforeP, paragraph);
     }
-
     parent.insertBefore(selectedBlock, paragraph);
-
     if (afterP.childNodes.length > 0) {
         parent.insertBefore(afterP, paragraph);
     }
-
     parent.removeChild(paragraph);
 
     setTimeout(() => {
         selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 }
+
