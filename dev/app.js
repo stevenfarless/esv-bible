@@ -111,82 +111,82 @@ class BibleApp {
 	}
 
 	attachEventListeners() {
-    console.log('🔧 Attaching event listeners...');
-    
-    // Header
-    console.log('🔍 Help elements:', { helpBtn: this.helpBtn, helpModal: this.helpModal });
-    
-    this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-    
-    // SINGLE HELP BUTTON LISTENER
-    if (this.helpBtn && this.helpModal) {
-        this.helpBtn.addEventListener('click', () => {
-            console.log('🔔 HELP BUTTON CLICKED!');
-            this.openModal(this.helpModal);
-        });
-    } else {
-        console.error('❌ HELP ELEMENTS MISSING!', { helpBtn: this.helpBtn, helpModal: this.helpModal });
-    }
-    
-    this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
-    this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
-    this.userBtn.addEventListener('click', () => this.toggleUserMenu());
+		console.log('🔧 Attaching event listeners...');
 
-    // Navigation
-    this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
-    this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
-    this.bookSelector.addEventListener('click', () => this.openModal(this.bookModal));
-    this.chapterSelector.addEventListener('click', () => this.openModal(this.chapterModal));
-    this.verseSelector.addEventListener('click', () => this.openModal(this.verseModal));
+		// Header
+		console.log('🔍 Help elements:', { helpBtn: this.helpBtn, helpModal: this.helpModal });
 
-    // Search
-    this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
-    this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
-    this.searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') this.closeSearch();
-    });
+		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
 
-    // Modals backdrop click
-    [this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, 
-     this.helpModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModal(modal);
-            });
-        }
-    });
+		// SINGLE HELP BUTTON LISTENER
+		if (this.helpBtn && this.helpModal) {
+			this.helpBtn.addEventListener('click', () => {
+				console.log('🔔 HELP BUTTON CLICKED!');
+				this.openModal(this.helpModal);
+			});
+		} else {
+			console.error('❌ HELP ELEMENTS MISSING!', { helpBtn: this.helpBtn, helpModal: this.helpModal });
+		}
 
-    // Modal close buttons
-    if (this.closeBookModal) this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
-    if (this.closeChapterModal) this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
-    if (this.closeVerseModal) this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
-    if (this.closeSettingsModal) this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
-    if (this.closeHelpModal) this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
-    if (this.closeLoginModal) this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
-    if (this.closeSignupModal) this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
-    if (this.closeUserMenuModal) this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
+		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this))
+		this.userBtn.addEventListener('click', () => this.toggleUserMenu());
 
-    // Settings
-    if (this.saveApiKeyBtn) this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
-    if (this.verseNumbersToggle) this.verseNumbersToggle.addEventListener('change', (e) => this.toggleVerseNumbers(e.target.checked));
-    if (this.headingsToggle) this.headingsToggle.addEventListener('change', (e) => this.toggleHeadings(e.target.checked));
-    if (this.footnotesToggle) this.footnotesToggle.addEventListener('change', (e) => this.toggleFootnotes(e.target.checked));
-    if (this.verseByVerseToggle) this.verseByVerseToggle.addEventListener('change', (e) => this.toggleVerseByVerse(e.target.checked));
-    if (this.fontSizeSlider) this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
+		// Navigation
+		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
+		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
+		this.bookSelector.addEventListener('click', () => this.openModal(this.bookModal));
+		this.chapterSelector.addEventListener('click', () => this.openModal(this.chapterModal));
+		this.verseSelector.addEventListener('click', () => this.openModal(this.verseModal));
 
-    // Search results
-    this.searchResults.addEventListener('click', (e) => {
-        if (e.target.closest('.search-result-item')) {
-            const reference = e.target.closest('.search-result-item').dataset.reference;
-            this.handleSearchResult(reference);
-        }
-    });
+		// Search
+		this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
+		this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+		this.searchInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') this.closeSearch();
+		});
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+		// Modals backdrop click
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal,
+		this.helpModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+			if (modal) {
+				modal.addEventListener('click', (e) => {
+					if (e.target === modal) this.closeModal(modal);
+				});
+			}
+		});
 
-    console.log('✅ All event listeners attached');
-}
+		// Modal close buttons
+		if (this.closeBookModal) this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
+		if (this.closeChapterModal) this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+		if (this.closeVerseModal) this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
+		if (this.closeSettingsModal) this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+		if (this.closeHelpModal) this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
+		if (this.closeLoginModal) this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
+		if (this.closeSignupModal) this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
+		if (this.closeUserMenuModal) this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
+
+		// Settings
+		if (this.saveApiKeyBtn) this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
+		if (this.verseNumbersToggle) this.verseNumbersToggle.addEventListener('change', (e) => this.toggleVerseNumbers(e.target.checked));
+		if (this.headingsToggle) this.headingsToggle.addEventListener('change', (e) => this.toggleHeadings(e.target.checked));
+		if (this.footnotesToggle) this.footnotesToggle.addEventListener('change', (e) => this.toggleFootnotes(e.target.checked));
+		if (this.verseByVerseToggle) this.verseByVerseToggle.addEventListener('change', (e) => this.toggleVerseByVerse(e.target.checked));
+		if (this.fontSizeSlider) this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
+
+		// Search results
+		this.searchResults.addEventListener('click', (e) => {
+			if (e.target.closest('.search-result-item')) {
+				const reference = e.target.closest('.search-result-item').dataset.reference;
+				this.handleSearchResult(reference);
+			}
+		});
+
+		// Keyboard shortcuts
+		document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+
+		console.log('✅ All event listeners attached');
+	}
 
 	// ================================
 	// Bible Structure
@@ -430,15 +430,15 @@ class BibleApp {
 	// ================================
 
 	openModal(modal) {
-    console.log('🚀 openModal:', modal?.id);
-    if (!modal) {
-        console.error('❌ Modal is null!');
-        return;
-    }
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    console.log('✅ Modal opened:', modal.classList.value);
-}
+		console.log('🚀 openModal:', modal?.id);
+		if (!modal) {
+			console.error('❌ Modal is null!');
+			return;
+		}
+		modal.classList.add('active');
+		document.body.style.overflow = 'hidden';
+		console.log('✅ Modal opened:', modal.classList.value);
+	}
 
 	closeModal(modal) {
 		// Add closing animation for settings
