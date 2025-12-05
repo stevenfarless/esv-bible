@@ -845,8 +845,8 @@ body {
 #settingsModal .modal-content {
 	width: 100%;
 	max-width: var(--max-width);
-	max-height: 70vh;
-	/* Only cover 70% of screen */
+	max-height: 25vh; /* changed from 70 */
+	/* Only cover 25% of screen */
 	border-radius: 12px 12px 0 0;
 	/* Rounded top corners only */
 	margin: 0 auto;
