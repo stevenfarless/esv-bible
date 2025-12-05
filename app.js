@@ -111,240 +111,82 @@ class BibleApp {
 	}
 
 	attachEventListeners() {
-		// Header
-		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-		document.getElementById('helpBtn').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.add('active');
-			document.body.style.overflow = 'hidden';
-		});
+    console.log('🔧 Attaching event listeners...');
+    
+    // Header
+    console.log('🔍 Help elements:', { helpBtn: this.helpBtn, helpModal: this.helpModal });
+    
+    this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
+    
+    // SINGLE HELP BUTTON LISTENER
+    if (this.helpBtn && this.helpModal) {
+        this.helpBtn.addEventListener('click', () => {
+            console.log('🔔 HELP BUTTON CLICKED!');
+            this.openModal(this.helpModal);
+        });
+    } else {
+        console.error('❌ HELP ELEMENTS MISSING!', { helpBtn: this.helpBtn, helpModal: this.helpModal });
+    }
+    
+    this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+    this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+    this.userBtn.addEventListener('click', () => this.toggleUserMenu());
 
-		document.getElementById('closeHelpModal').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.remove('active');
-			document.body.style.overflow = '';
-		});
-		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+    // Navigation
+    this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
+    this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
+    this.bookSelector.addEventListener('click', () => this.openModal(this.bookModal));
+    this.chapterSelector.addEventListener('click', () => this.openModal(this.chapterModal));
+    this.verseSelector.addEventListener('click', () => this.openModal(this.verseModal));
 
-		// Search
-		this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
-		this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
-		this.searchInput.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') this.closeSearch();
-		});
+    // Search
+    this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
+    this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+    this.searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.closeSearch();
+    });
 
-		// Navigation
-		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
-		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
-		this.bookSelector.addEventListener('click', () => this.openBookModal());
-		this.chapterSelector.addEventListener('click', () => this.openChapterModal());
-		this.verseSelector.addEventListener('click', () => this.openVerseModal());
+    // Modals backdrop click
+    [this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, 
+     this.helpModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) this.closeModal(modal);
+            });
+        }
+    });
 
-		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
+    // Modal close buttons
+    if (this.closeBookModal) this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
+    if (this.closeChapterModal) this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+    if (this.closeVerseModal) this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
+    if (this.closeSettingsModal) this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+    if (this.closeHelpModal) this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
+    if (this.closeLoginModal) this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
+    if (this.closeSignupModal) this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
+    if (this.closeUserMenuModal) this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
 
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal]
-			.forEach(modal => {
-				modal.addEventListener('click', (e) => {
-					if (e.target === modal) this.closeModal(modal);
-				});
-			});
+    // Settings
+    if (this.saveApiKeyBtn) this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
+    if (this.verseNumbersToggle) this.verseNumbersToggle.addEventListener('change', (e) => this.toggleVerseNumbers(e.target.checked));
+    if (this.headingsToggle) this.headingsToggle.addEventListener('change', (e) => this.toggleHeadings(e.target.checked));
+    if (this.footnotesToggle) this.footnotesToggle.addEventListener('change', (e) => this.toggleFootnotes(e.target.checked));
+    if (this.verseByVerseToggle) this.verseByVerseToggle.addEventListener('change', (e) => this.toggleVerseByVerse(e.target.checked));
+    if (this.fontSizeSlider) this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
-		// Copy button
-		this.copyBtn.addEventListener('click', () => this.copyPassage());
+    // Search results
+    this.searchResults.addEventListener('click', (e) => {
+        if (e.target.closest('.search-result-item')) {
+            const reference = e.target.closest('.search-result-item').dataset.reference;
+            this.handleSearchResult(reference);
+        }
+    });
 
-		// Modals
-		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
-		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
-		this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
-		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
 
-		// Settings modal drag-to-resize and swipe-to-close
-		const settingsContent = this.settingsModal.querySelector('.modal-content');
-		const settingsHeader = this.settingsModal.querySelector('.modal-header');
-		const settingsBody = this.settingsModal.querySelector('.modal-body');
-
-		let isDragging = false;
-		let startY = 0;
-		let startHeight = 0;
-		let startScrollTop = 0;
-
-		const handleTouchStart = (e) => {
-			// Only allow dragging from the header area (not the body content)
-			if (!settingsHeader.contains(e.target)) return;
-
-			isDragging = true;
-			startY = e.touches[0].clientY;
-			startHeight = settingsContent.offsetHeight;
-			startScrollTop = settingsBody.scrollTop;
-			settingsContent.classList.add('dragging');
-		};
-
-		const handleTouchMove = (e) => {
-			if (!isDragging) return;
-
-			const currentY = e.touches[0].clientY;
-			const deltaY = startY - currentY; // Positive = dragging up, negative = dragging down
-
-			// Calculate new height
-			let newHeight = startHeight + deltaY;
-
-			// Clamp between min and max
-			const minHeight = 200;
-			const maxHeight = window.innerHeight * 0.9;
-			newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
-
-			settingsContent.style.height = `${newHeight}px`;
-
-			// Prevent scrolling while dragging
-			e.preventDefault();
-		};
-
-		const handleTouchEnd = (e) => {
-			if (!isDragging) return;
-
-			isDragging = false;
-			settingsContent.classList.remove('dragging');
-
-			const endY = e.changedTouches[0].clientY;
-			const totalDragDistance = endY - startY; // Positive = dragged down
-
-			// Only close if:
-			// 1. Dragged down (not up)
-			// 2. Dragged more than 150px down
-			// 3. Content was at top when started
-			if (totalDragDistance > 150 && startScrollTop === 0) {
-				this.closeModal(this.settingsModal);
-				// Reset height for next open
-				setTimeout(() => {
-					settingsContent.style.height = '50vh';
-				}, 300);
-			}
-		};
-
-		// Touch events (mobile)
-		settingsHeader.addEventListener('touchstart', handleTouchStart, { passive: false });
-		document.addEventListener('touchmove', handleTouchMove, { passive: false });
-		document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-		// Mouse events (desktop)
-		let isMouseDragging = false;
-		let mouseStartY = 0;
-		let mouseStartHeight = 0;
-
-		settingsHeader.addEventListener('mousedown', (e) => {
-			// Ignore if clicking on close button
-			if (e.target.closest('.close-btn')) return;
-
-			isMouseDragging = true;
-			mouseStartY = e.clientY;
-			mouseStartHeight = settingsContent.offsetHeight;
-			settingsContent.classList.add('dragging');
-			e.preventDefault();
-		});
-
-		document.addEventListener('mousemove', (e) => {
-			if (!isMouseDragging) return;
-
-			const deltaY = mouseStartY - e.clientY;
-			let newHeight = mouseStartHeight + deltaY;
-
-			const minHeight = 200;
-			const maxHeight = window.innerHeight * 0.9;
-			newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
-
-			settingsContent.style.height = `${newHeight}px`;
-		});
-
-		document.addEventListener('mouseup', (e) => {
-			if (!isMouseDragging) return;
-
-			isMouseDragging = false;
-			settingsContent.classList.remove('dragging');
-
-			const endY = e.clientY;
-			const totalDragDistance = endY - mouseStartY;
-
-			// Close if dragged down more than 150px
-			if (totalDragDistance > 150) {
-				this.closeModal(this.settingsModal);
-				setTimeout(() => {
-					settingsContent.style.height = '50vh';
-				}, 300);
-			}
-		});
-
-		// Settings
-		this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
-		this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
-		this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
-		this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
-		this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse());
-		this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
-
-		// Theme toggle
-		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this));
-
-		// Theme selector
-		const themeSelector = document.getElementById('themeSelector');
-		const lightModeToggle = document.getElementById('lightModeToggle');
-
-		if (themeSelector) {
-			themeSelector.addEventListener('change', (e) => {
-				changeColorTheme(this, e.target.value);
-			});
-		}
-
-		if (lightModeToggle) {
-			lightModeToggle.addEventListener('change', () => {
-				toggleTheme(this);
-			});
-		}
-
-		// User button
-		this.userBtn.addEventListener('click', () => this.handleUserButtonClick());
-
-		// Auth modal switching
-		document.getElementById('showSignupLink').addEventListener('click', (e) => {
-			e.preventDefault();
-			this.closeModal(this.loginModal);
-			this.openModal(this.signupModal);
-		});
-
-		document.getElementById('showLoginLink').addEventListener('click', (e) => {
-			e.preventDefault();
-			this.closeModal(this.signupModal);
-			this.openModal(this.loginModal);
-		});
-
-		// Auth form submissions
-		document.getElementById('loginForm').addEventListener('submit', (e) => {
-			e.preventDefault();
-			this.handleLogin();
-		});
-
-		document.getElementById('signupForm').addEventListener('submit', (e) => {
-			e.preventDefault();
-			this.handleSignup();
-		});
-
-		document.getElementById('logoutBtn').addEventListener('click', () => {
-			this.handleLogout();
-		});
-
-		// Close auth modals
-		this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
-		this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
-		this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
-
-		// Track scroll position
-		window.addEventListener('scroll', () => {
-			clearTimeout(this.scrollTimeout);
-			this.scrollTimeout = setTimeout(() => {
-				this.saveReadingPosition();
-			}, 500);
-		});
-
-		// Keyboard shortcuts
-		document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
-	}
+    console.log('✅ All event listeners attached');
+}
 
 	// ================================
 	// Bible Structure
@@ -588,9 +430,15 @@ class BibleApp {
 	// ================================
 
 	openModal(modal) {
-		modal.classList.add('active');
-		document.body.style.overflow = 'hidden';
-	}
+    console.log('🚀 openModal:', modal?.id);
+    if (!modal) {
+        console.error('❌ Modal is null!');
+        return;
+    }
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    console.log('✅ Modal opened:', modal.classList.value);
+}
 
 	closeModal(modal) {
 		// Add closing animation for settings
