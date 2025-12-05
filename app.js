@@ -114,8 +114,7 @@ class BibleApp {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
 		// Help temporarily disabled
-
-		});
+		};
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
