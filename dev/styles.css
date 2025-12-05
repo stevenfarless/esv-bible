@@ -1342,3 +1342,69 @@ body.hide-verse-numbers .passage-text .verse-num {
 		opacity: 0;
 	}
 }
+
+/* Keyboard shortcut display */
+.shortcut-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-sm);
+}
+
+.shortcut-item {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-md);
+	padding: var(--spacing-sm);
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.shortcut-item kbd {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	background-color: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-family: var(--font-sans);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--primary-color);
+	box-shadow: 0 2px 0 var(--border-color);
+}
+
+.shortcut-item span {
+	flex: 1;
+	color: var(--text-secondary);
+	font-size: 0.9rem;
+}
+
+.tips-list {
+	list-style: none;
+	padding: 0;
+}
+
+.tips-list li {
+	padding: var(--spacing-sm) 0;
+	padding-left: var(--spacing-lg);
+	position: relative;
+	color: var(--text-secondary);
+	line-height: 1.6;
+}
+
+.tips-list li::before {
+	content: "→";
+	position: absolute;
+	left: 0;
+	color: var(--primary-color);
+	font-weight: bold;
+}
+
+.tips-list li a {
+	color: var(--primary-color);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.tips-list li a:hover {
+	text-decoration: underline;
+}
