@@ -116,11 +116,14 @@ class BibleApp {
 		// Header
 		console.log('🔍 Help elements:', { helpBtn: this.helpBtn, helpModal: this.helpModal });
 
-		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-
-		// SINGLE HELP BUTTON LISTENER
+		// SINGLE HELP BUTTON LISTENER (prevents duplicates)
 		if (this.helpBtn && this.helpModal) {
-			this.helpBtn.addEventListener('click', () => {
+			// Remove any existing listeners first
+			this.helpBtn.replaceWith(this.helpBtn.cloneNode(true));
+			this.helpBtn = document.getElementById('helpBtn');
+			this.helpBtn.addEventListener('click', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
 				console.log('🔔 HELP BUTTON CLICKED!');
 				this.openModal(this.helpModal);
 			});
@@ -129,8 +132,8 @@ class BibleApp {
 		}
 
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
-		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this))
-		this.userBtn.addEventListener('click', () => this.handleUserButtonClick())
+		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this));
+		this.userBtn.addEventListener('click', () => this.handleUserButtonClick);
 
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
@@ -146,7 +149,7 @@ class BibleApp {
 			if (e.key === 'Escape') this.closeSearch();
 		});
 
-		// Modals backdrop click
+		// Modals backdrop click - FIXED ARRAY SYNTAX
 		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal,
 		this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
 			if (modal) {
@@ -430,15 +433,19 @@ class BibleApp {
 	// ================================
 
 	openModal(modal) {
-		console.log('🚀 openModal:', modal?.id);
-		if (!modal) {
-			console.error('❌ Modal is null!');
-			return;
-		}
-		modal.classList.add('active');
-		document.body.style.overflow = 'hidden';
-		console.log('✅ Modal opened:', modal.classList.value);
-	}
+    console.log('🚀 openModal:', modal?.id);
+    if (!modal) {
+        console.error('❌ Modal is null!');
+        return;
+    }
+    
+    console.log('📋 Before:', modal.className);
+    modal.classList.add('active');
+    console.log('📋 After:', modal.className);
+    document.body.style.overflow = 'hidden';
+    console.log('✅ Modal opened:', modal.classList.value);
+}
+
 
 	closeModal(modal) {
 		// Add closing animation for settings

@@ -1429,3 +1429,13 @@ body.hide-verse-numbers .passage-text .verse-num {
 .tips-list li a:hover {
 	text-decoration: underline;
 }
+
+/* DEBUG: force help modal to be clearly visible and on top */
+#helpModal.modal {
+	outline: 3px solid red;
+}
+
+#helpModal.modal.active {
+	display: flex !important;
+	z-index: 3000 !important;
+}
