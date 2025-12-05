@@ -1,312 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESV Bible Reader</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ESV Bible Reader</title>
-	<link rel="stylesheet" href="styles.css">
-</head>
+  <body>
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">ESV Bible Reader</div>
+        <div class="header-controls">
+          <button id="searchToggleBtn" class="icon-btn" title="Search">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
 
-<body>
-	<header class="header">
-		<div class="header-content">
-			<div class="logo">ESV Bible Reader</div>
-			<div class="header-controls">
-				<button id="searchToggleBtn" class="icon-btn" title="Search">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<circle cx="11" cy="11" r="8"></circle>
-						<path d="m21 21-4.35-4.35"></path>
-					</svg>
-				</button>
+          <button id="themeToggleBtn" class="icon-btn" title="Toggle Theme">
+            <svg
+              id="themeIcon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
 
-				<button id="themeToggleBtn" class="icon-btn" title="Toggle Theme">
-					<svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-						stroke-width="2">
-						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-					</svg>
-				</button>
+          <button id="userBtn" class="icon-btn" title="Account">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </button>
 
-				<button id="userBtn" class="icon-btn" title="Account">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-						<circle cx="12" cy="7" r="4"></circle>
-					</svg>
-				</button>
+          <button id="settingsBtn" class="icon-btn" aria-label="Settings">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+              ></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
 
-				<button id="settingsBtn" class="icon-btn" aria-label="Settings">
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path
-							d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
-						</path>
-						<circle cx="12" cy="12" r="3"></circle>
-					</svg>
-				</button>
-			</div>
-		</div>
-	</header>
+    <div id="searchContainer" class="search-container">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search passages or enter reference (e.g., John 3:16)"
+        />
+        <button id="closeSearchBtn" class="close-btn">&times;</button>
+      </div>
+      <div id="searchResults" class="search-results"></div>
+    </div>
 
-	<div id="searchContainer" class="search-container">
-		<div class="search-wrapper">
-			<input type="text" id="searchInput" class="search-input"
-				placeholder="Search passages or enter reference (e.g., John 3:16)">
-			<button id="closeSearchBtn" class="close-btn">&times;</button>
-		</div>
-		<div id="searchResults" class="search-results"></div>
-	</div>
+    <nav class="navigation">
+      <div class="nav-content">
+        <button id="prevChapterBtn" class="nav-btn">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Previous</span>
+        </button>
 
-	<nav class="navigation">
-		<div class="nav-content">
-			<button id="prevChapterBtn" class="nav-btn">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="15 18 9 12 15 6"></polyline>
-				</svg>
-				<span>Previous</span>
-			</button>
+        <div class="passage-selector">
+          <button id="bookSelector" class="selector-btn">
+            <span id="currentBook">Gen</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
 
-			<div class="passage-selector">
-				<button id="bookSelector" class="selector-btn">
-					<span id="currentBook">Gen</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				</button>
+          <button id="chapterSelector" class="selector-btn">
+            <span id="currentChapter">1</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
 
-				<button id="chapterSelector" class="selector-btn">
-					<span id="currentChapter">1</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				</button>
+          <button id="verseSelector" class="selector-btn">
+            <span id="currentVerse">1</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
 
-				<button id="verseSelector" class="selector-btn">
-					<span id="currentVerse">1</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				</button>
-			</div>
+        <button id="nextChapterBtn" class="nav-btn">
+          <span>Next</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </nav>
 
-			<button id="nextChapterBtn" class="nav-btn">
-				<span>Next</span>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="9 18 15 12 9 6"></polyline>
-				</svg>
-			</button>
-		</div>
-	</nav>
+    <main class="main-content">
+      <div class="passage-container">
+        <div class="passage-header">
+          <h2 id="passageTitle" class="passage-title">Genesis 1</h2>
+          <button id="copyBtn" class="icon-btn" title="Copy passage">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path
+                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div id="passageText" class="passage-text">
+          <div class="loading">Loading passage...</div>
+        </div>
+        <div class="passage-footer">
+          <p id="copyright" class="copyright"></p>
+        </div>
+      </div>
+    </main>
 
-	<main class="main-content">
-		<div class="passage-container">
-			<div class="passage-header">
-				<h2 id="passageTitle" class="passage-title">Genesis 1</h2>
-				<button id="copyBtn" class="icon-btn" title="Copy passage">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-						<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-					</svg>
-				</button>
-			</div>
-			<div id="passageText" class="passage-text">
-				<div class="loading">Loading passage...</div>
-			</div>
-			<div class="passage-footer">
-				<p id="copyright" class="copyright"></p>
-			</div>
-		</div>
-	</main>
+    <div id="bookModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Select a Book</h3>
+          <button id="closeBookModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="book-category">
+            <h4>Old Testament</h4>
+            <div id="oldTestamentBooks" class="book-grid"></div>
+          </div>
+          <div class="book-category">
+            <h4>New Testament</h4>
+            <div id="newTestamentBooks" class="book-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	<div id="bookModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>Select a Book</h3>
-				<button id="closeBookModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div class="book-category">
-					<h4>Old Testament</h4>
-					<div id="oldTestamentBooks" class="book-grid"></div>
-				</div>
-				<div class="book-category">
-					<h4>New Testament</h4>
-					<div id="newTestamentBooks" class="book-grid"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div id="chapterModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><span id="chapterModalBook">Genesis</span></h3>
+          <button id="closeChapterModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="chapterGrid" class="chapter-grid"></div>
+        </div>
+      </div>
+    </div>
 
-	<div id="chapterModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3><span id="chapterModalBook">Genesis</span></h3>
-				<button id="closeChapterModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div id="chapterGrid" class="chapter-grid"></div>
-			</div>
-		</div>
-	</div>
+    <div id="verseModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><span id="verseModalBook">Genesis 1</span></h3>
+          <button id="closeVerseModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="verseGrid" class="chapter-grid"></div>
+        </div>
+      </div>
+    </div>
 
-	<div id="verseModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3><span id="verseModalBook">Genesis 1</span></h3>
-				<button id="closeVerseModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div id="verseGrid" class="chapter-grid"></div>
-			</div>
-		</div>
-	</div>
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Settings</h3>
+          <button id="closeSettingsModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-group" id="apiKeySection">
+            <h4>API Configuration</h4>
+            <div class="setting-item">
+              <label>ESV API Key</label>
+              <input
+                type="text"
+                id="apiKeyInput"
+                class="input-field"
+                placeholder="Enter your API key"
+              />
+              <small class="help-text">
+                Get your free API key at
+                <a href="https://api.esv.org/account/" target="_blank"
+                  >api.esv.org/account</a
+                >
+              </small>
+            </div>
+            <button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
+          </div>
 
-	<div id="settingsModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>Settings</h3>
-				<button id="closeSettingsModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div class="settings-group" id="apiKeySection">
-					<h4>API Configuration</h4>
-					<div class="setting-item">
-						<label>ESV API Key</label>
-						<input type="text" id="apiKeyInput" class="input-field" placeholder="Enter your API key">
-						<small class="help-text">
-							Get your free API key at
-							<a href="https://api.esv.org/account/" target="_blank">api.esv.org/account</a>
-						</small>
-					</div>
-					<button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
-				</div>
+          <div class="settings-group">
+            <h4>Display Options</h4>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="verseNumbersToggle" checked />
+                <span>Show verse numbers</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="headingsToggle" checked />
+                <span>Show section headings</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="footnotesToggle" />
+                <span>Show footnotes</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="verseByVerseToggle" />
+                <span>Verse-by-verse display</span>
+              </label>
+            </div>
+          </div>
 
-				<div class="settings-group">
-					<h4>Display Options</h4>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="verseNumbersToggle" checked>
-							<span>Show verse numbers</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="headingsToggle" checked>
-							<span>Show section headings</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="footnotesToggle">
-							<span>Show footnotes</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="verseByVerseToggle">
-							<span>Verse-by-verse display</span>
-						</label>
-					</div>
-				</div>
+          <div class="settings-group">
+            <h4>Font Size</h4>
+            <div class="setting-item">
+              <input
+                type="range"
+                id="fontSizeSlider"
+                class="slider"
+                min="12"
+                max="32"
+                value="18"
+              />
+              <span id="fontSizeValue">18px</span>
+            </div>
+          </div>
 
-				<div class="settings-group">
-					<h4>Font Size</h4>
-					<div class="setting-item">
-						<input type="range" id="fontSizeSlider" class="slider" min="12" max="32" value="18">
-						<span id="fontSizeValue">18px</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+          <!-- Theme Selection -->
+          <div class="settings-group">
+            <h4>Theme</h4>
+            <div class="setting-item">
+              <label>Color Theme</label>
+              <select id="themeSelector" class="input-field">
+                <option value="dracula">Dracula (Purple/Pink)</option>
+                <option value="steel">Steel (Blue/Cool)</option>
+              </select>
+              <small class="help-text"
+                >Choose your preferred color scheme</small
+              >
+            </div>
 
-	<div id="loginModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>Sign In</h3>
-				<button id="closeLoginModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<form id="loginForm" class="auth-form">
-					<div class="setting-item">
-						<label>Email</label>
-						<input type="email" id="loginEmail" class="input-field" placeholder="your@email.com"
-							autocomplete="email" required>
-					</div>
-					<div class="setting-item">
-						<label>Password</label>
-						<input type="password" id="loginPassword" class="input-field" placeholder="Password"
-							autocomplete="current-password" required>
-					</div>
-					<button type="submit" class="primary-btn" style="width: 100%;">Sign In</button>
-				</form>
-				<p class="auth-switch">
-					Don't have an account? <a href="#" id="showSignupLink">Sign up</a>
-				</p>
-			</div>
-		</div>
-	</div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="lightModeToggle" />
+                <span>Light Mode</span>
+              </label>
+              <small class="help-text">
+                Enable light mode for your selected theme</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	<div id="signupModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>Create Account</h3>
-				<button id="closeSignupModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<form id="signupForm" class="auth-form">
-					<div class="setting-item">
-						<label>Email</label>
-						<input type="email" id="signupEmail" class="input-field" placeholder="your@email.com"
-							autocomplete="email" required>
-					</div>
-					<div class="setting-item">
-						<label>Password</label>
-						<input type="password" id="signupPassword" class="input-field"
-							placeholder="At least 6 characters" autocomplete="new-password" required>
-					</div>
-					<div class="setting-item">
-						<label>ESV API Key</label>
-						<input type="text" id="signupApiKey" class="input-field" placeholder="Your ESV API key"
-							autocomplete="off" required>
-						<small class="help-text">
-							Get your free API key at
-							<a href="https://api.esv.org/account/" target="_blank">api.esv.org/account</a>
-						</small>
-					</div>
-					<button type="submit" class="primary-btn" style="width: 100%;">Create Account</button>
-				</form>
-				<p class="auth-switch">
-					Already have an account? <a href="#" id="showLoginLink">Sign in</a>
-				</p>
-			</div>
-		</div>
-	</div>
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Sign In</h3>
+          <button id="closeLoginModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="loginForm" class="auth-form">
+            <div class="setting-item">
+              <label>Email</label>
+              <input
+                type="email"
+                id="loginEmail"
+                class="input-field"
+                placeholder="your@email.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="setting-item">
+              <label>Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                class="input-field"
+                placeholder="Password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+            <button type="submit" class="primary-btn" style="width: 100%;">
+              Sign In
+            </button>
+          </form>
+          <p class="auth-switch">
+            Don't have an account? <a href="#" id="showSignupLink">Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
 
-	<div id="userMenuModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h3>Account</h3>
-				<button id="closeUserMenuModal" class="close-btn">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div class="user-info-box">
-					<p><strong>Email:</strong> <span id="userEmail"></span></p>
-					<p><strong>Theme:</strong> <span id="userTheme">Dracula (Dark)</span></p>
-				</div>
-				<button id="logoutBtn" class="primary-btn" style="width: 100%;">Sign Out</button>
-			</div>
-		</div>
-	</div>
+    <div id="signupModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create Account</h3>
+          <button id="closeSignupModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="signupForm" class="auth-form">
+            <div class="setting-item">
+              <label>Email</label>
+              <input
+                type="email"
+                id="signupEmail"
+                class="input-field"
+                placeholder="your@email.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="setting-item">
+              <label>Password</label>
+              <input
+                type="password"
+                id="signupPassword"
+                class="input-field"
+                placeholder="At least 6 characters"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <div class="setting-item">
+              <label>ESV API Key</label>
+              <input
+                type="text"
+                id="signupApiKey"
+                class="input-field"
+                placeholder="Your ESV API key"
+                autocomplete="off"
+                required
+              />
+              <small class="help-text">
+                Get your free API key at
+                <a href="https://api.esv.org/account/" target="_blank"
+                  >api.esv.org/account</a
+                >
+              </small>
+            </div>
+            <button type="submit" class="primary-btn" style="width: 100%;">
+              Create Account
+            </button>
+          </form>
+          <p class="auth-switch">
+            Already have an account? <a href="#" id="showLoginLink">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
 
-	<div id="toast" class="toast"></div>
+    <div id="userMenuModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Account</h3>
+          <button id="closeUserMenuModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="user-info-box">
+            <p><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p>
+              <strong>Theme:</strong> <span id="userTheme">Dracula (Dark)</span>
+            </p>
+          </div>
+          <button id="logoutBtn" class="primary-btn" style="width: 100%;">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
 
-	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <div id="toast" class="toast"></div>
 
-	<script type="module" src="firebase-config.js"></script>
-	<script type="module" src="app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-</body>
-
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
 </html>

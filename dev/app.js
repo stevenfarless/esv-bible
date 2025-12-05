@@ -3,119 +3,119 @@
 // ====================
 
 import { BibleApi } from './bible-api.js';
-import { cacheElements, loadTheme, toggleTheme, updateThemeIcon } from './ui.js';
 import { initializeState, navigateChapter as navChapter, scrollToVerse as scrollVerse, applyVerseGlow as glowVerse } from './reading-state.js';
 import { loadUserData as loadUserDataFromFirebase } from './firebase-config.js';
+import { cacheElements, loadTheme, toggleTheme, updateThemeIcon, changeColorTheme } from './ui.js';
 
 class BibleApp {
-    constructor() {
-        // Configuration
-        this.API_BASE_URL = 'https://api.esv.org/v3';
-        this.API_KEY = '';
+	constructor() {
+		// Configuration
+		this.API_BASE_URL = 'https://api.esv.org/v3';
+		this.API_KEY = '';
 
-        // Firebase references
-        this.auth = window.firebaseAuth;
-        this.database = window.firebaseDatabase;
-        this.currentUser = null;
+		// Firebase references
+		this.auth = window.firebaseAuth;
+		this.database = window.firebaseDatabase;
+		this.currentUser = null;
 
-        // Bible structure data
-        this.bibleBooks = this.initializeBibleStructure();
+		// Bible structure data
+		this.bibleBooks = this.initializeBibleStructure();
 
 		// Book abbreviations for UI
 		this.bookAbbreviations = {
-		  'Genesis': 'Gen',
-		  'Exodus': 'Exod',
-		  'Leviticus': 'Lev',
-		  'Numbers': 'Num',
-		  'Deuteronomy': 'Deut',
-		  'Joshua': 'Josh',
-		  'Judges': 'Judg',
-		  'Ruth': 'Ruth',
-		  '1 Samuel': '1Sam',
-		  '2 Samuel': '2Sam',
-		  '1 Kings': '1Kgs',
-		  '2 Kings': '2Kgs',
-		  '1 Chronicles': '1Chr',
-		  '2 Chronicles': '2Chr',
-		  'Ezra': 'Ezra',
-		  'Nehemiah': 'Neh',
-		  'Esther': 'Esth',
-		  'Job': 'Job',
-		  'Psalms': 'Ps',
-		  'Proverbs': 'Prov',
-		  'Ecclesiastes': 'Eccl',
-		  'Song of Solomon': 'Song',
-		  'Isaiah': 'Isa',
-		  'Jeremiah': 'Jer',
-		  'Lamentations': 'Lam',
-		  'Ezekiel': 'Ezek',
-		  'Daniel': 'Dan',
-		  'Hosea': 'Hos',
-		  'Joel': 'Joel',
-		  'Amos': 'Amos',
-		  'Obadiah': 'Obad',
-		  'Jonah': 'Jonah',
-		  'Micah': 'Mic',
-		  'Nahum': 'Nah',
-		  'Habakkuk': 'Hab',
-		  'Zephaniah': 'Zeph',
-		  'Haggai': 'Hag',
-		  'Zechariah': 'Zech',
-		  'Malachi': 'Mal',
-		  'Matthew': 'Matt',
-		  'Mark': 'Mark',
-		  'Luke': 'Luke',
-		  'John': 'John',
-		  'Acts': 'Acts',
-		  'Romans': 'Rom',
-		  '1 Corinthians': '1Cor',
-		  '2 Corinthians': '2Cor',
-		  'Galatians': 'Gal',
-		  'Ephesians': 'Eph',
-		  'Philippians': 'Phil',
-		  'Colossians': 'Col',
-		  '1 Thessalonians': '1Thes',
-		  '2 Thessalonians': '2Thes',
-		  '1 Timothy': '1Tim',
-		  '2 Timothy': '2Tim',
-		  'Titus': 'Titus',
-		  'Philemon': 'Phlm',
-		  'Hebrews': 'Heb',
-		  'James': 'Jas',
-		  '1 Peter': '1Pet',
-		  '2 Peter': '2Pet',
-		  '1 John': '1John',
-		  '2 John': '2John',
-		  '3 John': '3John',
-		  'Jude': 'Jude',
-		  'Revelation': 'Rev',
+			'Genesis': 'Gen',
+			'Exodus': 'Exod',
+			'Leviticus': 'Lev',
+			'Numbers': 'Num',
+			'Deuteronomy': 'Deut',
+			'Joshua': 'Josh',
+			'Judges': 'Judg',
+			'Ruth': 'Ruth',
+			'1 Samuel': '1Sam',
+			'2 Samuel': '2Sam',
+			'1 Kings': '1Kgs',
+			'2 Kings': '2Kgs',
+			'1 Chronicles': '1Chr',
+			'2 Chronicles': '2Chr',
+			'Ezra': 'Ezra',
+			'Nehemiah': 'Neh',
+			'Esther': 'Esth',
+			'Job': 'Job',
+			'Psalms': 'Ps',
+			'Proverbs': 'Prov',
+			'Ecclesiastes': 'Eccl',
+			'Song of Solomon': 'Song',
+			'Isaiah': 'Isa',
+			'Jeremiah': 'Jer',
+			'Lamentations': 'Lam',
+			'Ezekiel': 'Ezek',
+			'Daniel': 'Dan',
+			'Hosea': 'Hos',
+			'Joel': 'Joel',
+			'Amos': 'Amos',
+			'Obadiah': 'Obad',
+			'Jonah': 'Jonah',
+			'Micah': 'Mic',
+			'Nahum': 'Nah',
+			'Habakkuk': 'Hab',
+			'Zephaniah': 'Zeph',
+			'Haggai': 'Hag',
+			'Zechariah': 'Zech',
+			'Malachi': 'Mal',
+			'Matthew': 'Matt',
+			'Mark': 'Mark',
+			'Luke': 'Luke',
+			'John': 'John',
+			'Acts': 'Acts',
+			'Romans': 'Rom',
+			'1 Corinthians': '1Cor',
+			'2 Corinthians': '2Cor',
+			'Galatians': 'Gal',
+			'Ephesians': 'Eph',
+			'Philippians': 'Phil',
+			'Colossians': 'Col',
+			'1 Thessalonians': '1Thes',
+			'2 Thessalonians': '2Thes',
+			'1 Timothy': '1Tim',
+			'2 Timothy': '2Tim',
+			'Titus': 'Titus',
+			'Philemon': 'Phlm',
+			'Hebrews': 'Heb',
+			'James': 'Jas',
+			'1 Peter': '1Pet',
+			'2 Peter': '2Pet',
+			'1 John': '1John',
+			'2 John': '2John',
+			'3 John': '3John',
+			'Jude': 'Jude',
+			'Revelation': 'Rev',
 		};
-  
-        // State management (use helper now)
-        this.state = initializeState();
 
-        // Cache for search debouncing
-        this.searchTimeout = null;
+		// State management (use helper now)
+		this.state = initializeState();
 
-        // Scroll tracking
-        this.scrollTimeout = null;
+		// Cache for search debouncing
+		this.searchTimeout = null;
 
-        // Reading position tracking
-        this.lastScrollPosition = 0;
+		// Scroll tracking
+		this.scrollTimeout = null;
 
-        // Initialize app
-        this.init();
+		// Reading position tracking
+		this.lastScrollPosition = 0;
 
-        // stores untouched HTML for current chapter
-        this.originalPassageHtml = null;
+		// Initialize app
+		this.init();
 
-        // ESV API client
-        this.bibleApi = new BibleApi(
-            this.API_BASE_URL,
-            () => this.API_KEY,
-            () => this.state
-        );
-    }
+		// stores untouched HTML for current chapter
+		this.originalPassageHtml = null;
+
+		// ESV API client
+		this.bibleApi = new BibleApi(
+			this.API_BASE_URL,
+			() => this.API_KEY,
+			() => this.state
+		);
+	}
 
 	// ================================
 	// Initialization
@@ -123,6 +123,16 @@ class BibleApp {
 	init() {
 		cacheElements(this);
 		loadTheme(this);
+		// Set theme selector value
+		const themeSelector = document.getElementById('themeSelector');
+		const lightModeToggle = document.getElementById('lightModeToggle');
+		if (themeSelector) {
+			themeSelector.value = localStorage.getItem('colorTheme') || 'dracula';
+		}
+		if (lightModeToggle) {
+			lightModeToggle.checked = document.body.classList.contains('light-mode');
+		}
+
 		this.attachEventListeners();
 
 		// Wait for Firebase auth state
@@ -191,6 +201,23 @@ class BibleApp {
 
 		// Theme toggle
 		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this));
+
+		// Theme selector
+		const themeSelector = document.getElementById('themeSelector');
+		const lightModeToggle = document.getElementById('lightModeToggle');
+
+		if (themeSelector) {
+			themeSelector.addEventListener('change', (e) => {
+				changeColorTheme(this, e.target.value);
+			});
+		}
+
+		if (lightModeToggle) {
+			lightModeToggle.addEventListener('change', () => {
+				toggleTheme(this);
+			});
+		}
+
 
 		// User button
 		this.userBtn.addEventListener('click', () => this.handleUserButtonClick());
@@ -295,40 +322,40 @@ class BibleApp {
 	// ================================
 
 	async loadPassage(book, chapter, restoreScroll = false) {
-    if (!restoreScroll) {
-        this.saveReadingPosition();
-    }
+		if (!restoreScroll) {
+			this.saveReadingPosition();
+		}
 
-    this.state.currentBook = book;
-    this.state.currentChapter = chapter;
-    this.updateNavigationState();
+		this.state.currentBook = book;
+		this.state.currentChapter = chapter;
+		this.updateNavigationState();
 
-    const reference = `${book} ${chapter}`;
+		const reference = `${book} ${chapter}`;
 
-    this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
+		this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
 
-    const data = await this.bibleApi.fetchPassage(reference);
-    if (!data) return;
+		const data = await this.bibleApi.fetchPassage(reference);
+		if (!data) return;
 
-    this.passageTitle.textContent = reference;
-    this.passageText.innerHTML = data.passages[0];
+		this.passageTitle.textContent = reference;
+		this.passageText.innerHTML = data.passages[0];
 
-    // cache original HTML for highlight logic
-    this.originalPassageHtml = this.passageText.innerHTML;
+		// cache original HTML for highlight logic
+		this.originalPassageHtml = this.passageText.innerHTML;
 
-    if (restoreScroll) {
-        window.scrollTo(0, this.lastScrollPosition || 0);
-    } else {
-        window.scrollTo(0, 0);
-    }
-}
+		if (restoreScroll) {
+			window.scrollTo(0, this.lastScrollPosition || 0);
+		} else {
+			window.scrollTo(0, 0);
+		}
+	}
 
 	displayPassage(data, restoreScroll = false) {
 		const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
 
 		this.passageTitle.textContent = canonical;
 		this.passageText.innerHTML = data.passages[0];
-	    // Cache original HTML for this chapter
+		// Cache original HTML for this chapter
 		// this.originalPassageHtml = this.passageText.innerHTML;
 
 		// Wrap each verse number and its text in a container span
@@ -381,26 +408,26 @@ class BibleApp {
 	// ================================
 
 	navigateChapter(direction) {
-        navChapter(this, direction);
-    }
+		navChapter(this, direction);
+	}
 
-    updateNavigationState() {
-	  const book = this.state.currentBook;
-	  const abbr = this.bookAbbreviations[book] || book;
+	updateNavigationState() {
+		const book = this.state.currentBook;
+		const abbr = this.bookAbbreviations[book] || book;
 
-	  this.currentBookSpan.textContent = abbr;
-	  this.currentChapterSpan.textContent = this.state.currentChapter;
+		this.currentBookSpan.textContent = abbr;
+		this.currentChapterSpan.textContent = this.state.currentChapter;
 
-	  // Update button states
-	  const books = this.getAllBooks();
-	  const currentBookIndex = books.indexOf(book);
-	  const isFirstChapter = this.state.currentChapter === 1;
-	  const isLastChapter =
-	    this.state.currentChapter === this.getChapterCount(book);
+		// Update button states
+		const books = this.getAllBooks();
+		const currentBookIndex = books.indexOf(book);
+		const isFirstChapter = this.state.currentChapter === 1;
+		const isLastChapter =
+			this.state.currentChapter === this.getChapterCount(book);
 
-	  this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
-	  this.nextChapterBtn.disabled =
-	    currentBookIndex === books.length - 1 && isLastChapter;
+		this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
+		this.nextChapterBtn.disabled =
+			currentBookIndex === books.length - 1 && isLastChapter;
 	}
 
 
@@ -623,11 +650,11 @@ class BibleApp {
 	}
 
 	scrollToVerse(verseNumber) {
-	  scrollVerse(this, verseNumber);
+		scrollVerse(this, verseNumber);
 	}
 
 	applyVerseGlow() {
-	  glowVerse(this);
+		glowVerse(this);
 	}
 
 	// ================================
@@ -922,19 +949,19 @@ class BibleApp {
 	// Firebase Data Management
 	// ================================
 	async loadUserData() {
-	if (!this.currentUser) return;
+		if (!this.currentUser) return;
 
-	const data = await loadUserDataFromFirebase(this.currentUser.uid);
-	if (!data) return;
-	
-	this.API_KEY = data.apiKey;
-	
-	const s = data.settings;
-	this.state.fontSize = s.fontSize;
-	this.state.showVerseNumbers = s.showVerseNumbers;
-	this.state.showHeadings = s.showHeadings;
-	this.state.showFootnotes = s.showFootnotes;
-	this.state.verseByVerse = s.verseByVerse;
+		const data = await loadUserDataFromFirebase(this.currentUser.uid);
+		if (!data) return;
+
+		this.API_KEY = data.apiKey;
+
+		const s = data.settings;
+		this.state.fontSize = s.fontSize;
+		this.state.showVerseNumbers = s.showVerseNumbers;
+		this.state.showHeadings = s.showHeadings;
+		this.state.showFootnotes = s.showFootnotes;
+		this.state.verseByVerse = s.verseByVerse;
 	}
 
 	// ================================
