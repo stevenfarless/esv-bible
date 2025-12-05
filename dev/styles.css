@@ -173,10 +173,18 @@ body {
 	align-items: center;
 }
 
-.logo {
+/* .logo {
 	font-size: 1.5rem;
 	font-weight: 600;
 	color: var(--primary-color);
+	letter-spacing: -0.025em;
+} */
+
+.logo {
+	font-size: 1.5rem;
+	font-weight: 600;
+	font-family: 'Cinzel', serif;
+	color: #8BE9FD;
 	letter-spacing: -0.025em;
 }
 
