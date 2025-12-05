@@ -1372,6 +1372,7 @@ body.hide-verse-numbers .passage-text .verse-num {
 	gap: var(--spacing-md);
 	padding: var(--spacing-sm);
 	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
 	border-radius: 6px;
 }
 
