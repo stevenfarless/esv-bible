@@ -738,7 +738,8 @@ class BibleApp {
 			localStorage.setItem(setting, toggle.checked);
 		}
 
-		this.loadPassage(this.state.currentBook, this.state.currentChapter);
+		// Force reload with current scroll position
+		await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
 	}
 
 	async toggleVerseByVerse() {
