@@ -1273,21 +1273,17 @@ body.light-mode .passage-text sup a:hover {
 
 @keyframes verseGlowPulse {
 	0% {
-		box-shadow: 0 0 0 rgba(255, 215, 0, 0);
-		transform: scale(1);
+		box-shadow: 0 0 0 rgba(255, 215, 0, 0), transform: scale(1);
 	}
 
 	50% {
-		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-		transform: scale(1.03);
+		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), transform: scale(1.03);
 	}
 
 	100% {
-		box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-		transform: scale(1.02);
+		box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), transform: scale(1.02);
 	}
 }
-
 
 
 /* Reduce glow spacing when a heading follows immediately */
@@ -1376,7 +1372,6 @@ body.hide-verse-numbers .passage-text .verse-num {
 	gap: var(--spacing-md);
 	padding: var(--spacing-sm);
 	background-color: var(--bg-tertiary);
-	border: 1px solid var(--border-color);
 	border-radius: 6px;
 }
 
@@ -1430,12 +1425,27 @@ body.hide-verse-numbers .passage-text .verse-num {
 	text-decoration: underline;
 }
 
-/* DEBUG: force help modal to be clearly visible and on top */
-#helpModal.modal {
-	outline: 3px solid red;
+.shortcut-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }
 
-#helpModal.modal.active {
-	display: flex !important;
-	z-index: 3000 !important;
+.shortcut-item {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem;
+	background: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.shortcut-item kbd {
+	padding: 0.25rem 0.5rem;
+	background: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--primary-color);
 }
