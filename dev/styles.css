@@ -201,6 +201,89 @@ body.steel-theme.light-mode {
 	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
 }
 
+/* ================================
+   Onyx Theme (Pure Black/White - OLED Friendly)
+   ================================ */
+body.onyx-theme {
+	/* Onyx Dark Mode Colors - OLED Black */
+	--onyx-gold: #D4AF37;
+	--onyx-silver: #C0C0C0;
+	--onyx-bronze: #CD7F32;
+	--onyx-blue: #6B9BD1;
+	--onyx-green: #67C23A;
+	--onyx-red: #E86C5B;
+	--onyx-purple: #9B7EBD;
+
+	/* Pure Black Backgrounds */
+	--onyx-black: #000000;
+	--onyx-dark-gray: #0A0A0A;
+	--onyx-medium-gray: #1A1A1A;
+	--onyx-light-gray: #2A2A2A;
+
+	/* Override theme variables */
+	--primary-color: var(--onyx-gold);
+	--primary-dark: #B8941F;
+	--primary-light: #E6C968;
+	--secondary-color: var(--onyx-bronze);
+	--accent-color: var(--onyx-silver);
+
+	--text-primary: #F5F5F5;
+	--text-secondary: #B8B8B8;
+	--text-muted: #888888;
+
+	--bg-primary: var(--onyx-black);
+	--bg-secondary: var(--onyx-dark-gray);
+	--bg-tertiary: var(--onyx-medium-gray);
+	--border-color: var(--onyx-light-gray);
+
+	--success-color: var(--onyx-green);
+	--warning-color: var(--onyx-gold);
+	--error-color: var(--onyx-red);
+
+	--shadow-sm: 0 1px 3px rgba(255, 255, 255, 0.1);
+	--shadow-md: 0 4px 6px rgba(255, 255, 255, 0.1);
+	--shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.15);
+}
+
+/* Onyx Light Mode - Pure White */
+body.onyx-theme.light-mode {
+	/* Onyx Light Colors */
+	--onyx-dark-gold: #8B7500;
+	--onyx-dark-bronze: #8B5A00;
+	--onyx-dark-blue: #2C5F9E;
+	--onyx-dark-gray-text: #333333;
+
+	/* Pure White Backgrounds */
+	--onyx-white: #FFFFFF;
+	--onyx-off-white: #F9F9F9;
+	--onyx-light-gray-bg: #EFEFEF;
+	--onyx-border-light: #DDDDDD;
+
+	/* Override for light mode */
+	--primary-color: var(--onyx-dark-gold);
+	--primary-dark: #6B5A00;
+	--primary-light: #A08C1A;
+	--secondary-color: var(--onyx-dark-bronze);
+	--accent-color: var(--onyx-dark-blue);
+
+	--text-primary: var(--onyx-dark-gray-text);
+	--text-secondary: #666666;
+	--text-muted: #999999;
+
+	--bg-primary: var(--onyx-white);
+	--bg-secondary: var(--onyx-off-white);
+	--bg-tertiary: var(--onyx-light-gray-bg);
+	--border-color: var(--onyx-border-light);
+
+	--success-color: #52A832;
+	--warning-color: var(--onyx-dark-gold);
+	--error-color: #D64436;
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
+}
+
 
 
 /* ================================
