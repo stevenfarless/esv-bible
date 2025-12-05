@@ -76,12 +76,15 @@ class BibleApp {
 		cacheElements(this);
 		loadTheme(this);
 
-		// Set theme selector value
+		// Set theme selector value AND apply the theme class
 		const themeSelector = document.getElementById('themeSelector');
 		const lightModeToggle = document.getElementById('lightModeToggle');
 
 		if (themeSelector) {
-			themeSelector.value = localStorage.getItem('colorTheme') || 'dracula';
+			const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
+			themeSelector.value = savedTheme;
+			// Apply the saved theme immediately
+			changeColorTheme(this, savedTheme);
 		}
 
 		if (lightModeToggle) {
@@ -106,6 +109,7 @@ class BibleApp {
 			}
 		});
 	}
+
 
 	attachEventListeners() {
 		// Header
