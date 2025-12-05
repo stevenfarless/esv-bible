@@ -130,7 +130,7 @@ class BibleApp {
 
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this))
-		this.userBtn.addEventListener('click', () => this.toggleUserMenu());
+		this.userBtn.addEventListener('click', () => this.handleUserButtonClick())
 
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
