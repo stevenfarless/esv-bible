@@ -110,12 +110,19 @@ class BibleApp {
 		});
 	}
 
-
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-    	this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
-    	this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+		document.getElementById('helpBtn').addEventListener('click', () => {
+			document.getElementById('helpModal').classList.add('active');
+			document.body.style.overflow = 'hidden';
+		});
+
+		document.getElementById('closeHelpModal').addEventListener('click', () => {
+			document.getElementById('helpModal').classList.remove('active');
+			document.body.style.overflow = '';
+		});
+		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
 		this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
@@ -133,21 +140,21 @@ class BibleApp {
 
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
-		// Update the modal array to include verseModal
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.closeModal(modal);
-        });
-    });
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal]
+			.forEach(modal => {
+				modal.addEventListener('click', (e) => {
+					if (e.target === modal) this.closeModal(modal);
+				});
+			});
 
 		// Copy button
 		this.copyBtn.addEventListener('click', () => this.copyPassage());
 
 		// Modals
 		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
-    	this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
-    	this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
-    	this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+		this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
+		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
 
 		// Settings modal drag-to-resize and swipe-to-close
 		const settingsContent = this.settingsModal.querySelector('.modal-content');
@@ -937,16 +944,16 @@ class BibleApp {
 
 		// Escape to close modals
 		if (e.key === 'Escape') {
-        if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
-        if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
-        if (this.helpModal.classList.contains('active')) this.closeModal(this.helpModal);
-        if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
-        if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
-        if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
-        if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
-        if (this.searchContainer.classList.contains('active')) this.closeSearch();
-        if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
-    }
+			if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
+			if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
+			if (this.helpModal.classList.contains('active')) this.closeModal(this.helpModal);
+			if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
+			if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
+			if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
+			if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
+			if (this.searchContainer.classList.contains('active')) this.closeSearch();
+			if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
+		}
 
 		// Navigation shortcuts (only when no modal is open and search is closed)
 		if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
