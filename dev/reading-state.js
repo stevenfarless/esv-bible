@@ -56,9 +56,54 @@ export function applyVerseGlow(app) {
     app.passageText.innerHTML = app.originalPassageHtml;
     if (app.state.selectedVerse === null) return;
 
-    // Special handling for verse 1 - just scroll to top
+    // Special handling for verse 1 - find first paragraph/content
     if (app.state.selectedVerse === 1) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const firstParagraph = app.passageText.querySelector('p');
+        if (!firstParagraph) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        // Find where verse 2 starts (if it exists)
+        const verse2 = app.passageText.querySelector('.verse-num');
+
+        if (verse2 && firstParagraph.contains(verse2)) {
+            // Split the paragraph at verse 2
+            const verse1Block = document.createElement('div');
+            verse1Block.classList.add('selected-verse-glow');
+
+            const afterVerse1 = document.createElement('p');
+            let foundVerse2 = false;
+            const nodes = Array.from(firstParagraph.childNodes);
+
+            nodes.forEach(node => {
+                if (node === verse2) {
+                    foundVerse2 = true;
+                    afterVerse1.appendChild(node);
+                } else if (foundVerse2) {
+                    afterVerse1.appendChild(node);
+                } else {
+                    verse1Block.appendChild(node);
+                }
+            });
+
+            const parent = firstParagraph.parentNode;
+            parent.insertBefore(verse1Block, firstParagraph);
+            if (afterVerse1.childNodes.length > 0) {
+                parent.insertBefore(afterVerse1, firstParagraph);
+            }
+            parent.removeChild(firstParagraph);
+
+            setTimeout(() => {
+                verse1Block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        } else {
+            // Entire first paragraph is verse 1
+            firstParagraph.classList.add('selected-verse-glow');
+            setTimeout(() => {
+                firstParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
         return;
     }
 
@@ -74,7 +119,6 @@ export function applyVerseGlow(app) {
 
     if (!targetVerseNum) return;
 
-    // Rest of the existing code...
     if (app.state.verseByVerse) {
         const container = targetVerseNum.closest('.verse-container');
         if (!container) return;
