@@ -845,8 +845,7 @@ body {
 #settingsModal .modal-content {
 	width: 100%;
 	max-width: var(--max-width);
-	height: 25vh;
-	/* Reduced from 50vh */
+	height: 50vh;
 	max-height: 90vh;
 	min-height: 200px;
 	border-radius: 12px 12px 0 0;
