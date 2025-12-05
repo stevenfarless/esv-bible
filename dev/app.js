@@ -191,6 +191,24 @@ class BibleApp {
 		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
 		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
 
+		// Add swipe-to-close for settings modal
+		let touchStartY = 0;
+		let touchEndY = 0;
+
+		this.settingsModal.querySelector('.modal-content').addEventListener('touchstart', (e) => {
+			touchStartY = e.changedTouches[0].screenY;
+		}, { passive: true });
+
+		this.settingsModal.querySelector('.modal-content').addEventListener('touchend', (e) => {
+			touchEndY = e.changedTouches[0].screenY;
+			const swipeDistance = touchEndY - touchStartY;
+
+			// If swiped down more than 100px, close the modal
+			if (swipeDistance > 100) {
+				this.closeModal(this.settingsModal);
+			}
+		}, { passive: true });
+
 		// Settings
 		this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
 		this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
@@ -561,8 +579,19 @@ class BibleApp {
 	}
 
 	closeModal(modal) {
-		modal.classList.remove('active');
-		document.body.style.overflow = '';
+		// Add closing animation for settings
+		if (modal === this.settingsModal) {
+			const content = modal.querySelector('.modal-content');
+			content.style.animation = 'slideDownToBottom 250ms ease';
+			setTimeout(() => {
+				modal.classList.remove('active');
+				document.body.style.overflow = '';
+				content.style.animation = ''; // Reset animation
+			}, 250);
+		} else {
+			modal.classList.remove('active');
+			document.body.style.overflow = '';
+		}
 	}
 
 	openBookModal() {
