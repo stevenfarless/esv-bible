@@ -728,19 +728,33 @@ class BibleApp {
 	}
 
 	async toggleSetting(setting) {
-		const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
-		this.state[setting] = toggle.checked;
+    // Map setting names to their toggle element names
+    const toggleMap = {
+        'showVerseNumbers': 'verseNumbersToggle',
+        'showHeadings': 'headingsToggle',
+        'showFootnotes': 'footnotesToggle'
+    };
+    
+    const toggleElement = this[toggleMap[setting]];
+    
+    if (!toggleElement) {
+        console.error(`Toggle not found for setting: ${setting}`);
+        return;
+    }
+    
+    this.state[setting] = toggleElement.checked;
 
-		// Save to Firebase or localStorage
-		if (this.currentUser) {
-			await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggle.checked);
-		} else {
-			localStorage.setItem(setting, toggle.checked);
-		}
+    // Save to Firebase or localStorage
+    if (this.currentUser) {
+        await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggleElement.checked);
+    } else {
+        localStorage.setItem(setting, toggleElement.checked);
+    }
 
-		// Force reload with current scroll position
-		await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
-	}
+    // Reload passage with current scroll position
+    await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
+}
+
 
 	async toggleVerseByVerse() {
 		this.state.verseByVerse = this.verseByVerseToggle.checked;
