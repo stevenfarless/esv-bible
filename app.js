@@ -719,41 +719,55 @@ class BibleApp {
 		this.fontSizeSlider.value = this.state.fontSize;
 		this.fontSizeValue.textContent = `${this.state.fontSize}px`;
 		this.passageText.style.fontSize = `${this.state.fontSize}px`;
+
 		// Apply verse-by-verse class 
 		if (this.state.verseByVerse) {
 			this.passageText.classList.add('verse-by-verse');
 		} else {
 			this.passageText.classList.remove('verse-by-verse');
 		}
+
+		// Toggle verse number visibility with CSS
+		if (this.state.showVerseNumbers) {
+			document.body.classList.remove('hide-verse-numbers');
+		} else {
+			document.body.classList.add('hide-verse-numbers');
+		}
 	}
 
+
 	async toggleSetting(setting) {
-    // Map setting names to their toggle element names
-    const toggleMap = {
-        'showVerseNumbers': 'verseNumbersToggle',
-        'showHeadings': 'headingsToggle',
-        'showFootnotes': 'footnotesToggle'
-    };
-    
-    const toggleElement = this[toggleMap[setting]];
-    
-    if (!toggleElement) {
-        console.error(`Toggle not found for setting: ${setting}`);
-        return;
-    }
-    
-    this.state[setting] = toggleElement.checked;
+		const toggleMap = {
+			'showVerseNumbers': 'verseNumbersToggle',
+			'showHeadings': 'headingsToggle',
+			'showFootnotes': 'footnotesToggle'
+		};
 
-    // Save to Firebase or localStorage
-    if (this.currentUser) {
-        await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggleElement.checked);
-    } else {
-        localStorage.setItem(setting, toggleElement.checked);
-    }
+		const toggleElement = this[toggleMap[setting]];
 
-    // Reload passage with current scroll position
-    await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
-}
+		if (!toggleElement) {
+			console.error(`Toggle not found for setting: ${setting}`);
+			return;
+		}
+
+		this.state[setting] = toggleElement.checked;
+
+		// Save to Firebase or localStorage
+		if (this.currentUser) {
+			await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggleElement.checked);
+		} else {
+			localStorage.setItem(setting, toggleElement.checked);
+		}
+
+		// Special handling for verse numbers - use CSS toggle instead of reload
+		if (setting === 'showVerseNumbers') {
+			this.applySettings();  // Just toggle CSS class
+		} else {
+			// Reload passage for headings/footnotes
+			await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
+		}
+	}
+
 
 
 	async toggleVerseByVerse() {
