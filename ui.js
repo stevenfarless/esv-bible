@@ -78,45 +78,52 @@ export function attachEventListeners(app) {
     // moved here and turned into a function receiving `app`.
 }
 
+// Load theme from localStorage
 export function loadTheme(app) {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'light') {
+    const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
+    const savedMode = localStorage.getItem('themeMode') || 'dark';
+
+    // Apply theme class
+    document.body.classList.remove('steel-theme');
+    if (savedTheme === 'steel') {
+        document.body.classList.add('steel-theme');
+    }
+
+    // Apply light/dark mode
+    if (savedMode === 'light') {
         document.body.classList.add('light-mode');
-    }
-    updateThemeIcon(app);
-}
-
-export function toggleTheme(app) {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    const theme = isLight ? 'light' : 'dark';
-
-    localStorage.setItem('theme', theme);
-    updateThemeIcon(app);
-
-    app.showToast(
-        isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme'
-    );
-}
-
-export function updateThemeIcon(app) {
-    const isLight = document.body.classList.contains('light-mode');
-
-    if (isLight) {
-        app.themeIcon.innerHTML = `
-            ircle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        `;
     } else {
-        app.themeIcon.innerHTML = `
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        `;
+        document.body.classList.remove('light-mode');
     }
+
+    updateThemeIcon(app);
+}
+
+// Toggle between light and dark mode (keeps current theme)
+export function toggleTheme(app) {
+    const isLightMode = document.body.classList.toggle('light-mode');
+    localStorage.setItem('themeMode', isLightMode ? 'light' : 'dark');
+    updateThemeIcon(app);
+}
+
+// Update theme icon based on current mode
+export function updateThemeIcon(app) {
+    const isLightMode = document.body.classList.contains('light-mode');
+    app.themeToggleBtn.innerHTML = isLightMode
+        ? '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></svg>'
+        : '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/></svg>';
+}
+
+// Change color theme (dracula or steel)
+export function changeColorTheme(app, theme) {
+    // Remove all theme classes
+    document.body.classList.remove('steel-theme');
+
+    // Add new theme class if not dracula (dracula is default)
+    if (theme === 'steel') {
+        document.body.classList.add('steel-theme');
+    }
+
+    // Save preference
+    localStorage.setItem('colorTheme', theme);
 }

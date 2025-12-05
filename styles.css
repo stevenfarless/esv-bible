@@ -131,6 +131,79 @@ body.light-mode {
 }
 
 /* ================================
+   Steel Theme (Cool Blue - Dark & Light)
+   ================================ */
+body.steel-theme {
+	/* Steel Dark Mode Colors */
+	--steel-blue: #4682B4;
+	--deep-blue: #2E5C8A;
+	--light-steel: #6FA8DC;
+	--slate: #556B7C;
+	--ice: #A8D4E8;
+	--mint: #7FCDBB;
+	--amber: #E8A15F;
+
+	/* Steel Dark Backgrounds */
+	--steel-dark-navy: #1B2838;
+	--steel-darker-navy: #141E2B;
+	--steel-medium-navy: #243447;
+	--steel-light-navy: #2E4156;
+
+	/* Override theme variables */
+	--primary-color: var(--steel-blue);
+	--primary-dark: var(--deep-blue);
+	--primary-light: var(--light-steel);
+	--secondary-color: var(--amber);
+	--accent-color: var(--ice);
+
+	--text-primary: #E8EDF2;
+	--text-secondary: #8799AC;
+	--text-muted: #8799AC;
+
+	--bg-primary: var(--steel-darker-navy);
+	--bg-secondary: var(--steel-dark-navy);
+	--bg-tertiary: var(--steel-medium-navy);
+	--border-color: var(--steel-light-navy);
+
+	--success-color: var(--mint);
+	--warning-color: var(--amber);
+	--error-color: #D9534F;
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Steel Light Mode */
+body.steel-theme.light-mode {
+	/* Steel Light Backgrounds */
+	--steel-light-bg: #F0F4F8;
+	--steel-lighter-bg: #FFFFFF;
+	--steel-light-secondary: #E1E8ED;
+	--steel-light-tertiary: #D1DCE5;
+
+	/* Override for light mode */
+	--primary-color: var(--steel-blue);
+	--primary-dark: var(--deep-blue);
+	--accent-color: var(--deep-blue);
+
+	--text-primary: #1B2838;
+	--text-secondary: #556B7C;
+	--text-muted: #8799AC;
+
+	--bg-primary: var(--steel-lighter-bg);
+	--bg-secondary: var(--steel-light-bg);
+	--bg-tertiary: var(--steel-light-secondary);
+	--border-color: var(--steel-light-tertiary);
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* ================================
    Base Styles
    ================================ */
 
@@ -184,7 +257,8 @@ body {
 	font-size: 1.5rem;
 	font-weight: 400;
 	font-family: 'Cinzel', serif;
-	color: var(--dracula-orange);
+	color: var(--secondary-color);
+	/* Uses orange in Dracula, amber in Steel */
 	letter-spacing: -0.025em;
 }
 
