@@ -113,14 +113,8 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-		document.getElementById('helpBtn').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.add('active');
-			document.body.style.overflow = 'hidden';
-		});
+		// Help temporarily disabled
 
-		document.getElementById('closeHelpModal').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.remove('active');
-			document.body.style.overflow = '';
 		});
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
@@ -129,7 +123,7 @@ class BibleApp {
 		this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
 		this.searchInput.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') this.closeSearch();
-		});
+		
 
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
@@ -140,7 +134,8 @@ class BibleApp {
 
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal]
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal]
+
 			.forEach(modal => {
 				modal.addEventListener('click', (e) => {
 					if (e.target === modal) this.closeModal(modal);
@@ -153,7 +148,6 @@ class BibleApp {
 		// Modals
 		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
 		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
-		this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
 		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
 
 		// Settings modal drag-to-resize and swipe-to-close
