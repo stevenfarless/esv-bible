@@ -1,0 +1,30 @@
+name: Deploy Main to GitHub Pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to GitHub Pages (main)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.ACTIONS }}
+          publish_branch: gh-pages
+          publish_dir: ./
+          destination_dir: .
+          keep_files: true
