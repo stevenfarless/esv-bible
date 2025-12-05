@@ -845,12 +845,19 @@ body {
 #settingsModal .modal-content {
 	width: 100%;
 	max-width: var(--max-width);
-	max-height: 25vh; /* changed from 70 */
-	/* Only cover 25% of screen */
+	height: 50vh;
+	/* Reduced from 70vh */
+	max-height: 90vh;
+	min-height: 200px;
 	border-radius: 12px 12px 0 0;
-	/* Rounded top corners only */
 	margin: 0 auto;
 	animation: slideUpFromBottom var(--transition-normal);
+}
+
+/* When actively dragging */
+#settingsModal .modal-content.dragging {
+	transition: none !important;
+	user-select: none;
 }
 
 /* Slide up animation for bottom sheet */
