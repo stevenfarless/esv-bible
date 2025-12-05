@@ -736,14 +736,25 @@ class BibleApp {
 	}
 
 	loadLocalSettings() {
-		// Load from localStorage for non-logged-in users
-		this.API_KEY = localStorage.getItem('esvApiKey') || '';
-		this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
-		this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
-		this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
-		this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
-		this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
-	}
+    // Load from localStorage for non-logged-in users ONLY
+    this.API_KEY = localStorage.getItem('esvApiKey') || '';
+    this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
+    this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
+    this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
+    this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+    this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+    
+    // Load theme settings from localStorage (fallback only)
+    const colorTheme = localStorage.getItem('colorTheme') || 'dracula';
+    const lightMode = localStorage.getItem('lightMode') === 'true';
+    
+    changeColorTheme(this, colorTheme);
+    if (lightMode) {
+        document.body.classList.add('light-mode');
+    }
+    updateThemeIcon(lightMode);
+}
+
 
 	applySettings() {
 		this.apiKeyInput.value = this.API_KEY;
