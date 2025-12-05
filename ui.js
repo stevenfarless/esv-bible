@@ -4,6 +4,7 @@
 export function cacheElements(app) {
     // Header
     app.searchToggleBtn = document.getElementById('searchToggleBtn');
+    app.helpBtn = document.getElementById('helpBtn');
     app.settingsBtn = document.getElementById('settingsBtn');
     app.themeToggleBtn = document.getElementById('themeToggleBtn');
     app.userBtn = document.getElementById('userBtn');
@@ -35,6 +36,7 @@ export function cacheElements(app) {
     app.chapterModal = document.getElementById('chapterModal');
     app.verseModal = document.getElementById('verseModal');
     app.settingsModal = document.getElementById('settingsModal');
+    app.helpModal = document.getElementById('helpModal');
     app.loginModal = document.getElementById('loginModal');
     app.signupModal = document.getElementById('signupModal');
     app.userMenuModal = document.getElementById('userMenuModal');
@@ -44,6 +46,7 @@ export function cacheElements(app) {
     app.closeChapterModal = document.getElementById('closeChapterModal');
     app.closeVerseModal = document.getElementById('closeVerseModal');
     app.closeSettingsModal = document.getElementById('closeSettingsModal');
+    app.closeHelpModal = document.getElementById('closeHelpModal');
     app.closeLoginModal = document.getElementById('closeLoginModal');
     app.closeSignupModal = document.getElementById('closeSignupModal');
     app.closeUserMenuModal = document.getElementById('closeUserMenuModal');

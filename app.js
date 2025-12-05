@@ -114,7 +114,8 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
+    	this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
+    	this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
 		this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
@@ -133,19 +134,20 @@ class BibleApp {
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
 		// Update the modal array to include verseModal
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-			modal.addEventListener('click', (e) => {
-				if (e.target === modal) this.closeModal(modal);
-			});
-		});
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) this.closeModal(modal);
+        });
+    });
 
 		// Copy button
 		this.copyBtn.addEventListener('click', () => this.copyPassage());
 
 		// Modals
 		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
-		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
-		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+    	this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+    	this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
+    	this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
 
 		// Settings modal drag-to-resize and swipe-to-close
 		const settingsContent = this.settingsModal.querySelector('.modal-content');
@@ -686,6 +688,52 @@ class BibleApp {
 		scrollVerse(this, verseNumber);
 	}
 
+	navigateToNextVerse() {
+		const currentVerse = this.state.selectedVerse || 1;
+		const maxVerse = this.getCurrentVerseCount();
+
+		if (currentVerse < maxVerse) {
+			// Go to next verse in current chapter
+			this.scrollToVerse(currentVerse + 1);
+		} else {
+			// At last verse, go to next chapter
+			this.navigateChapter(1);
+		}
+	}
+
+	navigateToPreviousVerse() {
+		const currentVerse = this.state.selectedVerse || 1;
+
+		if (currentVerse > 1) {
+			// Go to previous verse in current chapter
+			this.scrollToVerse(currentVerse - 1);
+		} else {
+			// At first verse, go to previous chapter (and its last verse)
+			const books = this.getAllBooks();
+			const currentBookIndex = books.indexOf(this.state.currentBook);
+			const isFirstChapter = this.state.currentChapter === 1;
+
+			if (currentBookIndex === 0 && isFirstChapter) {
+				// Already at Genesis 1:1, can't go back further
+				return;
+			}
+
+			// Navigate to previous chapter
+			let newChapter = this.state.currentChapter - 1;
+			let newBook = this.state.currentBook;
+
+			if (newChapter < 1) {
+				// Go to previous book's last chapter
+				newBook = books[currentBookIndex - 1];
+				newChapter = this.getChapterCount(newBook);
+			}
+
+			this.state.selectedVerse = null;
+			this.loadPassage(newBook, newChapter);
+		}
+	}
+
+
 	applyVerseGlow() {
 		glowVerse(this);
 	}
@@ -736,24 +784,24 @@ class BibleApp {
 	}
 
 	loadLocalSettings() {
-    // Load from localStorage for non-logged-in users ONLY
-    this.API_KEY = localStorage.getItem('esvApiKey') || '';
-    this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
-    this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
-    this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
-    this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
-    this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
-    
-    // Load theme settings from localStorage (fallback only)
-    const colorTheme = localStorage.getItem('colorTheme') || 'dracula';
-    const lightMode = localStorage.getItem('lightMode') === 'true';
-    
-    changeColorTheme(this, colorTheme);
-    if (lightMode) {
-        document.body.classList.add('light-mode');
-    }
-    updateThemeIcon(lightMode);
-}
+		// Load from localStorage for non-logged-in users ONLY
+		this.API_KEY = localStorage.getItem('esvApiKey') || '';
+		this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
+		this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
+		this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
+		this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+		this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+
+		// Load theme settings from localStorage (fallback only)
+		const colorTheme = localStorage.getItem('colorTheme') || 'dracula';
+		const lightMode = localStorage.getItem('lightMode') === 'true';
+
+		changeColorTheme(this, colorTheme);
+		if (lightMode) {
+			document.body.classList.add('light-mode');
+		}
+		updateThemeIcon(lightMode);
+	}
 
 
 	applySettings() {
@@ -889,27 +937,39 @@ class BibleApp {
 
 		// Escape to close modals
 		if (e.key === 'Escape') {
-			if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
-			if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
-			if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
-			if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
-			if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
-			if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
-			if (this.searchContainer.classList.contains('active')) this.closeSearch();
-			if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
-		}
+        if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
+        if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
+        if (this.helpModal.classList.contains('active')) this.closeModal(this.helpModal);
+        if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
+        if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
+        if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
+        if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
+        if (this.searchContainer.classList.contains('active')) this.closeSearch();
+        if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
+    }
 
-		// Arrow keys for navigation (when no modal is open)
+		// Navigation shortcuts (only when no modal is open and search is closed)
 		if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
-			if (e.key === 'ArrowLeft') {
+			// Chapter navigation: Arrow Left/Right or H/L
+			if (e.key === 'ArrowLeft' || e.key === 'h') {
 				e.preventDefault();
 				this.navigateChapter(-1);
-			} else if (e.key === 'ArrowRight') {
+			} else if (e.key === 'ArrowRight' || e.key === 'l') {
 				e.preventDefault();
 				this.navigateChapter(1);
 			}
+
+			// Verse navigation: Arrow Up/Down or K/J
+			else if (e.key === 'ArrowUp' || e.key === 'k') {
+				e.preventDefault();
+				this.navigateToPreviousVerse();
+			} else if (e.key === 'ArrowDown' || e.key === 'j') {
+				e.preventDefault();
+				this.navigateToNextVerse();
+			}
 		}
 	}
+
 
 	// ================================
 	// Firebase Authentication
