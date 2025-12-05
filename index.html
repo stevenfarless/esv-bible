@@ -244,93 +244,94 @@
           <button id="closeSettingsModal" class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
-          <button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
-        </div>
-
-        <div class="settings-group">
-          <h4>Display Options</h4>
-          <div class="setting-item">
-            <label class="checkbox-label">
-              <input type="checkbox" id="verseNumbersToggle" checked />
-              <span>Show verse numbers</span>
-            </label>
-          </div>
-          <div class="setting-item">
-            <label class="checkbox-label">
-              <input type="checkbox" id="headingsToggle" checked />
-              <span>Show section headings</span>
-            </label>
-          </div>
-          <div class="setting-item">
-            <label class="checkbox-label">
-              <input type="checkbox" id="footnotesToggle" />
-              <span>Show footnotes</span>
-            </label>
-          </div>
-          <div class="setting-item">
-            <label class="checkbox-label">
-              <input type="checkbox" id="verseByVerseToggle" />
-              <span>Verse-by-verse display</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-group">
-          <h4>Font Size</h4>
-          <div class="setting-item">
-            <input
-              type="range"
-              id="fontSizeSlider"
-              class="slider"
-              min="12"
-              max="32"
-              value="18"
-            />
-            <span id="fontSizeValue">18px</span>
-          </div>
-        </div>
-
-        <!-- Theme Selection -->
-        <div class="settings-group">
-          <!-- <h4>Theme</h4> -->
-          <div class="setting-item">
-            <label>Color Theme</label>
-            <select id="themeSelector" class="input-field">
-              <option value="dracula">Dracula (Purple/Pink)</option>
-              <option value="steel">Steel (Blue/Cool)</option>
-              <option value="onyx">Onyx (Gold/OLED)</option>
-            </select>
-            <small class="help-text">Choose your preferred color scheme</small>
+          <div class="settings-group">
+            <h4>Display Options</h4>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="verseNumbersToggle" checked />
+                <span>Show verse numbers</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="headingsToggle" checked />
+                <span>Show section headings</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="footnotesToggle" />
+                <span>Show footnotes</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="verseByVerseToggle" />
+                <span>Verse-by-verse display</span>
+              </label>
+            </div>
           </div>
 
-          <!-- <div class="setting-item">
-            <label class="checkbox-label">
-              <input type="checkbox" id="lightModeToggle" />
-              <span>Light Mode</span>
-            </label>
-            <small class="help-text">
-              Enable light mode for your selected theme</small
+          <div class="settings-group">
+            <h4>Font Size</h4>
+            <div class="setting-item">
+              <input
+                type="range"
+                id="fontSizeSlider"
+                class="slider"
+                min="12"
+                max="32"
+                value="18"
+              />
+              <span id="fontSizeValue">18px</span>
+            </div>
+          </div>
+
+          <!-- Theme Selection -->
+          <div class="settings-group">
+            <!-- <h4>Theme</h4> -->
+            <div class="setting-item">
+              <label>Color Theme</label>
+              <select id="themeSelector" class="input-field">
+                <option value="dracula">Dracula (Purple/Pink)</option>
+                <option value="steel">Steel (Blue/Cool)</option>
+                <option value="onyx">Onyx (Gold/OLED)</option>
+              </select>
+              <small class="help-text"
+                >Choose your preferred color scheme</small
+              >
+            </div>
+
+            <!-- <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="lightModeToggle" />
+                <span>Light Mode</span>
+              </label>
+              <small class="help-text">
+                Enable light mode for your selected theme</small
               >
             </div> -->
+          </div>
+          <div class="settings-group" id="apiKeySection">
+            <h4>API Configuration</h4>
+            <div class="setting-item">
+              <label>ESV API Key</label>
+              <input
+                type="text"
+                id="apiKeyInput"
+                class="input-field"
+                placeholder="Enter your API key"
+              />
+              <small class="help-text">
+                Get your free API key at
+                <a href="https://api.esv.org/account/" target="_blank"
+                  >api.esv.org/account</a
+                >
+              </small>
+            </div>
+            <button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="settings-group" id="apiKeySection">
-      <h4>API Configuration</h4>
-      <div class="setting-item">
-        <label>ESV API Key</label>
-        <input
-          type="text"
-          id="apiKeyInput"
-          class="input-field"
-          placeholder="Enter your API key"
-        />
-        <small class="help-text">
-          Get your free API key at
-          <a href="https://api.esv.org/account/" target="_blank"
-            >api.esv.org/account</a
-          >
-        </small>
       </div>
     </div>
 
