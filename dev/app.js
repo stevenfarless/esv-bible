@@ -147,13 +147,14 @@ class BibleApp {
 		});
 
 		// Modals backdrop click
-	this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal.forEach(modal => {
-    if (modal) {
-        modal.addEventListener('click', e => {
-            if (e.target === modal) this.closeModal(modal);
-        });
-    }
-});
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal,
+		this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
+			if (modal) {
+				modal.addEventListener('click', e => {
+					if (e.target === modal) this.closeModal(modal);
+				});
+			}
+		});
 
 		// Modal close buttons
 		if (this.closeBookModal) this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
