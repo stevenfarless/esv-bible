@@ -833,6 +833,76 @@ body {
 }
 
 /* ================================
+   Settings Bottom Sheet
+   ================================ */
+
+/* Override modal styles specifically for settings */
+#settingsModal.modal {
+	align-items: flex-end;
+	/* Align to bottom instead of center */
+}
+
+#settingsModal .modal-content {
+	width: 100%;
+	max-width: var(--max-width);
+	max-height: 70vh;
+	/* Only cover 70% of screen */
+	border-radius: 12px 12px 0 0;
+	/* Rounded top corners only */
+	margin: 0 auto;
+	animation: slideUpFromBottom var(--transition-normal);
+}
+
+/* Slide up animation for bottom sheet */
+@keyframes slideUpFromBottom {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+/* Add a drag handle indicator at the top */
+#settingsModal .modal-header::before {
+	content: '';
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40px;
+	height: 4px;
+	background-color: var(--text-muted);
+	border-radius: 2px;
+	opacity: 0.5;
+}
+
+/* Adjust header padding to account for handle */
+#settingsModal .modal-header {
+	padding-top: calc(var(--spacing-lg) + 12px);
+	position: relative;
+}
+
+/* Make background slightly transparent so you can see changes */
+#settingsModal {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+	#settingsModal .modal-content {
+		max-height: 80vh;
+		/* Slightly taller on mobile */
+		width: 100%;
+		border-radius: 16px 16px 0 0;
+	}
+}
+
+
+/* ================================
    Settings
    ================================ */
 
@@ -1253,4 +1323,16 @@ body.light-mode .selected-verse-glow {
 /* Hide verse numbers when setting is off */
 body.hide-verse-numbers .passage-text .verse-num {
 	display: none !important;
+}
+
+@keyframes slideDownToBottom {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateY(100%);
+		opacity: 0;
+	}
 }
