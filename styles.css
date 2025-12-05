@@ -184,7 +184,7 @@ body {
 	font-size: 1.5rem;
 	font-weight: 400;
 	font-family: 'Cinzel', serif;
-	color: #8BE9FD;
+	color: var(--dracula-orange);
 	letter-spacing: -0.025em;
 }
 
@@ -435,7 +435,7 @@ body {
 .search-results {
 	max-width: var(--max-width);
 	margin: 0 auto;
-	padding: 0 var(--spacing-lg) var(--spacing-lg);
+	/* padding: 0 var(--spacing-lg) var(--spacing-lg); */
 	max-height: 400px;
 	overflow-y: auto;
 }
