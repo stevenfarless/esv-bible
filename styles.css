@@ -131,6 +131,162 @@ body.light-mode {
 }
 
 /* ================================
+   Steel Theme (Cool Blue - Dark & Light)
+   ================================ */
+body.steel-theme {
+	/* Steel Dark Mode Colors */
+	--steel-blue: #4682B4;
+	--deep-blue: #2E5C8A;
+	--light-steel: #6FA8DC;
+	--slate: #556B7C;
+	--ice: #A8D4E8;
+	--mint: #7FCDBB;
+	--amber: #E8A15F;
+
+	/* Steel Dark Backgrounds */
+	--steel-dark-navy: #1B2838;
+	--steel-darker-navy: #141E2B;
+	--steel-medium-navy: #243447;
+	--steel-light-navy: #2E4156;
+
+	/* Override theme variables */
+	--primary-color: var(--steel-blue);
+	--primary-dark: var(--deep-blue);
+	--primary-light: var(--light-steel);
+	--secondary-color: var(--amber);
+	--accent-color: var(--ice);
+
+	--text-primary: #E8EDF2;
+	--text-secondary: #8799AC;
+	--text-muted: #8799AC;
+
+	--bg-primary: var(--steel-darker-navy);
+	--bg-secondary: var(--steel-dark-navy);
+	--bg-tertiary: var(--steel-medium-navy);
+	--border-color: var(--steel-light-navy);
+
+	--success-color: var(--mint);
+	--warning-color: var(--amber);
+	--error-color: #D9534F;
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Steel Light Mode */
+body.steel-theme.light-mode {
+	/* Steel Light Backgrounds */
+	--steel-light-bg: #F0F4F8;
+	--steel-lighter-bg: #FFFFFF;
+	--steel-light-secondary: #E1E8ED;
+	--steel-light-tertiary: #D1DCE5;
+
+	/* Override for light mode */
+	--primary-color: var(--steel-blue);
+	--primary-dark: var(--deep-blue);
+	--accent-color: var(--deep-blue);
+
+	--text-primary: #1B2838;
+	--text-secondary: #556B7C;
+	--text-muted: #8799AC;
+
+	--bg-primary: var(--steel-lighter-bg);
+	--bg-secondary: var(--steel-light-bg);
+	--bg-tertiary: var(--steel-light-secondary);
+	--border-color: var(--steel-light-tertiary);
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   Onyx Theme (Pure Black/White - OLED Friendly)
+   ================================ */
+body.onyx-theme {
+	/* Onyx Dark Mode Colors - OLED Black */
+	--onyx-gold: #D4AF37;
+	--onyx-silver: #C0C0C0;
+	--onyx-bronze: #CD7F32;
+	--onyx-blue: #6B9BD1;
+	--onyx-green: #67C23A;
+	--onyx-red: #E86C5B;
+	--onyx-purple: #9B7EBD;
+
+	/* Pure Black Backgrounds */
+	--onyx-black: #000000;
+	--onyx-dark-gray: #0A0A0A;
+	--onyx-medium-gray: #1A1A1A;
+	--onyx-light-gray: #2A2A2A;
+
+	/* Override theme variables */
+	--primary-color: var(--onyx-gold);
+	--primary-dark: #B8941F;
+	--primary-light: #E6C968;
+	--secondary-color: var(--onyx-bronze);
+	--accent-color: var(--onyx-silver);
+
+	--text-primary: #F5F5F5;
+	--text-secondary: #B8B8B8;
+	--text-muted: #888888;
+
+	--bg-primary: var(--onyx-black);
+	--bg-secondary: var(--onyx-dark-gray);
+	--bg-tertiary: var(--onyx-medium-gray);
+	--border-color: var(--onyx-light-gray);
+
+	--success-color: var(--onyx-green);
+	--warning-color: var(--onyx-gold);
+	--error-color: var(--onyx-red);
+
+	--shadow-sm: 0 1px 3px rgba(255, 255, 255, 0.1);
+	--shadow-md: 0 4px 6px rgba(255, 255, 255, 0.1);
+	--shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.15);
+}
+
+/* Onyx Light Mode - Pure White */
+body.onyx-theme.light-mode {
+	/* Onyx Light Colors */
+	--onyx-dark-gold: #8B7500;
+	--onyx-dark-bronze: #8B5A00;
+	--onyx-dark-blue: #2C5F9E;
+	--onyx-dark-gray-text: #333333;
+
+	/* Pure White Backgrounds */
+	--onyx-white: #FFFFFF;
+	--onyx-off-white: #F9F9F9;
+	--onyx-light-gray-bg: #EFEFEF;
+	--onyx-border-light: #DDDDDD;
+
+	/* Override for light mode */
+	--primary-color: var(--onyx-dark-gold);
+	--primary-dark: #6B5A00;
+	--primary-light: #A08C1A;
+	--secondary-color: var(--onyx-dark-bronze);
+	--accent-color: var(--onyx-dark-blue);
+
+	--text-primary: var(--onyx-dark-gray-text);
+	--text-secondary: #666666;
+	--text-muted: #999999;
+
+	--bg-primary: var(--onyx-white);
+	--bg-secondary: var(--onyx-off-white);
+	--bg-tertiary: var(--onyx-light-gray-bg);
+	--border-color: var(--onyx-border-light);
+
+	--success-color: #52A832;
+	--warning-color: var(--onyx-dark-gold);
+	--error-color: #D64436;
+
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
+}
+
+
+
+/* ================================
    Base Styles
    ================================ */
 
@@ -173,10 +329,19 @@ body {
 	align-items: center;
 }
 
-.logo {
+/* .logo {
 	font-size: 1.5rem;
 	font-weight: 600;
 	color: var(--primary-color);
+	letter-spacing: -0.025em;
+} */
+
+.logo {
+	font-size: 1.5rem;
+	font-weight: 400;
+	font-family: 'Cinzel', serif;
+	color: var(--secondary-color);
+	/* Uses orange in Dracula, amber in Steel */
 	letter-spacing: -0.025em;
 }
 
@@ -427,7 +592,7 @@ body {
 .search-results {
 	max-width: var(--max-width);
 	margin: 0 auto;
-	padding: 0 var(--spacing-lg) var(--spacing-lg);
+	/* padding: 0 var(--spacing-lg) var(--spacing-lg); */
 	max-height: 400px;
 	overflow-y: auto;
 }
@@ -537,7 +702,7 @@ body {
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.7);
 	z-index: 1000;
-	backdrop-filter: blur(4px);
+	/* backdrop-filter: blur(4px); */
 }
 
 .modal.active {
@@ -666,6 +831,82 @@ body {
 	color: var(--bg-primary);
 	transform: scale(1.05);
 }
+
+/* ================================
+   Settings Bottom Sheet
+   ================================ */
+
+/* Override modal styles specifically for settings */
+#settingsModal.modal {
+	align-items: flex-end;
+	/* Align to bottom instead of center */
+}
+
+#settingsModal .modal-content {
+	width: 100%;
+	max-width: var(--max-width);
+	height: 50vh;
+	max-height: 90vh;
+	min-height: 200px;
+	border-radius: 12px 12px 0 0;
+	margin: 0 auto;
+	animation: slideUpFromBottom var(--transition-normal);
+}
+
+/* When actively dragging */
+#settingsModal .modal-content.dragging {
+	transition: none !important;
+	user-select: none;
+}
+
+/* Slide up animation for bottom sheet */
+@keyframes slideUpFromBottom {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+/* Add a drag handle indicator at the top */
+#settingsModal .modal-header::before {
+	content: '';
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40px;
+	height: 4px;
+	background-color: var(--text-muted);
+	border-radius: 2px;
+	opacity: 0.5;
+}
+
+/* Adjust header padding to account for handle */
+#settingsModal .modal-header {
+	padding-top: calc(var(--spacing-lg) + 12px);
+	position: relative;
+}
+
+/* Make background slightly transparent so you can see changes */
+#settingsModal {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+	#settingsModal .modal-content {
+		max-height: 80vh;
+		/* Slightly taller on mobile */
+		width: 100%;
+		border-radius: 16px 16px 0 0;
+	}
+}
+
 
 /* ================================
    Settings
@@ -1017,17 +1258,33 @@ body.light-mode .passage-text sup a:hover {
    ================================ */
 
 .selected-verse-glow {
-	box-shadow: 0 0 12px rgba(255, 215, 0, 0.35),
-		0 0 24px rgba(255, 215, 0, 0.15);
-	background-color: rgba(255, 215, 0, 0.05);
-	border-left: 3px solid rgba(255, 215, 0, 0.6);
-	border-right: 3px solid rgba(255, 215, 0, 0.6);
-	border-radius: 6px;
-	padding: 10px 12px;
-	margin: 0.5rem 0;
-	transition: all 0.3s ease;
-	animation: verse-highlight 0.6s ease;
+	background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+	border-left: 4px solid rgba(255, 215, 0, 0.6);
+	border-radius: 8px;
+	padding: 12px;
+	margin: 8px 0;
+	box-shadow:
+		0 0 20px rgba(255, 215, 0, 0.3),
+		inset 0 0 10px rgba(255, 215, 0, 0.1);
+	transform: scale(1.02);
+	transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	animation: verseGlowPulse 1.2s ease-in-out;
 }
+
+@keyframes verseGlowPulse {
+	0% {
+		box-shadow: 0 0 0 rgba(255, 215, 0, 0), transform: scale(1);
+	}
+
+	50% {
+		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), transform: scale(1.03);
+	}
+
+	100% {
+		box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), transform: scale(1.02);
+	}
+}
+
 
 /* Reduce glow spacing when a heading follows immediately */
 .selected-verse-glow+h2,
@@ -1083,4 +1340,112 @@ body.light-mode .selected-verse-glow {
 			0 0 20px rgba(255, 165, 0, 0.2);
 		background-color: rgba(255, 165, 0, 0.08);
 	}
+}
+
+/* Hide verse numbers when setting is off */
+body.hide-verse-numbers .passage-text .verse-num {
+	display: none !important;
+}
+
+@keyframes slideDownToBottom {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+}
+
+/* Keyboard shortcut display */
+.shortcut-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-sm);
+}
+
+.shortcut-item {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-md);
+	padding: var(--spacing-sm);
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.shortcut-item kbd {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	background-color: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-family: var(--font-sans);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--primary-color);
+	box-shadow: 0 2px 0 var(--border-color);
+}
+
+.shortcut-item span {
+	flex: 1;
+	color: var(--text-secondary);
+	font-size: 0.9rem;
+}
+
+.tips-list {
+	list-style: none;
+	padding: 0;
+}
+
+.tips-list li {
+	padding: var(--spacing-sm) 0;
+	padding-left: var(--spacing-lg);
+	position: relative;
+	color: var(--text-secondary);
+	line-height: 1.6;
+}
+
+.tips-list li::before {
+	content: "→";
+	position: absolute;
+	left: 0;
+	color: var(--primary-color);
+	font-weight: bold;
+}
+
+.tips-list li a {
+	color: var(--primary-color);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.tips-list li a:hover {
+	text-decoration: underline;
+}
+
+.shortcut-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.shortcut-item {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem;
+	background: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.shortcut-item kbd {
+	padding: 0.25rem 0.5rem;
+	background: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--primary-color);
 }

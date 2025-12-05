@@ -3,126 +3,94 @@
 // ====================
 
 import { BibleApi } from './bible-api.js';
-import { cacheElements, loadTheme, toggleTheme, updateThemeIcon } from './ui.js';
 import { initializeState, navigateChapter as navChapter, scrollToVerse as scrollVerse, applyVerseGlow as glowVerse } from './reading-state.js';
 import { loadUserData as loadUserDataFromFirebase } from './firebase-config.js';
+import { cacheElements, loadTheme, toggleTheme, updateThemeIcon, changeColorTheme } from './ui.js';
 
 class BibleApp {
-    constructor() {
-        // Configuration
-        this.API_BASE_URL = 'https://api.esv.org/v3';
-        this.API_KEY = '';
+	constructor() {
+		// Configuration
+		this.API_BASE_URL = 'https://api.esv.org/v3';
+		this.API_KEY = '';
 
-        // Firebase references
-        this.auth = window.firebaseAuth;
-        this.database = window.firebaseDatabase;
-        this.currentUser = null;
+		// Firebase references
+		this.auth = window.firebaseAuth;
+		this.database = window.firebaseDatabase;
+		this.currentUser = null;
 
-        // Bible structure data
-        this.bibleBooks = this.initializeBibleStructure();
+		// Bible structure data
+		this.bibleBooks = this.initializeBibleStructure();
 
 		// Book abbreviations for UI
 		this.bookAbbreviations = {
-		  'Genesis': 'Gen',
-		  'Exodus': 'Exod',
-		  'Leviticus': 'Lev',
-		  'Numbers': 'Num',
-		  'Deuteronomy': 'Deut',
-		  'Joshua': 'Josh',
-		  'Judges': 'Judg',
-		  'Ruth': 'Ruth',
-		  '1 Samuel': '1Sam',
-		  '2 Samuel': '2Sam',
-		  '1 Kings': '1Kgs',
-		  '2 Kings': '2Kgs',
-		  '1 Chronicles': '1Chr',
-		  '2 Chronicles': '2Chr',
-		  'Ezra': 'Ezra',
-		  'Nehemiah': 'Neh',
-		  'Esther': 'Esth',
-		  'Job': 'Job',
-		  'Psalms': 'Ps',
-		  'Proverbs': 'Prov',
-		  'Ecclesiastes': 'Eccl',
-		  'Song of Solomon': 'Song',
-		  'Isaiah': 'Isa',
-		  'Jeremiah': 'Jer',
-		  'Lamentations': 'Lam',
-		  'Ezekiel': 'Ezek',
-		  'Daniel': 'Dan',
-		  'Hosea': 'Hos',
-		  'Joel': 'Joel',
-		  'Amos': 'Amos',
-		  'Obadiah': 'Obad',
-		  'Jonah': 'Jonah',
-		  'Micah': 'Mic',
-		  'Nahum': 'Nah',
-		  'Habakkuk': 'Hab',
-		  'Zephaniah': 'Zeph',
-		  'Haggai': 'Hag',
-		  'Zechariah': 'Zech',
-		  'Malachi': 'Mal',
-		  'Matthew': 'Matt',
-		  'Mark': 'Mark',
-		  'Luke': 'Luke',
-		  'John': 'John',
-		  'Acts': 'Acts',
-		  'Romans': 'Rom',
-		  '1 Corinthians': '1Cor',
-		  '2 Corinthians': '2Cor',
-		  'Galatians': 'Gal',
-		  'Ephesians': 'Eph',
-		  'Philippians': 'Phil',
-		  'Colossians': 'Col',
-		  '1 Thessalonians': '1Thes',
-		  '2 Thessalonians': '2Thes',
-		  '1 Timothy': '1Tim',
-		  '2 Timothy': '2Tim',
-		  'Titus': 'Titus',
-		  'Philemon': 'Phlm',
-		  'Hebrews': 'Heb',
-		  'James': 'Jas',
-		  '1 Peter': '1Pet',
-		  '2 Peter': '2Pet',
-		  '1 John': '1John',
-		  '2 John': '2John',
-		  '3 John': '3John',
-		  'Jude': 'Jude',
-		  'Revelation': 'Rev',
+			'Genesis': 'Gen', 'Exodus': 'Exod', 'Leviticus': 'Lev', 'Numbers': 'Num',
+			'Deuteronomy': 'Deut', 'Joshua': 'Josh', 'Judges': 'Judg', 'Ruth': 'Ruth',
+			'1 Samuel': '1Sam', '2 Samuel': '2Sam', '1 Kings': '1Kgs', '2 Kings': '2Kgs',
+			'1 Chronicles': '1Chr', '2 Chronicles': '2Chr', 'Ezra': 'Ezra', 'Nehemiah': 'Neh',
+			'Esther': 'Esth', 'Job': 'Job', 'Psalms': 'Ps', 'Proverbs': 'Prov',
+			'Ecclesiastes': 'Eccl', 'Song of Solomon': 'Song', 'Isaiah': 'Isa', 'Jeremiah': 'Jer',
+			'Lamentations': 'Lam', 'Ezekiel': 'Ezek', 'Daniel': 'Dan', 'Hosea': 'Hos',
+			'Joel': 'Joel', 'Amos': 'Amos', 'Obadiah': 'Obad', 'Jonah': 'Jonah',
+			'Micah': 'Mic', 'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zeph',
+			'Haggai': 'Hag', 'Zechariah': 'Zech', 'Malachi': 'Mal', 'Matthew': 'Matt',
+			'Mark': 'Mark', 'Luke': 'Luke', 'John': 'John', 'Acts': 'Acts', 'Romans': 'Rom',
+			'1 Corinthians': '1Cor', '2 Corinthians': '2Cor', 'Galatians': 'Gal', 'Ephesians': 'Eph',
+			'Philippians': 'Phil', 'Colossians': 'Col', '1 Thessalonians': '1Thes', '2 Thessalonians': '2Thes',
+			'1 Timothy': '1Tim', '2 Timothy': '2Tim', 'Titus': 'Titus', 'Philemon': 'Phlm',
+			'Hebrews': 'Heb', 'James': 'Jas', '1 Peter': '1Pet', '2 Peter': '2Pet',
+			'1 John': '1John', '2 John': '2John', '3 John': '3John', 'Jude': 'Jude',
+			'Revelation': 'Rev',
 		};
-  
-        // State management (use helper now)
-        this.state = initializeState();
 
-        // Cache for search debouncing
-        this.searchTimeout = null;
+		// State management (use helper now)
+		this.state = initializeState();
 
-        // Scroll tracking
-        this.scrollTimeout = null;
+		// Cache for search debouncing
+		this.searchTimeout = null;
 
-        // Reading position tracking
-        this.lastScrollPosition = 0;
+		// Scroll tracking
+		this.scrollTimeout = null;
 
-        // Initialize app
-        this.init();
+		// Reading position tracking
+		this.lastScrollPosition = 0;
 
-        // stores untouched HTML for current chapter
-        this.originalPassageHtml = null;
+		// stores untouched HTML for current chapter
+		this.originalPassageHtml = null;
 
-        // ESV API client
-        this.bibleApi = new BibleApi(
-            this.API_BASE_URL,
-            () => this.API_KEY,
-            () => this.state
-        );
-    }
+		// ESV API client
+		this.bibleApi = new BibleApi(
+			this.API_BASE_URL,
+			() => this.API_KEY,
+			() => this.state
+		);
+
+		// Initialize app
+		this.init();
+	}
 
 	// ================================
 	// Initialization
 	// ================================
+
 	init() {
 		cacheElements(this);
 		loadTheme(this);
+
+		// Set theme selector value AND apply the theme class
+		const themeSelector = document.getElementById('themeSelector');
+		const lightModeToggle = document.getElementById('lightModeToggle');
+
+		if (themeSelector) {
+			const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
+			themeSelector.value = savedTheme;
+			// Apply the saved theme immediately
+			changeColorTheme(this, savedTheme);
+		}
+
+		if (lightModeToggle) {
+			lightModeToggle.checked = document.body.classList.contains('light-mode');
+		}
+
 		this.attachEventListeners();
 
 		// Wait for Firebase auth state
@@ -145,6 +113,15 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
+		document.getElementById('helpBtn').addEventListener('click', () => {
+			document.getElementById('helpModal').classList.add('active');
+			document.body.style.overflow = 'hidden';
+		});
+
+		document.getElementById('closeHelpModal').addEventListener('click', () => {
+			document.getElementById('helpModal').classList.remove('active');
+			document.body.style.overflow = '';
+		});
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
@@ -159,19 +136,16 @@ class BibleApp {
 		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
 		this.bookSelector.addEventListener('click', () => this.openBookModal());
 		this.chapterSelector.addEventListener('click', () => this.openChapterModal());
-
-		// After chapterSelector listener
 		this.verseSelector.addEventListener('click', () => this.openVerseModal());
 
-		// After closeChapterModal listener
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
-		// Update the modal array to include verseModal
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.loginModal, this.signupModal, this.userMenuModal].forEach(modal => {
-			modal.addEventListener('click', (e) => {
-				if (e.target === modal) this.closeModal(modal);
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal]
+			.forEach(modal => {
+				modal.addEventListener('click', (e) => {
+					if (e.target === modal) this.closeModal(modal);
+				});
 			});
-		});
 
 		// Copy button
 		this.copyBtn.addEventListener('click', () => this.copyPassage());
@@ -179,7 +153,123 @@ class BibleApp {
 		// Modals
 		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
 		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
+		this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
 		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+
+		// Settings modal drag-to-resize and swipe-to-close
+		const settingsContent = this.settingsModal.querySelector('.modal-content');
+		const settingsHeader = this.settingsModal.querySelector('.modal-header');
+		const settingsBody = this.settingsModal.querySelector('.modal-body');
+
+		let isDragging = false;
+		let startY = 0;
+		let startHeight = 0;
+		let startScrollTop = 0;
+
+		const handleTouchStart = (e) => {
+			// Only allow dragging from the header area (not the body content)
+			if (!settingsHeader.contains(e.target)) return;
+
+			isDragging = true;
+			startY = e.touches[0].clientY;
+			startHeight = settingsContent.offsetHeight;
+			startScrollTop = settingsBody.scrollTop;
+			settingsContent.classList.add('dragging');
+		};
+
+		const handleTouchMove = (e) => {
+			if (!isDragging) return;
+
+			const currentY = e.touches[0].clientY;
+			const deltaY = startY - currentY; // Positive = dragging up, negative = dragging down
+
+			// Calculate new height
+			let newHeight = startHeight + deltaY;
+
+			// Clamp between min and max
+			const minHeight = 200;
+			const maxHeight = window.innerHeight * 0.9;
+			newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+			settingsContent.style.height = `${newHeight}px`;
+
+			// Prevent scrolling while dragging
+			e.preventDefault();
+		};
+
+		const handleTouchEnd = (e) => {
+			if (!isDragging) return;
+
+			isDragging = false;
+			settingsContent.classList.remove('dragging');
+
+			const endY = e.changedTouches[0].clientY;
+			const totalDragDistance = endY - startY; // Positive = dragged down
+
+			// Only close if:
+			// 1. Dragged down (not up)
+			// 2. Dragged more than 150px down
+			// 3. Content was at top when started
+			if (totalDragDistance > 150 && startScrollTop === 0) {
+				this.closeModal(this.settingsModal);
+				// Reset height for next open
+				setTimeout(() => {
+					settingsContent.style.height = '50vh';
+				}, 300);
+			}
+		};
+
+		// Touch events (mobile)
+		settingsHeader.addEventListener('touchstart', handleTouchStart, { passive: false });
+		document.addEventListener('touchmove', handleTouchMove, { passive: false });
+		document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+		// Mouse events (desktop)
+		let isMouseDragging = false;
+		let mouseStartY = 0;
+		let mouseStartHeight = 0;
+
+		settingsHeader.addEventListener('mousedown', (e) => {
+			// Ignore if clicking on close button
+			if (e.target.closest('.close-btn')) return;
+
+			isMouseDragging = true;
+			mouseStartY = e.clientY;
+			mouseStartHeight = settingsContent.offsetHeight;
+			settingsContent.classList.add('dragging');
+			e.preventDefault();
+		});
+
+		document.addEventListener('mousemove', (e) => {
+			if (!isMouseDragging) return;
+
+			const deltaY = mouseStartY - e.clientY;
+			let newHeight = mouseStartHeight + deltaY;
+
+			const minHeight = 200;
+			const maxHeight = window.innerHeight * 0.9;
+			newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+			settingsContent.style.height = `${newHeight}px`;
+		});
+
+		document.addEventListener('mouseup', (e) => {
+			if (!isMouseDragging) return;
+
+			isMouseDragging = false;
+			settingsContent.classList.remove('dragging');
+
+			const endY = e.clientY;
+			const totalDragDistance = endY - mouseStartY;
+
+			// Close if dragged down more than 150px
+			if (totalDragDistance > 150) {
+				this.closeModal(this.settingsModal);
+				setTimeout(() => {
+					settingsContent.style.height = '50vh';
+				}, 300);
+			}
+		});
 
 		// Settings
 		this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
@@ -191,6 +281,22 @@ class BibleApp {
 
 		// Theme toggle
 		this.themeToggleBtn.addEventListener('click', () => toggleTheme(this));
+
+		// Theme selector
+		const themeSelector = document.getElementById('themeSelector');
+		const lightModeToggle = document.getElementById('lightModeToggle');
+
+		if (themeSelector) {
+			themeSelector.addEventListener('change', (e) => {
+				changeColorTheme(this, e.target.value);
+			});
+		}
+
+		if (lightModeToggle) {
+			lightModeToggle.addEventListener('change', () => {
+				toggleTheme(this);
+			});
+		}
 
 		// User button
 		this.userBtn.addEventListener('click', () => this.handleUserButtonClick());
@@ -249,21 +355,20 @@ class BibleApp {
 			'Old Testament': {
 				'Genesis': 50, 'Exodus': 40, 'Leviticus': 27, 'Numbers': 36, 'Deuteronomy': 34,
 				'Joshua': 24, 'Judges': 21, 'Ruth': 4, '1 Samuel': 31, '2 Samuel': 24,
-				'1 Kings': 22, '2 Kings': 25, '1 Chronicles': 29, '2 Chronicles': 36,
-				'Ezra': 10, 'Nehemiah': 13, 'Esther': 10, 'Job': 42, 'Psalms': 150,
-				'Proverbs': 31, 'Ecclesiastes': 12, 'Song of Solomon': 8, 'Isaiah': 66,
-				'Jeremiah': 52, 'Lamentations': 5, 'Ezekiel': 48, 'Daniel': 12,
-				'Hosea': 14, 'Joel': 3, 'Amos': 9, 'Obadiah': 1, 'Jonah': 4, 'Micah': 7,
-				'Nahum': 3, 'Habakkuk': 3, 'Zephaniah': 3, 'Haggai': 2, 'Zechariah': 14,
-				'Malachi': 4
+				'1 Kings': 22, '2 Kings': 25, '1 Chronicles': 29, '2 Chronicles': 36, 'Ezra': 10,
+				'Nehemiah': 13, 'Esther': 10, 'Job': 42, 'Psalms': 150, 'Proverbs': 31,
+				'Ecclesiastes': 12, 'Song of Solomon': 8, 'Isaiah': 66, 'Jeremiah': 52, 'Lamentations': 5,
+				'Ezekiel': 48, 'Daniel': 12, 'Hosea': 14, 'Joel': 3, 'Amos': 9,
+				'Obadiah': 1, 'Jonah': 4, 'Micah': 7, 'Nahum': 3, 'Habakkuk': 3,
+				'Zephaniah': 3, 'Haggai': 2, 'Zechariah': 14, 'Malachi': 4
 			},
 			'New Testament': {
 				'Matthew': 28, 'Mark': 16, 'Luke': 24, 'John': 21, 'Acts': 28,
-				'Romans': 16, '1 Corinthians': 16, '2 Corinthians': 13, 'Galatians': 6,
-				'Ephesians': 6, 'Philippians': 4, 'Colossians': 4, '1 Thessalonians': 5,
-				'2 Thessalonians': 3, '1 Timothy': 6, '2 Timothy': 4, 'Titus': 3,
-				'Philemon': 1, 'Hebrews': 13, 'James': 5, '1 Peter': 5, '2 Peter': 3,
-				'1 John': 5, '2 John': 1, '3 John': 1, 'Jude': 1, 'Revelation': 22
+				'Romans': 16, '1 Corinthians': 16, '2 Corinthians': 13, 'Galatians': 6, 'Ephesians': 6,
+				'Philippians': 4, 'Colossians': 4, '1 Thessalonians': 5, '2 Thessalonians': 3, '1 Timothy': 6,
+				'2 Timothy': 4, 'Titus': 3, 'Philemon': 1, 'Hebrews': 13, 'James': 5,
+				'1 Peter': 5, '2 Peter': 3, '1 John': 5, '2 John': 1, '3 John': 1,
+				'Jude': 1, 'Revelation': 22
 			}
 		};
 	}
@@ -295,81 +400,37 @@ class BibleApp {
 	// ================================
 
 	async loadPassage(book, chapter, restoreScroll = false) {
-    if (!restoreScroll) {
-        this.saveReadingPosition();
-    }
+		if (!restoreScroll) {
+			this.saveReadingPosition();
+		}
 
-    this.state.currentBook = book;
-    this.state.currentChapter = chapter;
-    this.updateNavigationState();
+		this.state.currentBook = book;
+		this.state.currentChapter = chapter;
 
-    const reference = `${book} ${chapter}`;
+		this.updateNavigationState();
 
-    this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
+		const reference = `${book} ${chapter}`;
+		this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
 
-    const data = await this.bibleApi.fetchPassage(reference);
-    if (!data) return;
+		const data = await this.bibleApi.fetchPassage(reference);
 
-    this.passageTitle.textContent = reference;
-    this.passageText.innerHTML = data.passages[0];
+		if (!data) return;
 
-    // cache original HTML for highlight logic
-    this.originalPassageHtml = this.passageText.innerHTML;
-
-    if (restoreScroll) {
-        window.scrollTo(0, this.lastScrollPosition || 0);
-    } else {
-        window.scrollTo(0, 0);
-    }
-}
-
-	displayPassage(data, restoreScroll = false) {
-		const canonical = data.canonical || `${this.state.currentBook} ${this.state.currentChapter}`;
-
-		this.passageTitle.textContent = canonical;
+		this.passageTitle.textContent = reference;
 		this.passageText.innerHTML = data.passages[0];
-	    // Cache original HTML for this chapter
-		// this.originalPassageHtml = this.passageText.innerHTML;
 
-		// Wrap each verse number and its text in a container span
-		const verseNums = this.passageText.querySelectorAll('.verse-num');
-		verseNums.forEach((verseNum, index) => {
-			const container = document.createElement('span');
-			container.classList.add('verse-container');
-
-			const parent = verseNum.parentNode;
-			parent.insertBefore(container, verseNum);
-
-			// Move this verse number and its following text nodes into the container
-			let node = verseNum;
-			while (node) {
-				const next = node.nextSibling;
-				// Stop when hitting another verse number or a heading/paragraph break
-				if (
-					next &&
-					next.nodeType === 1 &&
-					next.classList.contains('verse-num')
-				) {
-					break;
-				}
-				container.appendChild(node);
-				node = next;
-			}
-		});
+		// cache original HTML for highlight logic
+		this.originalPassageHtml = this.passageText.innerHTML;
 
 		this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
 		// Reset verse selector
 		this.currentVerseSpan.textContent = '1';
 
-		// Restore scroll position or scroll to top
 		if (restoreScroll) {
-			setTimeout(() => {
-				const savedPosition = this.getSavedScrollPosition();
-				window.scrollTo({ top: savedPosition, behavior: 'smooth' });  // Changed from 'auto' to 'smooth'
-			}, 100);
+			window.scrollTo(0, this.lastScrollPosition || 0);
 		} else {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
+			window.scrollTo(0, 0);
 		}
 
 		// Save reading position after loading
@@ -381,28 +442,24 @@ class BibleApp {
 	// ================================
 
 	navigateChapter(direction) {
-        navChapter(this, direction);
-    }
-
-    updateNavigationState() {
-	  const book = this.state.currentBook;
-	  const abbr = this.bookAbbreviations[book] || book;
-
-	  this.currentBookSpan.textContent = abbr;
-	  this.currentChapterSpan.textContent = this.state.currentChapter;
-
-	  // Update button states
-	  const books = this.getAllBooks();
-	  const currentBookIndex = books.indexOf(book);
-	  const isFirstChapter = this.state.currentChapter === 1;
-	  const isLastChapter =
-	    this.state.currentChapter === this.getChapterCount(book);
-
-	  this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
-	  this.nextChapterBtn.disabled =
-	    currentBookIndex === books.length - 1 && isLastChapter;
+		navChapter(this, direction);
 	}
 
+	updateNavigationState() {
+		const book = this.state.currentBook;
+		const abbr = this.bookAbbreviations[book] || book;
+		this.currentBookSpan.textContent = abbr;
+		this.currentChapterSpan.textContent = this.state.currentChapter;
+
+		// Update button states
+		const books = this.getAllBooks();
+		const currentBookIndex = books.indexOf(book);
+		const isFirstChapter = this.state.currentChapter === 1;
+		const isLastChapter = this.state.currentChapter === this.getChapterCount(book);
+
+		this.prevChapterBtn.disabled = currentBookIndex === 0 && isFirstChapter;
+		this.nextChapterBtn.disabled = currentBookIndex === books.length - 1 && isLastChapter;
+	}
 
 	// ================================
 	// Search
@@ -446,20 +503,21 @@ class BibleApp {
 	isPassageReference(query) {
 		// Simple check for passage reference patterns
 		const patterns = [
-			/^[1-3]?\s*[a-z]+\s+\d+/i,  // Book Chapter
-			/^[1-3]?\s*[a-z]+\s+\d+:\d+/i  // Book Chapter:Verse
+			/^[1-3]?\s*[a-z]+\s+\d+/i, // Book Chapter
+			/^[1-3]?\s*[a-z]+\s+\d+:\d+/i // Book Chapter:Verse
 		];
 		return patterns.some(pattern => pattern.test(query.trim()));
 	}
 
 	async handlePassageReference(reference) {
 		const data = await this.bibleApi.fetchPassage(reference);
+
 		if (data && data.passages && data.passages.length > 0) {
 			// Display as single result
 			this.searchResults.innerHTML = `
                 <div class="search-result-item" data-reference="${data.canonical}">
                     <div class="search-result-reference">${data.canonical}</div>
-                    <div class="search-result-content">${this.stripHTML(data.passages[0]).substring(0, 200)}...</div>
+                    <div class="search-result-content">${this.stripHTML(data.passages[0].substring(0, 200))}...</div>
                 </div>
             `;
 
@@ -473,7 +531,7 @@ class BibleApp {
 	}
 
 	async performKeywordSearch(query) {
-		this.searchResults.innerHTML = '<div class="loading" style="min-height: 100px;">Searching...</div>';
+		this.searchResults.innerHTML = '<div class="loading" style="min-height: 100px">Searching...</div>';
 
 		const data = await this.bibleApi.searchPassages(query);
 
@@ -506,7 +564,7 @@ class BibleApp {
 
 	loadPassageFromReference(reference) {
 		// Parse reference to extract book and chapter
-		const match = reference.match(/^([1-3]?\s*[A-Za-z\s]+)\s+(\d+)/);
+		const match = reference.match(/([1-3]?[A-Za-z\s]+)\s+(\d+)/);
 		if (match) {
 			const book = match[1].trim();
 			const chapter = parseInt(match[2]);
@@ -515,8 +573,8 @@ class BibleApp {
 	}
 
 	highlightSearchTerm(text, term) {
-		const regex = new RegExp(`(${term})`, 'gi');
-		return text.replace(regex, '<strong>$1</strong>');
+		const regex = new RegExp(term, 'gi');
+		return text.replace(regex, '<strong>$&</strong>');
 	}
 
 	stripHTML(html) {
@@ -528,14 +586,26 @@ class BibleApp {
 	// ================================
 	// Modals
 	// ================================
+
 	openModal(modal) {
 		modal.classList.add('active');
 		document.body.style.overflow = 'hidden';
 	}
 
 	closeModal(modal) {
-		modal.classList.remove('active');
-		document.body.style.overflow = '';
+		// Add closing animation for settings
+		if (modal === this.settingsModal) {
+			const content = modal.querySelector('.modal-content');
+			content.style.animation = 'slideDownToBottom 250ms ease';
+			setTimeout(() => {
+				modal.classList.remove('active');
+				document.body.style.overflow = '';
+				content.style.animation = ''; // Reset animation
+			}, 250);
+		} else {
+			modal.classList.remove('active');
+			document.body.style.overflow = '';
+		}
 	}
 
 	openBookModal() {
@@ -547,7 +617,7 @@ class BibleApp {
 		const createBookButton = (book) => {
 			const btn = document.createElement('button');
 			btn.className = 'book-item';
-			btn.textContent = this.bookAbbreviations[book] || book;  // use shared map
+			btn.textContent = this.bookAbbreviations[book] || book; // use shared map
 			btn.addEventListener('click', () => {
 				this.state.selectedVerse = null; // Clear verse selection
 				this.loadPassage(book, 1);
@@ -566,7 +636,6 @@ class BibleApp {
 			this.newTestamentBooks.appendChild(createBookButton(book));
 		});
 	}
-
 
 	openChapterModal() {
 		this.populateChapterModal();
@@ -623,16 +692,63 @@ class BibleApp {
 	}
 
 	scrollToVerse(verseNumber) {
-	  scrollVerse(this, verseNumber);
+		scrollVerse(this, verseNumber);
 	}
 
+	navigateToNextVerse() {
+		const currentVerse = this.state.selectedVerse || 1;
+		const maxVerse = this.getCurrentVerseCount();
+
+		if (currentVerse < maxVerse) {
+			// Go to next verse in current chapter
+			this.scrollToVerse(currentVerse + 1);
+		} else {
+			// At last verse, go to next chapter
+			this.navigateChapter(1);
+		}
+	}
+
+	navigateToPreviousVerse() {
+		const currentVerse = this.state.selectedVerse || 1;
+
+		if (currentVerse > 1) {
+			// Go to previous verse in current chapter
+			this.scrollToVerse(currentVerse - 1);
+		} else {
+			// At first verse, go to previous chapter (and its last verse)
+			const books = this.getAllBooks();
+			const currentBookIndex = books.indexOf(this.state.currentBook);
+			const isFirstChapter = this.state.currentChapter === 1;
+
+			if (currentBookIndex === 0 && isFirstChapter) {
+				// Already at Genesis 1:1, can't go back further
+				return;
+			}
+
+			// Navigate to previous chapter
+			let newChapter = this.state.currentChapter - 1;
+			let newBook = this.state.currentBook;
+
+			if (newChapter < 1) {
+				// Go to previous book's last chapter
+				newBook = books[currentBookIndex - 1];
+				newChapter = this.getChapterCount(newBook);
+			}
+
+			this.state.selectedVerse = null;
+			this.loadPassage(newBook, newChapter);
+		}
+	}
+
+
 	applyVerseGlow() {
-	  glowVerse(this);
+		glowVerse(this);
 	}
 
 	// ================================
 	// Settings
 	// ================================
+
 	checkApiKey() {
 		if (!this.API_KEY) {
 			setTimeout(() => {
@@ -645,6 +761,7 @@ class BibleApp {
 
 	async saveApiKey() {
 		const apiKey = this.apiKeyInput.value.trim();
+
 		if (!apiKey) {
 			this.showToast('Please enter a valid API key');
 			return;
@@ -674,14 +791,25 @@ class BibleApp {
 	}
 
 	loadLocalSettings() {
-		// Load from localStorage for non-logged-in users
+		// Load from localStorage for non-logged-in users ONLY
 		this.API_KEY = localStorage.getItem('esvApiKey') || '';
 		this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
 		this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
 		this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
 		this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
 		this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+
+		// Load theme settings from localStorage (fallback only)
+		const colorTheme = localStorage.getItem('colorTheme') || 'dracula';
+		const lightMode = localStorage.getItem('lightMode') === 'true';
+
+		changeColorTheme(this, colorTheme);
+		if (lightMode) {
+			document.body.classList.add('light-mode');
+		}
+		updateThemeIcon(lightMode);
 	}
+
 
 	applySettings() {
 		this.apiKeyInput.value = this.API_KEY;
@@ -692,27 +820,58 @@ class BibleApp {
 		this.fontSizeSlider.value = this.state.fontSize;
 		this.fontSizeValue.textContent = `${this.state.fontSize}px`;
 		this.passageText.style.fontSize = `${this.state.fontSize}px`;
+
 		// Apply verse-by-verse class 
 		if (this.state.verseByVerse) {
 			this.passageText.classList.add('verse-by-verse');
 		} else {
 			this.passageText.classList.remove('verse-by-verse');
 		}
+
+		// Toggle verse number visibility with CSS
+		if (this.state.showVerseNumbers) {
+			document.body.classList.remove('hide-verse-numbers');
+		} else {
+			document.body.classList.add('hide-verse-numbers');
+		}
 	}
 
 	async toggleSetting(setting) {
-		const toggle = this[`${setting.replace('show', '').toLowerCase()}Toggle`];
-		this.state[setting] = toggle.checked;
+		// Map setting names to their toggle element names
+		const toggleMap = {
+			'showVerseNumbers': 'verseNumbersToggle',
+			'showHeadings': 'headingsToggle',
+			'showFootnotes': 'footnotesToggle'
+		};
+
+		const toggleElement = this[toggleMap[setting]];
+
+		if (!toggleElement) {
+			console.error(`Toggle not found for setting: ${setting}`);
+			return;
+		}
+
+		this.state[setting] = toggleElement.checked;
 
 		// Save to Firebase or localStorage
 		if (this.currentUser) {
-			await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggle.checked);
+			await this.database.ref(`users/${this.currentUser.uid}/settings/${setting}`).set(toggleElement.checked);
 		} else {
-			localStorage.setItem(setting, toggle.checked);
+			localStorage.setItem(setting, toggleElement.checked);
 		}
 
-		this.loadPassage(this.state.currentBook, this.state.currentChapter);
+		// Special handling for verse numbers - use CSS toggle instead of reload
+		if (setting === 'showVerseNumbers') {
+			this.applySettings();  // Just toggle CSS class
+		} else {
+			// Save current scroll position BEFORE reloading
+			this.lastScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+			// Reload passage for headings/footnotes
+			await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
+		}
 	}
+
 
 	async toggleVerseByVerse() {
 		this.state.verseByVerse = this.verseByVerseToggle.checked;
@@ -732,7 +891,6 @@ class BibleApp {
 		}
 	}
 
-
 	async updateFontSize(size) {
 		this.state.fontSize = parseInt(size);
 		this.fontSizeValue.textContent = `${size}px`;
@@ -749,17 +907,20 @@ class BibleApp {
 	// ================================
 	// Utilities
 	// ================================
+
 	copyPassage() {
 		const textContent = this.stripHTML(this.passageText.innerHTML);
 		const reference = this.passageTitle.textContent;
 		const fullText = `${reference}\n\n${textContent}\n\n${this.copyright.textContent}`;
 
-		navigator.clipboard.writeText(fullText).then(() => {
-			this.showToast('Passage copied to clipboard!');
-		}).catch(err => {
-			console.error('Failed to copy:', err);
-			this.showToast('Failed to copy passage');
-		});
+		navigator.clipboard.writeText(fullText)
+			.then(() => {
+				this.showToast('Passage copied to clipboard!');
+			})
+			.catch(err => {
+				console.error('Failed to copy:', err);
+				this.showToast('Failed to copy passage');
+			});
 	}
 
 	showError(message) {
@@ -785,6 +946,7 @@ class BibleApp {
 		if (e.key === 'Escape') {
 			if (this.bookModal.classList.contains('active')) this.closeModal(this.bookModal);
 			if (this.chapterModal.classList.contains('active')) this.closeModal(this.chapterModal);
+			if (this.helpModal.classList.contains('active')) this.closeModal(this.helpModal);
 			if (this.settingsModal.classList.contains('active')) this.closeModal(this.settingsModal);
 			if (this.loginModal.classList.contains('active')) this.closeModal(this.loginModal);
 			if (this.signupModal.classList.contains('active')) this.closeModal(this.signupModal);
@@ -793,21 +955,33 @@ class BibleApp {
 			if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
 		}
 
-		// Arrow keys for navigation (when no modal is open)
+		// Navigation shortcuts (only when no modal is open and search is closed)
 		if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
-			if (e.key === 'ArrowLeft') {
+			// Chapter navigation: Arrow Left/Right or H/L
+			if (e.key === 'ArrowLeft' || e.key === 'h') {
 				e.preventDefault();
 				this.navigateChapter(-1);
-			} else if (e.key === 'ArrowRight') {
+			} else if (e.key === 'ArrowRight' || e.key === 'l') {
 				e.preventDefault();
 				this.navigateChapter(1);
+			}
+
+			// Verse navigation: Arrow Up/Down or K/J
+			else if (e.key === 'ArrowUp' || e.key === 'k') {
+				e.preventDefault();
+				this.navigateToPreviousVerse();
+			} else if (e.key === 'ArrowDown' || e.key === 'j') {
+				e.preventDefault();
+				this.navigateToNextVerse();
 			}
 		}
 	}
 
+
 	// ================================
 	// Firebase Authentication
 	// ================================
+
 	handleUserButtonClick() {
 		if (this.currentUser) {
 			// Show user menu
@@ -840,9 +1014,8 @@ class BibleApp {
 			document.getElementById('loginPassword').value = '';
 		} catch (error) {
 			console.error('Login error:', error);
-
 			if (error.code === 'auth/user-not-found') {
-				if (confirm('Invalid login. No account found with this email.\n\nWould you like to sign up instead?')) {
+				if (confirm('Invalid login. No account found with this email. Would you like to sign up instead?')) {
 					this.closeModal(this.loginModal);
 					this.openModal(this.signupModal);
 					document.getElementById('signupEmail').value = email;
@@ -850,7 +1023,7 @@ class BibleApp {
 			} else if (error.code === 'auth/wrong-password') {
 				this.showToast('Incorrect password');
 			} else {
-				this.showToast('Login failed: ' + error.message);
+				this.showToast(`Login failed: ${error.message}`);
 			}
 		}
 	}
@@ -898,11 +1071,10 @@ class BibleApp {
 			document.getElementById('signupApiKey').value = '';
 		} catch (error) {
 			console.error('Signup error:', error);
-
 			if (error.code === 'auth/email-already-in-use') {
 				this.showToast('Account already exists. Please sign in.');
 			} else {
-				this.showToast('Signup failed: ' + error.message);
+				this.showToast(`Signup failed: ${error.message}`);
 			}
 		}
 	}
@@ -921,25 +1093,26 @@ class BibleApp {
 	// ================================
 	// Firebase Data Management
 	// ================================
-	async loadUserData() {
-	if (!this.currentUser) return;
 
-	const data = await loadUserDataFromFirebase(this.currentUser.uid);
-	if (!data) return;
-	
-	this.API_KEY = data.apiKey;
-	
-	const s = data.settings;
-	this.state.fontSize = s.fontSize;
-	this.state.showVerseNumbers = s.showVerseNumbers;
-	this.state.showHeadings = s.showHeadings;
-	this.state.showFootnotes = s.showFootnotes;
-	this.state.verseByVerse = s.verseByVerse;
+	async loadUserData() {
+		if (!this.currentUser) return;
+
+		const data = await loadUserDataFromFirebase(this.currentUser.uid);
+		if (!data) return;
+
+		this.API_KEY = data.apiKey;
+		const s = data.settings;
+		this.state.fontSize = s.fontSize;
+		this.state.showVerseNumbers = s.showVerseNumbers;
+		this.state.showHeadings = s.showHeadings;
+		this.state.showFootnotes = s.showFootnotes;
+		this.state.verseByVerse = s.verseByVerse;
 	}
 
 	// ================================
 	// Reading Position Persistence
 	// ================================
+
 	async saveReadingPosition() {
 		if (!this.currentUser) return;
 
@@ -985,6 +1158,7 @@ class BibleApp {
 // ================================
 // Initialize App
 // ================================
+
 document.addEventListener('DOMContentLoaded', () => {
 	const app = new BibleApp();
 });

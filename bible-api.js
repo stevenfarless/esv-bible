@@ -21,7 +21,7 @@ export class BibleApi {
             q: reference,
             'include-headings': state.showHeadings,
             'include-footnotes': state.showFootnotes,
-            'include-verse-numbers': state.showVerseNumbers,
+            'include-verse-numbers': true,  // ← Always true for selection to work
             'include-short-copyright': false,
             'include-passage-references': false
         });
@@ -36,6 +36,7 @@ export class BibleApi {
 
         return response.json();
     }
+
 
     async searchPassages(query) {
         const API_KEY = this.getApiKey();

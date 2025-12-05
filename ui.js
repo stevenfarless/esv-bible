@@ -1,16 +1,13 @@
 // ui.js
-// Responsibility: DOM caching, event wiring, theme, modals, toast.
+// Responsibility: DOM caching, theme management
 
 export function cacheElements(app) {
     // Header
     app.searchToggleBtn = document.getElementById('searchToggleBtn');
+    app.helpBtn = document.getElementById('helpBtn');
     app.settingsBtn = document.getElementById('settingsBtn');
-
-    // Search
-    app.searchContainer = document.getElementById('searchContainer');
-    app.searchInput = document.getElementById('searchInput');
-    app.closeSearchBtn = document.getElementById('closeSearchBtn');
-    app.searchResults = document.getElementById('searchResults');
+    app.themeToggleBtn = document.getElementById('themeToggleBtn');
+    app.userBtn = document.getElementById('userBtn');
 
     // Navigation
     app.prevChapterBtn = document.getElementById('prevChapterBtn');
@@ -22,7 +19,13 @@ export function cacheElements(app) {
     app.currentChapterSpan = document.getElementById('currentChapter');
     app.currentVerseSpan = document.getElementById('currentVerse');
 
-    // Content
+    // Search
+    app.searchContainer = document.getElementById('searchContainer');
+    app.closeSearchBtn = document.getElementById('closeSearchBtn');
+    app.searchInput = document.getElementById('searchInput');
+    app.searchResults = document.getElementById('searchResults');
+
+    // Passage display
     app.passageTitle = document.getElementById('passageTitle');
     app.passageText = document.getElementById('passageText');
     app.copyright = document.getElementById('copyright');
@@ -30,22 +33,33 @@ export function cacheElements(app) {
 
     // Modals
     app.bookModal = document.getElementById('bookModal');
+    app.chapterModal = document.getElementById('chapterModal');
+    app.verseModal = document.getElementById('verseModal');
+    app.settingsModal = document.getElementById('settingsModal');
+    app.helpModal = document.getElementById('helpModal');
+    app.loginModal = document.getElementById('loginModal');
+    app.signupModal = document.getElementById('signupModal');
+    app.userMenuModal = document.getElementById('userMenuModal');
+
+    // Modal close buttons
     app.closeBookModal = document.getElementById('closeBookModal');
+    app.closeChapterModal = document.getElementById('closeChapterModal');
+    app.closeVerseModal = document.getElementById('closeVerseModal');
+    app.closeSettingsModal = document.getElementById('closeSettingsModal');
+    app.closeHelpModal = document.getElementById('closeHelpModal');
+    app.closeLoginModal = document.getElementById('closeLoginModal');
+    app.closeSignupModal = document.getElementById('closeSignupModal');
+    app.closeUserMenuModal = document.getElementById('closeUserMenuModal');
+
+    // Modal content
     app.oldTestamentBooks = document.getElementById('oldTestamentBooks');
     app.newTestamentBooks = document.getElementById('newTestamentBooks');
-
-    app.chapterModal = document.getElementById('chapterModal');
-    app.closeChapterModal = document.getElementById('closeChapterModal');
     app.chapterModalBook = document.getElementById('chapterModalBook');
     app.chapterGrid = document.getElementById('chapterGrid');
-
-    app.verseModal = document.getElementById('verseModal');
-    app.closeVerseModal = document.getElementById('closeVerseModal');
     app.verseModalBook = document.getElementById('verseModalBook');
     app.verseGrid = document.getElementById('verseGrid');
 
-    app.settingsModal = document.getElementById('settingsModal');
-    app.closeSettingsModal = document.getElementById('closeSettingsModal');
+    // Settings
     app.apiKeyInput = document.getElementById('apiKeyInput');
     app.saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
     app.verseNumbersToggle = document.getElementById('verseNumbersToggle');
@@ -55,68 +69,66 @@ export function cacheElements(app) {
     app.fontSizeSlider = document.getElementById('fontSizeSlider');
     app.fontSizeValue = document.getElementById('fontSizeValue');
 
-    // Theme & Auth
-    app.themeToggleBtn = document.getElementById('themeToggleBtn');
-    app.themeIcon = document.getElementById('themeIcon');
-    app.userBtn = document.getElementById('userBtn');
-
-    // Auth modals
-    app.loginModal = document.getElementById('loginModal');
-    app.signupModal = document.getElementById('signupModal');
-    app.userMenuModal = document.getElementById('userMenuModal');
-    app.closeLoginModal = document.getElementById('closeLoginModal');
-    app.closeSignupModal = document.getElementById('closeSignupModal');
-    app.closeUserMenuModal = document.getElementById('closeUserMenuModal');
-
     // Toast
     app.toast = document.getElementById('toast');
 }
 
-export function attachEventListeners(app) {
-    // header, search, navigation, modals, settings, theme, auth, keyboard, etc.
-    // This is essentially your current attachEventListeners method,
-    // moved here and turned into a function receiving `app`.
-}
-
+// Load theme on app start (uses localStorage as initial fallback)
 export function loadTheme(app) {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'light') {
+    const savedLightMode = localStorage.getItem('lightMode') === 'true';
+    if (savedLightMode) {
         document.body.classList.add('light-mode');
     }
-    updateThemeIcon(app);
+    updateThemeIcon(savedLightMode);
 }
 
-export function toggleTheme(app) {
+// Toggle between light and dark mode
+export async function toggleTheme(app) {
     document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    const theme = isLight ? 'light' : 'dark';
+    const isLightMode = document.body.classList.contains('light-mode');
 
-    localStorage.setItem('theme', theme);
-    updateThemeIcon(app);
+    // Save to Firebase if logged in
+    if (app.currentUser) {
+        await app.database.ref(`users/${app.currentUser.uid}/settings/lightMode`).set(isLightMode);
+    } else {
+        // Fallback to localStorage if not logged in
+        localStorage.setItem('lightMode', isLightMode);
+    }
 
-    app.showToast(
-        isLight ? 'Switched to Alucard (Light) theme' : 'Switched to Dracula (Dark) theme'
-    );
+    updateThemeIcon(isLightMode);
 }
 
-export function updateThemeIcon(app) {
-    const isLight = document.body.classList.contains('light-mode');
+// Update theme icon based on current mode
+export function updateThemeIcon(isLightMode) {
+    const icon = document.querySelector('#themeToggleBtn svg');
+    if (icon) {
+        if (isLightMode) {
+            // Moon icon for light mode
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+        } else {
+            // Sun icon for dark mode
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+        }
+    }
+}
 
-    if (isLight) {
-        app.themeIcon.innerHTML = `
-            ircle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        `;
+// Change color theme (dracula, steel, or onyx)
+export async function changeColorTheme(app, theme) {
+    // Remove all theme classes
+    document.body.classList.remove('steel-theme', 'onyx-theme');
+
+    // Add new theme class if not dracula (dracula is default)
+    if (theme === 'steel') {
+        document.body.classList.add('steel-theme');
+    } else if (theme === 'onyx') {
+        document.body.classList.add('onyx-theme');
+    }
+
+    // Save to Firebase if logged in
+    if (app.currentUser) {
+        await app.database.ref(`users/${app.currentUser.uid}/settings/colorTheme`).set(theme);
     } else {
-        app.themeIcon.innerHTML = `
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        `;
+        // Fallback to localStorage if not logged in
+        localStorage.setItem('colorTheme', theme);
     }
 }
