@@ -95,6 +95,8 @@ class BibleApp {
 
 		// Wait for Firebase auth state
 		this.auth.onAuthStateChanged(async (user) => {
+			console.log('onAuthStateChanged user:', user ? user.uid : null);
+
 			if (user) {
 				this.currentUser = user;
 				await this.loadUserData();
@@ -108,6 +110,7 @@ class BibleApp {
 				this.checkApiKey();
 			}
 		});
+
 	}
 
 	attachEventListeners() {
@@ -785,6 +788,8 @@ class BibleApp {
 	}
 
 	loadLocalSettings() {
+		console.log('loadLocalSettings colorTheme:', localStorage.getItem('colorTheme'));
+
 		// Load from localStorage for non-logged-in users ONLY
 		this.API_KEY = localStorage.getItem('esvApiKey') || '';
 		this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
@@ -817,22 +822,24 @@ class BibleApp {
 		this.verseByVerseToggle.checked = this.state.verseByVerse;
 		this.fontSizeSlider.value = this.state.fontSize;
 		this.fontSizeValue.textContent = `${this.state.fontSize}px`;
-		this.passageText.style.fontSize = `${this.state.fontSize}px`;
 
-		// Apply verse-by-verse class 
-		if (this.state.verseByVerse) {
-			this.passageText.classList.add('verse-by-verse');
-		} else {
-			this.passageText.classList.remove('verse-by-verse');
+		const colorTheme = this.state.colorTheme || "dracula";
+		changeColorTheme(this, colorTheme);
+
+		const themeSelector = document.getElementById("themeSelector");
+		if (themeSelector) {
+			themeSelector.value = colorTheme;
 		}
 
-		// Toggle verse number visibility with CSS
-		if (this.state.showVerseNumbers) {
-			document.body.classList.remove('hide-verse-numbers');
+		const isLightMode = !!this.state.lightMode;
+		if (isLightMode) {
+			document.body.classList.add("light-mode");
 		} else {
-			document.body.classList.add('hide-verse-numbers');
+			document.body.classList.remove("light-mode");
 		}
+		updateThemeIcon(isLightMode);
 	}
+
 
 	async toggleSetting(setting) {
 		// Map setting names to their toggle element names
@@ -1093,19 +1100,19 @@ class BibleApp {
 	// ================================
 
 	async loadUserData() {
-		if (!this.currentUser) return;
+		const userData = await loadUserDataFromFirebase(this.currentUser.uid);
+		if (!userData) return;
 
-		const data = await loadUserDataFromFirebase(this.currentUser.uid);
-		if (!data) return;
-
-		this.API_KEY = data.apiKey;
-		const s = data.settings;
-		this.state.fontSize = s.fontSize;
-		this.state.showVerseNumbers = s.showVerseNumbers;
-		this.state.showHeadings = s.showHeadings;
-		this.state.showFootnotes = s.showFootnotes;
-		this.state.verseByVerse = s.verseByVerse;
+		this.API_KEY = userData.apiKey;
+		this.state.fontSize = userData.settings.fontSize;
+		this.state.showVerseNumbers = userData.settings.showVerseNumbers;
+		this.state.showHeadings = userData.settings.showHeadings;
+		this.state.showFootnotes = userData.settings.showFootnotes;
+		this.state.verseByVerse = userData.settings.verseByVerse;
+		this.state.colorTheme = userData.settings.colorTheme;
+		this.state.lightMode = userData.settings.lightMode;
 	}
+
 
 	// ================================
 	// Reading Position Persistence
