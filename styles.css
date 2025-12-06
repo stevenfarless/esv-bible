@@ -1483,6 +1483,11 @@ body.hide-verse-numbers .passage-text .verse-num {
 }
 
 /* Hide help button */
-#userBtn {
+/* #userBtn {
 	display: none;
+} */
+
+#themeToggleBtn svg {
+	overflow: visible;
+	display: block;
 }
