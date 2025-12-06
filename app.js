@@ -809,7 +809,6 @@ class BibleApp {
 		}
 	}
 
-
 	applySettings() {
 		this.apiKeyInput.value = this.API_KEY;
 		this.verseNumbersToggle.checked = this.state.showVerseNumbers;

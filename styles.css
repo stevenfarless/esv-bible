@@ -653,7 +653,7 @@ body {
 	color: var(--primary-color);
 }
 
-.close-btn {
+/* .close-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -665,7 +665,28 @@ body {
 	color: var(--text-secondary);
 	cursor: pointer;
 	transition: all var(--transition-fast);
+} */
+
+.close-btn {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 8px;
+	/* more click area */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.1rem;
+	/* if using text */
 }
+
+.close-btn svg {
+	width: 20px;
+	/* was ~16px */
+	height: 20px;
+}
+
 
 .close-btn:hover {
 	background-color: var(--bg-tertiary);
@@ -1482,7 +1503,7 @@ body.hide-verse-numbers .passage-text .verse-num {
 	color: var(--primary-color);
 }
 
-/* Hide help button */
+/* Hide user button */
 /* #userBtn {
 	display: none;
 } */
