@@ -62,7 +62,15 @@ export async function loadUserData(userId) {
         userData.settings ? userData.settings.showFootnotes === true : false,
       verseByVerse:
         userData.settings ? userData.settings.verseByVerse === true : false,
-    };
+      colorTheme:
+        userData.settings && userData.settings.colorTheme
+          ? userData.settings.colorTheme
+          : "dracula",
+      lightMode:
+        userData.settings && typeof userData.settings.lightMode === "boolean"
+          ? userData.settings.lightMode
+          : false,
+    };;
 
     return { apiKey, settings };
   } catch (error) {

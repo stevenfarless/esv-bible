@@ -113,22 +113,23 @@ export function updateThemeIcon(isLightMode) {
 }
 
 // Change color theme (dracula, steel, or onyx)
+// ui.js
 export async function changeColorTheme(app, theme) {
-    // Remove all theme classes
     document.body.classList.remove('steel-theme', 'onyx-theme');
 
-    // Add new theme class if not dracula (dracula is default)
     if (theme === 'steel') {
         document.body.classList.add('steel-theme');
     } else if (theme === 'onyx') {
         document.body.classList.add('onyx-theme');
     }
 
-    // Save to Firebase if logged in
+    // logged-in path
     if (app.currentUser) {
-        await app.database.ref(`users/${app.currentUser.uid}/settings/colorTheme`).set(theme);
+        await app.database
+            .ref(`users/${app.currentUser.uid}/settings/colorTheme`)
+            .set(theme);
     } else {
-        // Fallback to localStorage if not logged in
         localStorage.setItem('colorTheme', theme);
     }
 }
+
