@@ -1481,3 +1481,8 @@ body.hide-verse-numbers .passage-text .verse-num {
 	font-weight: 600;
 	color: var(--primary-color);
 }
+
+/* Hide help button */
+#userBtn {
+	display: none;
+}
