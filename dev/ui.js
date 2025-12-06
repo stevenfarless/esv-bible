@@ -100,15 +100,17 @@ export async function toggleTheme(app) {
 }
 
 // Update theme icon based on current mode
+// ui.js
 export function updateThemeIcon(isLightMode) {
     const btn = document.getElementById('themeToggleBtn');
     if (!btn) return;
 
-    const currentSvg = btn.querySelector('svg');
+    const svg = btn.querySelector('svg');
+    if (!svg) return;
 
     if (isLightMode) {
-        // Moon icon for light mode (light background, show moon)
-        const moonSvg = `
+        // Light mode → show moon (to indicate you can switch to dark)
+        svg.outerHTML = `
       <svg width="20" height="20" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
@@ -116,14 +118,13 @@ export function updateThemeIcon(isLightMode) {
                  7 7 0 0 0 21 12.79z"></path>
       </svg>
     `;
-        currentSvg.outerHTML = moonSvg;
     } else {
-        // Sun icon for dark mode (dark background, show sun)
-        const sunSvg = `
+        // Dark mode → show sun (to indicate you can switch to light)
+        svg.outerHTML = `
       <svg width="20" height="20" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="5"></circle>
+        ircle cx="12" cy="12" r="5"></circle>
         <line x1="12" y1="1" x2="12" y2="3"></line>
         <line x1="12" y1="21" x2="12" y2="23"></line>
         <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
@@ -134,11 +135,8 @@ export function updateThemeIcon(isLightMode) {
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>
     `;
-        currentSvg.outerHTML = sunSvg;
     }
 }
-
-
 
 // Change color theme (dracula, steel, or onyx)
 export async function changeColorTheme(app, theme) {
