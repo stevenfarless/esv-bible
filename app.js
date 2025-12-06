@@ -113,15 +113,9 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-		document.getElementById('helpBtn').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.add('active');
-			document.body.style.overflow = 'hidden';
-		});
 
-		document.getElementById('closeHelpModal').addEventListener('click', () => {
-			document.getElementById('helpModal').classList.remove('active');
-			document.body.style.overflow = '';
-		});
+		this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
+
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
