@@ -77,19 +77,19 @@ class BibleApp {
 		loadTheme(this);
 
 		// Set theme selector value AND apply the theme class
-		const themeSelector = document.getElementById('themeSelector');
-		const lightModeToggle = document.getElementById('lightModeToggle');
+		// const themeSelector = document.getElementById('themeSelector');
+		// const lightModeToggle = document.getElementById('lightModeToggle');
 
-		if (themeSelector) {
-			const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
-			themeSelector.value = savedTheme;
-			// Apply the saved theme immediately
-			changeColorTheme(this, savedTheme);
-		}
+		// if (themeSelector) {
+		// 	const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
+		// 	themeSelector.value = savedTheme;
+		// 	// Apply the saved theme immediately
+		// 	changeColorTheme(this, savedTheme);
+		// }
 
-		if (lightModeToggle) {
-			lightModeToggle.checked = document.body.classList.contains('light-mode');
-		}
+		// if (lightModeToggle) {
+		// 	lightModeToggle.checked = document.body.classList.contains('light-mode');
+		// }
 
 		this.attachEventListeners();
 
@@ -802,6 +802,11 @@ class BibleApp {
 			document.body.classList.add('light-mode');
 		}
 		updateThemeIcon(lightMode);
+
+		const themeSelector = document.getElementById('themeSelector');
+		if (themeSelector) {
+			themeSelector.value = colorTheme;
+		}
 	}
 
 
