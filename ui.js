@@ -114,21 +114,24 @@ export function updateThemeIcon(isLightMode) {
 
 // Change color theme (dracula, steel, or onyx)
 export async function changeColorTheme(app, theme) {
-    // Remove all theme classes
-    document.body.classList.remove('steel-theme', 'onyx-theme');
+  // Remove all theme classes
+  document.body.classList.remove('steel-theme', 'onyx-theme');
 
-    // Add new theme class if not dracula (dracula is default)
-    if (theme === 'steel') {
-        document.body.classList.add('steel-theme');
-    } else if (theme === 'onyx') {
-        document.body.classList.add('onyx-theme');
-    }
+  // Add new theme class if not dracula (dracula is default)
+  if (theme === 'steel') {
+    document.body.classList.add('steel-theme');
+  } else if (theme === 'onyx') {
+    document.body.classList.add('onyx-theme');
+  }
 
-    // Save to Firebase if logged in
-    if (app.currentUser) {
-        await app.database.ref(`users/${app.currentUser.uid}/settings/colorTheme`).set(theme);
-    } else {
-        // Fallback to localStorage if not logged in
-        localStorage.setItem('colorTheme', theme);
-    }
+  // Save to Firebase if logged in
+  if (app.currentUser) {
+    await app.database
+      .ref(`users/${app.currentUser.uid}/settings/colorTheme`)
+      .set(theme);
+  } else {
+    // Fallback to localStorage if not logged in
+    localStorage.setItem('colorTheme', theme);
+  }
 }
+
