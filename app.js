@@ -84,7 +84,7 @@ class BibleApp {
 			const savedTheme = localStorage.getItem('colorTheme') || 'dracula';
 			themeSelector.value = savedTheme;
 			// Apply the saved theme immediately
-			changeColorTheme(this, savedTheme);
+			// changeColorTheme(this, savedTheme);
 		}
 
 		if (lightModeToggle) {
@@ -785,50 +785,42 @@ class BibleApp {
 	}
 
 	loadLocalSettings() {
-		// Load from localStorage for non-logged-in users ONLY
+		// API key for guests
 		this.API_KEY = localStorage.getItem('esvApiKey') || '';
-		this.state.fontSize = parseInt(localStorage.getItem('fontSize')) || 18;
+
+		this.state.fontSize = parseInt(localStorage.getItem('fontSize') || '18', 10);
 		this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
 		this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
 		this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
 		this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
 
-		// Load theme settings from localStorage (fallback only)
-		const colorTheme = localStorage.getItem('colorTheme') || 'dracula';
-		const lightMode = localStorage.getItem('lightMode') === 'true';
-
-		changeColorTheme(this, colorTheme);
-		if (lightMode) {
-			document.body.classList.add('light-mode');
-		}
-		updateThemeIcon(lightMode);
+		// Theme: read but do not apply yet
+		this.state.colorTheme = localStorage.getItem('colorTheme') || 'dracula';
+		this.state.lightMode = localStorage.getItem('lightMode') === 'true';
 	}
-
 
 	applySettings() {
-		this.apiKeyInput.value = this.API_KEY;
-		this.verseNumbersToggle.checked = this.state.showVerseNumbers;
-		this.headingsToggle.checked = this.state.showHeadings;
-		this.footnotesToggle.checked = this.state.showFootnotes;
-		this.verseByVerseToggle.checked = this.state.verseByVerse;
-		this.fontSizeSlider.value = this.state.fontSize;
-		this.fontSizeValue.textContent = `${this.state.fontSize}px`;
-		this.passageText.style.fontSize = `${this.state.fontSize}px`;
+		// API key input, toggles, font size etc...
 
-		// Apply verse-by-verse class 
-		if (this.state.verseByVerse) {
-			this.passageText.classList.add('verse-by-verse');
-		} else {
-			this.passageText.classList.remove('verse-by-verse');
+		// Theme selector UI
+		const themeSelector = document.getElementById('themeSelector');
+		if (themeSelector && this.state.colorTheme) {
+			themeSelector.value = this.state.colorTheme;
 		}
 
-		// Toggle verse number visibility with CSS
-		if (this.state.showVerseNumbers) {
-			document.body.classList.remove('hide-verse-numbers');
+		// Apply color theme class
+		const theme = this.state.colorTheme || 'dracula';
+		changeColorTheme(this, theme);
+
+		// Apply light/dark mode
+		if (this.state.lightMode) {
+			document.body.classList.add('light-mode');
 		} else {
-			document.body.classList.add('hide-verse-numbers');
+			document.body.classList.remove('light-mode');
 		}
+		updateThemeIcon(this.state.lightMode);
 	}
+
 
 	async toggleSetting(setting) {
 		// Map setting names to their toggle element names
@@ -1096,11 +1088,14 @@ class BibleApp {
 
 		this.API_KEY = data.apiKey;
 		const s = data.settings;
+
 		this.state.fontSize = s.fontSize;
 		this.state.showVerseNumbers = s.showVerseNumbers;
 		this.state.showHeadings = s.showHeadings;
 		this.state.showFootnotes = s.showFootnotes;
 		this.state.verseByVerse = s.verseByVerse;
+		this.state.colorTheme = s.colorTheme || 'dracula';
+		this.state.lightMode = typeof s.lightMode === 'boolean' ? s.lightMode : false;
 	}
 
 	// ================================
