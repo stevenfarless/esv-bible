@@ -26,5 +26,5 @@ jobs:
           github_token: ${{ secrets.ACTIONS }}
           publish_branch: gh-pages
           publish_dir: ./
-          destination_dir: main # ← CHANGE: deploy to /main folder
+          destination_dir: .
           keep_files: true
