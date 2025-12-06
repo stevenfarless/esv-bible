@@ -1,5 +1,5 @@
 /* ================================
-   ESV Bible Reader - Dracula/Alucard Themes
+   ESV Bible Reader - Styles
    ================================ */
 
 * {
@@ -9,8 +9,8 @@
 }
 
 /* ================================
-   Theme Variables - Dracula & Alucard
-   Official colors from https://spec.draculatheme.com
+   Theme Variables -
+   Official dracula and Alucard colors from https://spec.draculatheme.com
    ================================ */
 
 :root {
@@ -1199,35 +1199,34 @@ body {
    Links & Interactive Text
    ================================ */
 
-/* All links use Dracula Cyan for excellent contrast */
 a {
-	color: var(--dracula-cyan);
+	color: var(--accent-color);
 	text-decoration: none;
 	transition: color var(--transition-fast);
 }
 
 a:hover {
-	color: var(--dracula-purple);
+	color: var(--primary-color);
 	text-decoration: underline;
 }
 
 a:visited {
-	color: var(--dracula-purple);
+	color: var(--primary-color);
 }
 
-/* Verse numbers and footnote references */
 .passage-text a,
 .passage-text sup a {
-	color: var(--dracula-cyan);
+	color: var(--accent-color);
 	font-weight: 600;
 	text-decoration: none;
 }
 
 .passage-text a:hover,
 .passage-text sup a:hover {
-	color: var(--dracula-pink);
+	color: var(--primary-light);
 	text-decoration: none;
 }
+
 
 /* Light mode link colors */
 body.light-mode a {
