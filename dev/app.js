@@ -113,7 +113,9 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-		document.getElementById('helpBtn').addEventListener('click', () => this.openModal(this.helpModal));
+
+		this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
+
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
 
 		// Search
