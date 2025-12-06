@@ -1292,39 +1292,11 @@ body.light-mode .passage-text sup a:hover {
 	border-radius: 8px;
 	padding: 12px;
 	margin: 8px 0;
-	box-shadow:
-		0 0 20px rgba(255, 215, 0, 0.3),
-		inset 0 0 10px rgba(255, 215, 0, 0.1);
+	box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
 	transform: scale(1.02);
 	transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 	animation: verseGlowPulse 0.5s ease-out;
-	/* Poetry/Preformatted verse glow fix - inline tight fit */
-.passage-text .selected-verse-glow {
-  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.08)) !important;
-  border-radius: 6px !important;
-  padding: 2px 4px !important; 
-  margin: 1px 0 !important;
-  box-shadow: 
-    0 0 12px rgba(255,215,0,0.4),
-    inset 0 0 4px rgba(255,215,0,0.15) !important;
-  position: relative !important;
-  animation: verseGlowPulse 0.6s ease-out !important;
-  display: inline-block !important; /* Critical for poetry lines */
-  line-height: inherit !important;   /* Match surrounding text */
 }
-
-/* Poetry containers - let glow child control layout */
-.passage-text .poetry:has(.selected-verse-glow),
-.passage-text p:has(.selected-verse-glow) {
-  display: contents;
-}
-
-/* Light mode compatibility */
-body.light-mode .passage-text .selected-verse-glow {
-  background: rgba(255,165,0,0.12) !important;
-  box-shadow: 0 0 12px rgba(255,165,0,0.5), inset 0 0 4px rgba(255,165,0,0.2) !important;
-}
-
 
 
 @keyframes verseGlowPulse {
