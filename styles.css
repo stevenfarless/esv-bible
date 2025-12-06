@@ -747,11 +747,21 @@ body {
 	}
 }
 
-.modal-header {
+/* .modal-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: var(--spacing-lg);
+	border-bottom: 1px solid var(--border-color);
+} */
+
+/* Global modal header – used by all modals */
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	/* tighter than var(--spacing-lg) */
 	border-bottom: 1px solid var(--border-color);
 }
 
@@ -887,8 +897,28 @@ body {
 }
 
 /* Adjust header padding to account for handle */
-#settingsModal .modal-header {
+/* #settingsModal .modal-header {
 	padding-top: calc(var(--spacing-lg) + 12px);
+	position: relative;
+} */
+
+/* Settings bottom-sheet header with handle */
+#settingsModal .modal-header::before {
+	content: '';
+	position: absolute;
+	top: 6px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40px;
+	height: 4px;
+	background-color: var(--text-muted);
+	border-radius: 2px;
+	opacity: 0.5;
+}
+
+#settingsModal .modal-header {
+	padding: 0.75rem 0.75rem 0.5rem;
+	/* a bit more top space for the handle */
 	position: relative;
 }
 
@@ -1268,23 +1298,25 @@ body.light-mode .passage-text sup a:hover {
 		inset 0 0 10px rgba(255, 215, 0, 0.1);
 	transform: scale(1.02);
 	transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-	animation: verseGlowPulse 1.2s ease-in-out;
+	animation: verseGlowPulse 0.5s ease-out;
 }
 
 @keyframes verseGlowPulse {
 	0% {
-		box-shadow: 0 0 0 rgba(255, 215, 0, 0), transform: scale(1);
+		box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+		transform: scale(1);
 	}
 
 	50% {
-		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), transform: scale(1.03);
+		box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+		transform: scale(1.03);
 	}
 
 	100% {
-		box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), transform: scale(1.02);
+		box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+		transform: scale(1.02);
 	}
 }
-
 
 /* Reduce glow spacing when a heading follows immediately */
 .selected-verse-glow+h2,
