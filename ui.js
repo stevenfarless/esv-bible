@@ -102,9 +102,6 @@ export async function toggleTheme(app) {
 export function updateThemeIcon(isLightMode) {
     const icon = document.querySelector('#themeToggleBtn svg');
     if (icon) {
-        // Set viewBox to prevent clipping
-        icon.setAttribute('viewBox', '0 0 24 24');
-
         if (isLightMode) {
             // Moon icon for light mode
             icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
@@ -114,7 +111,6 @@ export function updateThemeIcon(isLightMode) {
         }
     }
 }
-
 
 // Change color theme (dracula, steel, or onyx)
 export async function changeColorTheme(app, theme) {
