@@ -989,16 +989,36 @@ class BibleApp {
 
 	handleUserButtonClick() {
 		if (this.currentUser) {
-			// Show user menu
 			document.getElementById('userEmail').textContent = this.currentUser.email;
-			const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
-			document.getElementById('userTheme').textContent = theme;
+
+			// Determine color theme name from state
+			const colorTheme = this.state.colorTheme || 'dracula';
+			let themeName;
+			switch (colorTheme) {
+				case 'steel':
+					themeName = 'Steel';
+					break;
+				case 'onyx':
+					themeName = 'Onyx';
+					break;
+				default:
+					themeName = 'Dracula';
+			}
+
+			// Determine light/dark label from body class
+			const modeLabel = document.body.classList.contains('light-mode')
+				? 'Light'
+				: 'Dark';
+
+			document.getElementById('userTheme').textContent =
+				`${themeName} (${modeLabel})`;
+
 			this.openModal(this.userMenuModal);
 		} else {
-			// Show login modal
 			this.openModal(this.loginModal);
 		}
 	}
+
 
 	async handleLogin() {
 		const email = document.getElementById('loginEmail').value;
