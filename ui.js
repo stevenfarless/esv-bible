@@ -100,6 +100,7 @@ export async function toggleTheme(app) {
 }
 
 // Update theme icon based on current mode
+// Update theme icon based on current mode
 export function updateThemeIcon(isLightMode) {
     const btn = document.getElementById('themeToggleBtn');
     if (!btn) return;
@@ -107,13 +108,22 @@ export function updateThemeIcon(isLightMode) {
     const svg = btn.querySelector('svg');
     if (!svg) return;
 
+    // Ensure SVG has proper attributes
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '20');
+    svg.setAttribute('height', '20');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+
     // Clear old content
     svg.innerHTML = '';
 
     if (isLightMode) {
         // Moon icon for light mode (click to go dark)
         svg.innerHTML = `
-      <circle cx="12" cy="12" r="5"></circle>
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
     `;
     } else {
@@ -131,6 +141,7 @@ export function updateThemeIcon(isLightMode) {
     `;
     }
 }
+
 
 // Change color theme (dracula, steel, or onyx)
 export async function changeColorTheme(app, theme) {
