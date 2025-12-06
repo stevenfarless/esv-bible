@@ -1098,7 +1098,6 @@ class BibleApp {
 		this.state.lightMode = typeof s.lightMode === 'boolean' ? s.lightMode : false;
 	}
 
-
 	// ================================
 	// Reading Position Persistence
 	// ================================
