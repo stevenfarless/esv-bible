@@ -71,56 +71,20 @@ export function applyVerseGlow(app) {
 
     // Handle verse-by-verse mode
     if (app.state.verseByVerse) {
-        const container = targetVerseNum.closest('.verse-container');
-        if (container) {
-            app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
-                el.classList.remove('selected-verse-glow');
-            });
-            container.classList.add('selected-verse-glow');
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
+        app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
+            el.classList.remove('selected-verse-glow');
+        });
+        container.classList.add('selected-verse-glow');
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    return;
+}
 
-    // Standard mode: precise verse splitting
-    const paragraph = targetVerseNum.closest('p');
-    if (!paragraph) return;
-
-    const beforeP = document.createElement('p');
-    const selectedBlock = document.createElement('div');
-    const afterP = document.createElement('p');
-    selectedBlock.classList.add('selected-verse-glow');
-
-    let mode = 'before';
-    const nodes = Array.from(paragraph.childNodes);
-
-    nodes.forEach(node => {
-        if (node === targetVerseNum) {
-            mode = 'selected';
-            selectedBlock.appendChild(node);
-            return;
-        }
-        if (mode === 'selected') {
-            if (node.nodeType === 1 && node.id && node.id.startsWith('v')) {
-                mode = 'after';
-                afterP.appendChild(node);
-                return;
-            }
-        }
-        if (mode === 'before') {
-            beforeP.appendChild(node);
-        } else if (mode === 'selected') {
-            selectedBlock.appendChild(node);
-        } else {
-            afterP.appendChild(node);
-        }
-    });
-
-    const parent = paragraph.parentNode;
-    if (beforeP.childNodes.length > 0) parent.insertBefore(beforeP, paragraph);
-    parent.insertBefore(selectedBlock, paragraph);
-    if (afterP.childNodes.length > 0) parent.insertBefore(afterP, paragraph);
-    parent.removeChild(paragraph);
-
-    selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// Standard mode: precise verse splitting
+// Find the parent line/paragraph element to highlight
+const targetElement = targetVerseNum.closest('.line') || targetVerseNum.parentElement;
+if (targetElement) {
+    targetElement.classList.add('selected-verse-glow');
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 }
