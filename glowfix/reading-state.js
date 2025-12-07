@@ -78,8 +78,6 @@ export function applyVerseGlow(app) {
         container.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     return;
-}
-
 // Standard mode: precise verse splitting
 // Find the parent line/paragraph element to highlight
 const targetElement = targetVerseNum.closest('.line') || targetVerseNum.parentElement;
