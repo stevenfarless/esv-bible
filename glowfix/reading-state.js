@@ -61,7 +61,7 @@ export function applyVerseGlow(app) {
     let targetVerseNum = null;
 
     for (const vn of verseNums) {
-        if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
+        if (vn.firstChild && vn.firstChild.textContent.trim() === app.state.selectedVerse.toString()) {
             targetVerseNum = vn;
             break;
         }
