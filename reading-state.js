@@ -53,93 +53,107 @@ export function scrollToVerse(app, verseNumber) {
 export function applyVerseGlow(app) {
     if (!app.originalPassageHtml) return;
 
-    // Reset passage DOM
     app.passageText.innerHTML = app.originalPassageHtml;
-    if (app.state.selectedVerse == null) return;
+    if (app.state.selectedVerse === null) return;
 
-    // Find selected verse number element
+    // Special handling for verse 1
+    if (app.state.selectedVerse === 1) {
+        const firstParagraph = app.passageText.querySelector('p');
+        if (firstParagraph) {
+            // Find verse 2 to split verse 1 precisely
+            const verse2 = firstParagraph.querySelector('.verse-num');
+            if (verse2) {
+                const verse1Block = document.createElement('div');
+                verse1Block.classList.add('selected-verse-glow');
+                
+                let foundVerse2 = false;
+                const nodes = Array.from(firstParagraph.childNodes);
+                
+                nodes.forEach(node => {
+                    if (node === verse2) {
+                        foundVerse2 = true;
+                        return;
+                    }
+                    if (!foundVerse2) {
+                        verse1Block.appendChild(node.cloneNode(true));
+                    }
+                });
+                
+                firstParagraph.parentNode.insertBefore(verse1Block, firstParagraph);
+                firstParagraph.style.display = 'none'; // Hide original temporarily
+            } else {
+                firstParagraph.classList.add('selected-verse-glow');
+            }
+            
+            firstParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+
     const verseNums = app.passageText.querySelectorAll('.verse-num');
     let targetVerseNum = null;
+
     for (const vn of verseNums) {
-        if (vn.textContent.trim() === String(app.state.selectedVerse)) {
+        if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
             targetVerseNum = vn;
             break;
         }
     }
+
     if (!targetVerseNum) return;
 
-    // Verse-by-verse: just glow the existing container
+    // RESTORE ORIGINAL PRECISE HIGHLIGHTING
     if (app.state.verseByVerse) {
-        const container = targetVerseNum.closest('.verse-container, p, div');
-        if (!container) return;
-
-        app.passageText
-            .querySelectorAll('.selected-verse-glow')
-            .forEach(el => el.classList.remove('selected-verse-glow'));
-
-        container.classList.add('selected-verse-glow');
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
-
-    // General case: wrap from this .verse-num up to (but not including) next .verse-num
-    const paragraph = targetVerseNum.closest('p, div');
-    if (!paragraph) return;
-
-    const parent = paragraph.parentNode;
-    if (!parent) return;
-
-    // New wrapper will hold ONLY the selected verse content
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('selected-verse-glow');
-
-    const beforeBlock = document.createElement(paragraph.tagName.toLowerCase());
-    const afterBlock = document.createElement(paragraph.tagName.toLowerCase());
-
-    let mode = 'before';
-    const nodes = Array.from(paragraph.childNodes);
-
-    for (const node of nodes) {
-        if (node === targetVerseNum) {
-            // We are at the selected verse number: switch to selected mode
-            mode = 'selected';
-            wrapper.appendChild(node); // move the verse-num itself
-            continue;
+        const container = targetVerseNum.closest('.verse-container');
+        if (container) {
+            app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
+                el.classList.remove('selected-verse-glow');
+            });
+            container.classList.add('selected-verse-glow');
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+    } else {
+        // Precise verse splitting (your original logic)
+        const paragraph = targetVerseNum.closest('p');
+        if (!paragraph) return;
 
-        if (mode === 'selected') {
-            // If we hit the NEXT verse-num, switch to "after" and keep it (and all that follows) out of the wrapper
-            if (
-                node.nodeType === 1 && // element
-                node.classList.contains('verse-num')
-            ) {
-                mode = 'after';
-                afterBlock.appendChild(node);
-            } else {
-                wrapper.appendChild(node);
+        const beforeP = document.createElement('p');
+        const selectedBlock = document.createElement('div');
+        const afterP = document.createElement('p');
+        selectedBlock.classList.add('selected-verse-glow');
+
+        let mode = 'before';
+        const nodes = Array.from(paragraph.childNodes);
+
+        nodes.forEach(node => {
+            if (node === targetVerseNum) {
+                mode = 'selected';
+                selectedBlock.appendChild(node);
+                return;
             }
-        } else if (mode === 'before') {
-            beforeBlock.appendChild(node);
-        } else {
-            // mode === 'after'
-            afterBlock.appendChild(node);
-        }
+            if (mode === 'selected') {
+                if (node.nodeType === 1 && node.classList.contains('verse-num')) {
+                    mode = 'after';
+                    afterP.appendChild(node);
+                    return;
+                }
+            }
+            if (mode === 'before') {
+                beforeP.appendChild(node);
+            } else if (mode === 'selected') {
+                selectedBlock.appendChild(node);
+            } else {
+                afterP.appendChild(node);
+            }
+        });
+
+        const parent = paragraph.parentNode;
+        if (beforeP.childNodes.length > 0) parent.insertBefore(beforeP, paragraph);
+        parent.insertBefore(selectedBlock, paragraph);
+        if (afterP.childNodes.length > 0) parent.insertBefore(afterP, paragraph);
+        parent.removeChild(paragraph);
+
+        selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-
-    // Replace original paragraph with before + wrapper + after
-    const referenceNode = paragraph.nextSibling;
-    parent.removeChild(paragraph);
-
-    if (beforeBlock.childNodes.length > 0) {
-        parent.insertBefore(beforeBlock, referenceNode);
-    }
-
-    parent.insertBefore(wrapper, referenceNode);
-
-    if (afterBlock.childNodes.length > 0) {
-        parent.insertBefore(afterBlock, referenceNode);
-    }
-
-    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
