@@ -107,17 +107,6 @@ export function applyVerseGlow(app) {
                 }
             }
 
-            const verseNums = app.passageText.querySelectorAll('.verse-num');
-            let targetVerseNum = null;
-
-            for (const vn of verseNums) {
-                if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
-                    targetVerseNum = vn;
-                    break;
-                }
-            }
-
-            if (!targetVerseNum) return;
 
             // RESTORE ORIGINAL PRECISE HIGHLIGHTING
             if (app.state.verseByVerse) {
