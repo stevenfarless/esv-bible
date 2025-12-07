@@ -57,7 +57,7 @@ export function applyVerseGlow(app) {
     if (app.state.selectedVerse === null) return;
 
     // Find all verse numbers in the passage
-    const verseNums = app.passageText.querySelectorAll('.verse-num');
+    const verseNums = app.passageText.querySelectorAll('[id^="v"]');
     let targetVerseNum = null;
 
     for (const vn of verseNums) {
@@ -101,7 +101,7 @@ export function applyVerseGlow(app) {
             return;
         }
         if (mode === 'selected') {
-            if (node.nodeType === 1 && node.classList.contains('verse-num')) {
+            if (node.nodeType === 1 && node.id && node.id.startsWith('v')) {
                 mode = 'after';
                 afterP.appendChild(node);
                 return;
