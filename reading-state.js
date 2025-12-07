@@ -56,112 +56,71 @@ export function applyVerseGlow(app) {
     app.passageText.innerHTML = app.originalPassageHtml;
     if (app.state.selectedVerse === null) return;
 
-    // Special handling for verse 1
-    if (app.state.selectedVerse === 1) {
-        const firstParagraph = app.passageText.querySelector('p');
-        if (firstParagraph) {
-            // Find verse 2 to split verse 1 precisely
-            const verse2 = firstParagraph.querySelector('.verse-num');
-            if (verse2) {
-                const verse1Block = document.createElement('div');
-                verse1Block.classList.add('selected-verse-glow');
+    // Find all verse numbers in the passage
+    const verseNums = app.passageText.querySelectorAll('.verse-num');
+    let targetVerseNum = null;
 
-                let foundVerse2 = false;
-                const nodes = Array.from(firstParagraph.childNodes);
+    for (const vn of verseNums) {
+        if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
+            targetVerseNum = vn;
+            break;
+        }
+    }
 
-                nodes.forEach(node => {
-                    if (node === verse2) {
-                        foundVerse2 = true;
-                        return;
-                    }
-                    if (!foundVerse2) {
-                        verse1Block.appendChild(node.cloneNode(true));
-                    }
-                });
+    if (!targetVerseNum) return;
 
-                firstParagraph.parentNode.insertBefore(verse1Block, firstParagraph);
-                firstParagraph.style.display = 'none'; // Hide original temporarily
-                const verse = app.state.selectedVerse;
-                // Find the verse number element and apply glow to its parent container
-                const verseNums = app.passageText.querySelectorAll('.verse-num');
-                let targetParagraph = null;
+    // Handle verse-by-verse mode
+    if (app.state.verseByVerse) {
+        const container = targetVerseNum.closest('.verse-container');
+        if (container) {
+            app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
+                el.classList.remove('selected-verse-glow');
+            });
+            container.classList.add('selected-verse-glow');
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
 
-                for (const vn of verseNums) {
-                    if (vn.textContent.trim() === app.state.selectedVerse.toString()) {
-                        // Found the verse number, now find its parent paragraph
-                        targetParagraph = vn.closest('p');
-                        if (!targetParagraph) {
-                            targetParagraph = vn.parentElement;
-                        }
-                        break;
-                    }
-                }
+    // Standard mode: precise verse splitting
+    const paragraph = targetVerseNum.closest('p');
+    if (!paragraph) return;
 
-                if (targetParagraph) {
-                    targetParagraph.classList.add('selected-verse-glow');
-                    targetParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    // Fallback to old behavior
-                    firstParagraph.classList.add('selected-verse-glow');
-                    firstParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
+    const beforeP = document.createElement('p');
+    const selectedBlock = document.createElement('div');
+    const afterP = document.createElement('p');
+    selectedBlock.classList.add('selected-verse-glow');
 
+    let mode = 'before';
+    const nodes = Array.from(paragraph.childNodes);
 
-            // RESTORE ORIGINAL PRECISE HIGHLIGHTING
-            if (app.state.verseByVerse) {
-                const container = targetVerseNum.closest('.verse-container');
-                if (container) {
-                    app.passageText.querySelectorAll('.selected-verse-glow').forEach(el => {
-                        el.classList.remove('selected-verse-glow');
-                    });
-                    container.classList.add('selected-verse-glow');
-                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            } else {
-                // Precise verse splitting (your original logic)
-                const paragraph = targetVerseNum.closest('p');
-                if (!paragraph) return;
-
-                const beforeP = document.createElement('p');
-                const selectedBlock = document.createElement('div');
-                const afterP = document.createElement('p');
-                selectedBlock.classList.add('selected-verse-glow');
-
-                let mode = 'before';
-                const nodes = Array.from(paragraph.childNodes);
-
-                nodes.forEach(node => {
-                    if (node === targetVerseNum) {
-                        mode = 'selected';
-                        selectedBlock.appendChild(node);
-                        return;
-                    }
-                    if (mode === 'selected') {
-                        if (node.nodeType === 1 && node.classList.contains('verse-num')) {
-                            mode = 'after';
-                            afterP.appendChild(node);
-                            return;
-                        }
-                    }
-                    if (mode === 'before') {
-                        beforeP.appendChild(node);
-                    } else if (mode === 'selected') {
-                        selectedBlock.appendChild(node);
-                    } else {
-                        afterP.appendChild(node);
-                    }
-                });
-
-                const parent = paragraph.parentNode;
-                if (beforeP.childNodes.length > 0) parent.insertBefore(beforeP, paragraph);
-                parent.insertBefore(selectedBlock, paragraph);
-                if (afterP.childNodes.length > 0) parent.insertBefore(afterP, paragraph);
-                parent.removeChild(paragraph);
-
-                selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    nodes.forEach(node => {
+        if (node === targetVerseNum) {
+            mode = 'selected';
+            selectedBlock.appendChild(node);
+            return;
+        }
+        if (mode === 'selected') {
+            if (node.nodeType === 1 && node.classList.contains('verse-num')) {
+                mode = 'after';
+                afterP.appendChild(node);
+                return;
             }
         }
+        if (mode === 'before') {
+            beforeP.appendChild(node);
+        } else if (mode === 'selected') {
+            selectedBlock.appendChild(node);
+        } else {
+            afterP.appendChild(node);
+        }
+    });
 
-    }
+    const parent = paragraph.parentNode;
+    if (beforeP.childNodes.length > 0) parent.insertBefore(beforeP, paragraph);
+    parent.insertBefore(selectedBlock, paragraph);
+    if (afterP.childNodes.length > 0) parent.insertBefore(afterP, paragraph);
+    parent.removeChild(paragraph);
+
+    selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
