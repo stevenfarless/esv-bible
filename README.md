@@ -1,6 +1,6 @@
 # ESV Bible Web App
 
-An offline-capable, single-page ESV Bible reader focused on speed, readability, and a distraction-free experience. Built with vanilla JavaScript, HTML, and CSS, and deployed via GitHub Pages.
+A single-page ESV Bible reader focused on speed, readability, and a distraction-free experience. Built with vanilla JavaScript, HTML, and CSS, and deployed via GitHub Pages.
 
 ## Live Site
 
