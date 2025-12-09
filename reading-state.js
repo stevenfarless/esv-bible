@@ -149,9 +149,15 @@ export function applyVerseGlow(app) {
         // Insert the glow wrapper before the first line
         verseLines[0].parentNode.insertBefore(glowWrapper, verseLines[0]);
 
-        // Hide the original lines
+        // Hide the original lines AND their <br> tags
         verseLines.forEach(line => {
             line.style.display = 'none';
+
+            // Also hide the <br> tag that follows this span
+            const nextSibling = line.nextSibling;
+            if (nextSibling && nextSibling.nodeName === 'BR') {
+                nextSibling.style.display = 'none';
+            }
         });
 
         glowWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -203,5 +209,3 @@ export function applyVerseGlow(app) {
 
     selectedBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
-
-
