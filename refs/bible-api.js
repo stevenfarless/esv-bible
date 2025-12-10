@@ -20,7 +20,7 @@ export class BibleApi {
             'include-verse-numbers': state.showVerseNumbers,
             'include-short-copyright': false,
             'include-passage-references': false,
-            'include-footnotes': state.showFootnotes,  // ✅ FIXED!
+            'include-footnotes': state.showFootnotes,
             'include-footnote-body': false,
             'include-cross-references': state.showCrossReferences || false,
             'include-selahs': true,
@@ -30,7 +30,8 @@ export class BibleApi {
         });
 
         try {
-            const response = await fetch(`${this.baseUrl}passage/html/?${params}`, {
+            // ✅ FIXED: Added leading slash
+            const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {
                 headers: {
                     'Authorization': `Token ${apiKey}`
                 }
@@ -57,7 +58,8 @@ export class BibleApi {
         });
 
         try {
-            const response = await fetch(`${this.baseUrl}passage/search/?${params}`, {
+            // ✅ FIXED: Added leading slash
+            const response = await fetch(`${this.baseUrl}/passage/search/?${params}`, {
                 headers: {
                     'Authorization': `Token ${apiKey}`
                 }
