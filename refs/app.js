@@ -138,14 +138,14 @@ class BibleApp {
         this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
         this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
         this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
-        
+
         // Search
         this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
         this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
         this.searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.closeSearch();
         });
-        
+
         // Navigation
         this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
         this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
@@ -153,7 +153,7 @@ class BibleApp {
         this.chapterSelector.addEventListener('click', () => this.openChapterModal());
         this.verseSelector.addEventListener('click', () => this.openVerseModal());
         this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
-        
+
         // References modal (footnotes and cross-references)
         this.referencesModal = document.getElementById('referencesModal');
         this.closeReferencesModal = document.getElementById('closeReferencesModal');
@@ -501,7 +501,7 @@ class BibleApp {
         };
     }
 
-	    getAllBooks() {
+    getAllBooks() {
         return [
             ...Object.keys(this.bibleBooks['Old Testament']),
             ...Object.keys(this.bibleBooks['New Testament'])
@@ -1117,7 +1117,7 @@ class BibleApp {
         }
     }
 
-	    async handleLogin() {
+    async handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
@@ -1288,7 +1288,7 @@ class BibleApp {
     attachFootnoteHandlers() {
         // Handle footnote and cross-reference clicks
         const links = this.passageText.querySelectorAll('a.fn');
-        
+
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1310,37 +1310,81 @@ class BibleApp {
         // Check if it's a footnote (starts with #f)
         if (href.startsWith('#f')) {
             const footnoteId = href.substring(1); // Remove the #
-            this.loadFootnote(footnoteId);
+            this.loadFootnote(footnoteId, link); // ← Pass the link!
         }
 
         // Open the modal
         this.openModal(this.referencesModal);
     }
 
-    loadFootnote(footnoteId) {
-        // Find the footnote at the bottom of the passage
+    loadFootnote(footnoteId, clickedLink) {
+        // Extract the verse reference from the clicked link's context
+        let verseRef = '';
+
+        // Try to find the verse number that precedes this footnote link
+        if (clickedLink) {
+            // Look for the closest verse-num span before this link
+            let currentElement = clickedLink;
+
+            // Walk backwards through siblings to find verse number
+            while (currentElement) {
+                // Check if this element or any child contains a verse-num
+                const verseNum = currentElement.querySelector('.verse-num');
+                if (verseNum) {
+                    const verseNumber = verseNum.textContent.trim();
+                    verseRef = `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
+                    break;
+                }
+
+                // Check previous sibling
+                currentElement = currentElement.previousElementSibling;
+
+                // If we've walked back too far (past multiple elements), stop
+                if (!currentElement || currentElement.tagName === 'H2' || currentElement.tagName === 'H3') {
+                    break;
+                }
+            }
+
+            // Fallback: try walking up to parent and check its children
+            if (!verseRef) {
+                const parent = clickedLink.closest('p, div');
+                if (parent) {
+                    const verses = parent.querySelectorAll('.verse-num');
+                    if (verses.length > 0) {
+                        // Find the verse number closest before the link
+                        for (let i = verses.length - 1; i >= 0; i--) {
+                            if (parent.contains(verses[i]) &&
+                                verses[i].compareDocumentPosition(clickedLink) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                                const verseNumber = verses[i].textContent.trim();
+                                verseRef = `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback if we couldn't find verse reference
+        if (!verseRef) {
+            verseRef = `${this.state.currentBook} ${this.state.currentChapter}`;
+        }
+
+        // Find the footnote at the bottom of the passage (even though it's hidden now)
         const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
 
         if (footnoteElement) {
             // Get the parent <p> element that contains the full footnote
             const footnotePara = footnoteElement.closest('p');
-            
+
             if (footnotePara) {
-                // Extract the verse reference
-                const verseRefElement = footnotePara.querySelector('.footnote-ref');
-                const verseRef = verseRefElement ? verseRefElement.textContent : '';
-                
                 // Extract the actual note content
                 const noteElement = footnotePara.querySelector('note');
                 let footnoteText = '';
-                
+
                 if (noteElement) {
-                    // Get the HTML content but strip specific tags
-                    const noteHTML = noteElement.innerHTML;
-                    // Create a temp div to parse HTML
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = noteHTML;
-                    footnoteText = tempDiv.textContent || tempDiv.innerText || '';
+                    // Get text content from the note element
+                    footnoteText = noteElement.textContent || noteElement.innerText || '';
                 } else {
                     // Fallback: get all text after the footnote reference
                     const clone = footnotePara.cloneNode(true);
@@ -1350,27 +1394,28 @@ class BibleApp {
                     // Remove the verse reference
                     const refSpan = clone.querySelector('.footnote-ref');
                     if (refSpan) refSpan.remove();
-                    
+
                     footnoteText = clone.textContent.trim();
                 }
 
                 // Display the footnote
                 this.footnotesContent.innerHTML = `
-                    <div class="footnote-item">
-                        ${verseRef ? `<div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem;">${verseRef}</div>` : ''}
-                        <div class="footnote-text">${footnoteText}</div>
-                    </div>
-                `;
+                <div class="footnote-item">
+                    <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
+                    <div class="footnote-text">${footnoteText}</div>
+                </div>
+            `;
 
                 this.footnotesSection.style.display = 'block';
             }
         } else {
             // Fallback if footnote not found
             this.footnotesContent.innerHTML = `
-                <div class="footnote-item">
-                    <div class="footnote-text">Footnote not found.</div>
-                </div>
-            `;
+            <div class="footnote-item">
+                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
+                <div class="footnote-text">Footnote content not available.</div>
+            </div>
+        `;
             this.footnotesSection.style.display = 'block';
         }
     }

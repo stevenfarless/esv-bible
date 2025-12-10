@@ -6,41 +6,45 @@ export class BibleApi {
     }
 
     async fetchPassage(reference) {
-        const apiKey = this.getApiKey();
-        if (!apiKey) {
-            console.error('No API key available');
-            return null;
-        }
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+        console.error('No API key available');
+        return null;
+    }
 
-        const state = this.getState();
+    const state = this.getState();
+    const params = new URLSearchParams({
+        'q': reference,
+        'include-headings': state.showHeadings,
+        'include-verse-numbers': state.showVerseNumbers,
+        'include-short-copyright': false,
+        'include-passage-references': false,
+        'include-footnotes': true,  // Keep links active
+        'include-footnote-body': false,  // ← CHANGE THIS TO false (hide bottom text)
+        'include-cross-references': state.showCrossReferences || false,
+        'include-selahs': true,
+        'indent-poetry': true,
+        'indent-paragraphs': 0,
+        'indent-declares': 0
+    });
 
-        const params = new URLSearchParams({
-            'q': reference,
-            'include-headings': state.showHeadings,
-            'include-footnotes': state.showFootnotes,
-            'include-cross-references': state.showCrossReferences,
-            'include-verse-numbers': true,
-            'include-short-copyright': false,
-            'include-passage-references': false
+    try {
+        const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {
+            headers: {
+                'Authorization': `Token ${apiKey}`
+            }
         });
 
-        try {
-            const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {
-                headers: {
-                    'Authorization': `Token ${apiKey}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error fetching passage:', error);
-            return null;
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
         }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching passage:', error);
+        return null;
     }
+}
 
     async searchPassages(query) {
         const apiKey = this.getApiKey();
