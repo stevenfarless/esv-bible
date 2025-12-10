@@ -11,7 +11,7 @@
 <body>
 	<header class="header">
 		<div class="header-content">
-			<h1 class="logo">Bible</h1>
+			<h1 class="logo">Bible setacc</h1>
 			<div class="header-controls">
 				<button class="icon-btn" id="searchToggleBtn" title="Search (Ctrl+K)">
 					<!-- search icon svg -->
@@ -186,70 +186,123 @@
 				<button class="close-btn" id="closeSettingsModal">×</button>
 			</div>
 			<div class="modal-body">
-				<div class="settings-group">
-					<h4>Display Options</h4>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="verseNumbersToggle" checked />
-							<span>Show verse numbers</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="headingsToggle" checked />
-							<span>Show section headings</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="footnotesToggle" />
-							<span>Show footnotes</span>
-						</label>
-					</div>
-					<div class="setting-item">
-						<label class="checkbox-label">
-							<input type="checkbox" id="verseByVerseToggle" />
-							<span>Verse-by-verse display</span>
-						</label>
-					</div>
-				</div>
-
-				<div class="settings-group">
-					<h4>Font Size</h4>
-					<div class="setting-item">
-						<input type="range" id="fontSizeSlider" class="slider" min="12" max="32" value="18" />
-						<span id="fontSizeValue">18px</span>
-					</div>
-				</div>
-
-				<div class="settings-group">
-					<h4>Color Theme</h4>
-					<div class="setting-item">
-						<label>Color Theme</label>
-						<select id="themeSelector" class="input-field">
-							<option value="dracula">Dracula (Purple/Pink)</option>
-							<option value="steel">Steel (Blue/Cool)</option>
-							<option value="onyx">Onyx (Gold/OLED)</option>
-						</select>
-						<small class="help-text">
-							Choose your preferred color scheme.
-						</small>
-					</div>
-				</div>
-
-				<div class="settings-group" id="apiKeySection">
-					<h4>API Configuration</h4>
-					<div class="setting-item">
-						<label>ESV API Key</label>
-						<input type="text" id="apiKeyInput" class="input-field" placeholder="Enter your API key" />
-						<small class="help-text">
-							Get your free API key at
-							<a href="https://api.esv.org/account" target="_blank">api.esv.org/account</a>.
-						</small>
-					</div>
-					<button id="saveApiKeyBtn" class="primary-btn">
-						Save API Key
+				<!-- Accordion Section 1: Display Options -->
+				<div class="accordion-section" data-section="display">
+					<button class="accordion-header" data-target="display">
+						<span class="accordion-title">Display Options</span>
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
 					</button>
+					<div class="accordion-panel" data-panel="display">
+						<div class="settings-group">
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="verseNumbersToggle" checked />
+									<span>Show verse numbers</span>
+								</label>
+							</div>
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="headingsToggle" checked />
+									<span>Show section headings</span>
+								</label>
+							</div>
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="footnotesToggle" />
+									<span>Show footnotes</span>
+								</label>
+							</div>
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="verseByVerseToggle" />
+									<span>Verse-by-verse display</span>
+								</label>
+							</div>
+							<div class="setting-item">
+								<label>Font Size</label>
+								<input type="range" id="fontSizeSlider" class="slider" min="12" max="32" value="18" />
+								<span id="fontSizeValue">18px</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Accordion Section 2: Theme -->
+				<div class="accordion-section" data-section="theme">
+					<button class="accordion-header" data-target="theme">
+						<span class="accordion-title">Theme</span>
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="accordion-panel" data-panel="theme">
+						<div class="settings-group">
+							<div class="setting-item">
+								<label>Color Theme</label>
+								<select id="themeSelector" class="input-field">
+									<option value="dracula">Dracula (Purple/Pink)</option>
+									<option value="steel">Steel (Blue/Cool)</option>
+									<option value="onyx">Onyx (Gold/OLED)</option>
+								</select>
+								<small class="help-text">
+									Choose your preferred color scheme.
+								</small>
+							</div>
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="lightModeToggle" />
+									<span>Light Mode</span>
+								</label>
+								<small class="help-text">
+									Switch between light and dark mode
+								</small>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Accordion Section 3: API & Data -->
+				<div class="accordion-section" data-section="api">
+					<button class="accordion-header" data-target="api">
+						<span class="accordion-title">API & Data</span>
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="accordion-panel" data-panel="api">
+						<div class="settings-group">
+							<div class="setting-item">
+								<label>ESV API Key</label>
+								<input type="text" id="apiKeyInput" class="input-field" placeholder="Enter your API key" />
+								<small class="help-text">
+									Get your free API key at <a href="https://api.esv.org/account" target="_blank">api.esv.org/account</a>.
+								</small>
+							</div>
+							<button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Accordion Section 4: Account -->
+				<div class="accordion-section" data-section="account">
+					<button class="accordion-header" data-target="account">
+						<span class="accordion-title">Account</span>
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="accordion-panel" data-panel="account">
+						<div class="settings-group">
+							<p class="help-text">
+								Account settings (email, theme, reading position) are automatically synced via Firebase when you're signed in.
+							</p>
+							<button id="openAccountBtn" class="primary-btn" style="width: 100%; margin-top: 1rem;">
+								Manage Account
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -92,6 +92,7 @@ class BibleApp {
 		}
 
 		this.attachEventListeners();
+		this.initializeAccordion();
 
 		// Wait for Firebase auth state
 		this.auth.onAuthStateChanged(async (user) => {
@@ -110,7 +111,42 @@ class BibleApp {
 		});
 	}
 
-	attachEventListeners() {
+	initializeAccordion() {
+		// Get all accordion headers
+		const accordionHeaders = document.querySelectorAll('.accordion-header');
+		
+		// Add click handlers to each header
+		accordionHeaders.forEach(header => {
+			header.addEventListener('click', () => {
+				const targetSection = header.dataset.target;
+				const section = header.closest('.accordion-section');
+				
+				// Toggle the active class
+				section.classList.toggle('active');
+			});
+		});
+		
+		// Open the first section (Display Options) by default
+		const firstSection = document.querySelector('.accordion-section[data-section="display"]');
+		if (firstSection) {
+			firstSection.classList.add('active');
+		}
+		
+		// Handle "Manage Account" button
+		const openAccountBtn = document.getElementById('openAccountBtn');
+		if (openAccountBtn) {
+			openAccountBtn.addEventListener('click', () => {
+				this.closeModal(this.settingsModal);
+				if (this.currentUser) {
+					this.openModal(this.userMenuModal);
+				} else {
+					this.openModal(this.loginModal);
+				}
+			});
+		}
+	}
+
+		attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
 
