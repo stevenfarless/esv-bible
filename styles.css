@@ -1500,6 +1500,22 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hove
    FOOTNOTES AND CROSS-REFERENCES MODAL
    ========================================== */
 
+sup.footnote {
+	cursor: pointer;
+	transition: transform 0.2s ease, color 0.2s ease;
+}
+
+sup.footnote:hover {
+	transform: scale(1.2);
+	color: var(--accent-color);
+}
+
+sup.footnote:hover {
+	text-decoration: underline;
+	color: var(--secondary-color);
+}
+
+
 .footnote-item,
 .crossref-item {
 	margin-bottom: var(--spacing-lg);
