@@ -1227,7 +1227,7 @@ a:visited {
 }
 
 /* ============================================
-   SUPERSCRIPT FOOTNOTE LINKS - Theme-Specific
+   SUPERSCRIPT FOOTNOTE LINKS - Universal
    ============================================ */
 
 /* Base superscript styling */
@@ -1237,12 +1237,13 @@ a:visited {
 	line-height: 0;
 }
 
-/* DRACULA DARK (default) - Bright Pink */
+/* Universal footnote link styling - works for ALL themes */
 .passage-text sup a,
 .passage-text sup a.fn,
 .passage-text .footnote a,
 .passage-text a.footnote {
-	color: var(--dracula-pink);
+	color: var(--primary-color);
+	/* Auto-adjusts per theme */
 	font-weight: 700;
 	text-decoration: none;
 	padding: 0 0.15em;
@@ -1255,99 +1256,25 @@ a:visited {
 .passage-text sup a.fn:hover,
 .passage-text .footnote a:hover,
 .passage-text a.footnote:hover {
-	color: var(--dracula-purple);
-	background-color: rgba(255, 121, 198, 0.15);
+	color: var(--primary-dark);
+	background-color: rgba(189, 147, 249, 0.15);
+	/* Dracula purple fallback */
 }
 
-/* STEEL THEME - Bright Ice Blue */
-.steel-theme .passage-text sup a,
-.steel-theme .passage-text sup a.fn,
-.steel-theme .passage-text .footnote a,
-.steel-theme .passage-text a.footnote {
-	color: #6FC8E8;
-}
-
+/* Theme-specific hover backgrounds */
 .steel-theme .passage-text sup a:hover,
 .steel-theme .passage-text sup a.fn:hover,
 .steel-theme .passage-text .footnote a:hover,
 .steel-theme .passage-text a.footnote:hover {
-	color: var(--ice);
-	background-color: rgba(111, 200, 232, 0.15);
-}
-
-/* ONYX THEME - Bright Gold */
-.onyx-theme .passage-text sup a,
-.onyx-theme .passage-text sup a.fn,
-.onyx-theme .passage-text .footnote a,
-.onyx-theme .passage-text a.footnote {
-	color: var(--onyx-gold);
+	background-color: rgba(70, 130, 180, 0.15);
 }
 
 .onyx-theme .passage-text sup a:hover,
 .onyx-theme .passage-text sup a.fn:hover,
 .onyx-theme .passage-text .footnote a:hover,
 .onyx-theme .passage-text a.footnote:hover {
-	color: #F5C84C;
 	background-color: rgba(212, 175, 55, 0.15);
 }
-
-/* LIGHT MODE OVERRIDES */
-
-/* Dracula Light (Alucard) - Magenta Pink */
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote {
-	color: #C3356C;
-}
-
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a:hover,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn:hover,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hover,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hover {
-	color: #9B2957;
-	background-color: rgba(195, 53, 108, 0.1);
-}
-
-/* Steel Light Mode - Deep Blue */
-.steel-theme.light-mode .passage-text sup a,
-.steel-theme.light-mode .passage-text sup a.fn,
-.steel-theme.light-mode .passage-text .footnote a,
-.steel-theme.light-mode .passage-text a.footnote {
-	color: #2E5C8A;
-}
-
-.steel-theme.light-mode .passage-text sup a:hover,
-.steel-theme.light-mode .passage-text sup a.fn:hover,
-.steel-theme.light-mode .passage-text .footnote a:hover,
-.steel-theme.light-mode .passage-text a.footnote:hover {
-	color: #1B4469;
-	background-color: rgba(46, 92, 138, 0.1);
-}
-
-/* Onyx Light Mode - Dark Gold */
-.onyx-theme.light-mode .passage-text sup a,
-.onyx-theme.light-mode .passage-text sup a.fn,
-.onyx-theme.light-mode .passage-text .footnote a,
-.onyx-theme.light-mode .passage-text a.footnote {
-	color: var(--onyx-dark-gold);
-}
-
-.onyx-theme.light-mode .passage-text sup a:hover,
-.onyx-theme.light-mode .passage-text sup a.fn:hover,
-.onyx-theme.light-mode .passage-text .footnote a:hover,
-.onyx-theme.light-mode .passage-text a.footnote:hover {
-	color: #6B5A00;
-	background-color: rgba(139, 117, 0, 0.1);
-}
-
-
-/* Ensure superscript is visible */
-/* .passage-text sup {
-	font-size: 0.75em;
-	vertical-align: super;
-	line-height: 0;
-} */
 
 /* ==========================================
    FOOTNOTES AND CROSS-REFERENCES MODAL
