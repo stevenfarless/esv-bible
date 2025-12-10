@@ -112,41 +112,6 @@ class BibleApp {
 	}
 
 	initializeAccordion() {
-		// Get all accordion headers
-		const accordionHeaders = document.querySelectorAll('.accordion-header');
-
-		// Add click handlers to each header
-		accordionHeaders.forEach(header => {
-			header.addEventListener('click', () => {
-				const targetSection = header.dataset.target;
-				const section = header.closest('.accordion-section');
-
-				// Toggle the active class
-				section.classList.toggle('active');
-			});
-		});
-
-		// Open the first section (Display Options) by default
-		const firstSection = document.querySelector('.accordion-section[data-section="display"]');
-		if (firstSection) {
-			firstSection.classList.add('active');
-		}
-
-		// Handle "Manage Account" button
-		const openAccountBtn = document.getElementById('openAccountBtn');
-		if (openAccountBtn) {
-			openAccountBtn.addEventListener('click', () => {
-				this.closeModal(this.settingsModal);
-				if (this.currentUser) {
-					this.openModal(this.userMenuModal);
-				} else {
-					this.openModal(this.loginModal);
-				}
-			});
-		}
-	}
-
-	initializeAccordion() {
 		const accordionHeaders = document.querySelectorAll('.accordion-header');
 
 		accordionHeaders.forEach(header => {
@@ -336,6 +301,12 @@ class BibleApp {
 		this.verseNumbersToggle.addEventListener('change', () => this.toggleSetting('showVerseNumbers'));
 		this.headingsToggle.addEventListener('change', () => this.toggleSetting('showHeadings'));
 		this.footnotesToggle.addEventListener('change', () => this.toggleSetting('showFootnotes'));
+
+		this.crossReferencesToggle = document.getElementById('crossReferencesToggle');
+		if (this.crossReferencesToggle) {
+			this.crossReferencesToggle.addEventListener('change', () => this.toggleSetting('showCrossReferences'));
+		}
+
 		this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse());
 		this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
@@ -393,13 +364,6 @@ class BibleApp {
 		this.closeLoginModal.addEventListener('click', () => this.closeModal(this.loginModal));
 		this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
 		this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
-
-		// References modal (footnotes and cross-references)
-		this.referencesModal = document.getElementById('referencesModal');
-		this.closeReferencesModal = document.getElementById('closeReferencesModal');
-		this.footnotesSection = document.getElementById('footnotesSection');
-		this.footnotesContent = document.getElementById('footnotesContent');
-		this.crossReferencesSection = document.getElementById('crossReferencesSection');
 
 		// Track scroll position
 		window.addEventListener('scroll', () => {
