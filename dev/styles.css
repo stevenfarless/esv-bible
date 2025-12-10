@@ -1497,3 +1497,62 @@ body.hide-verse-numbers .passage-text .verse-num {
 	height: 20px;
 	overflow: visible;
 }
+
+/* Accordion Styles for Settings Modal */
+.accordion-section {
+	margin-bottom: var(--spacing-md);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	overflow: hidden;
+	background-color: var(--bg-tertiary);
+}
+
+.accordion-header {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spacing-md) var(--spacing-lg);
+	background-color: var(--bg-tertiary);
+	border: none;
+	cursor: pointer;
+	transition: all var(--transition-fast);
+	color: var(--text-primary);
+	outline: none;
+}
+
+.accordion-header:hover {
+	background-color: var(--bg-secondary);
+}
+
+.accordion-title {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--primary-color);
+}
+
+.accordion-chevron {
+	transition: transform var(--transition-normal);
+	color: var(--text-secondary);
+}
+
+.accordion-section.active .accordion-chevron {
+	transform: rotate(180deg);
+}
+
+.accordion-panel {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height var(--transition-normal) ease;
+}
+
+.accordion-section.active .accordion-panel {
+	max-height: 1000px;
+}
+
+.accordion-panel .settings-group {
+	padding: var(--spacing-lg);
+	margin-bottom: 0;
+	background-color: var(--bg-secondary);
+	border-top: 1px solid var(--border-color);
+}
