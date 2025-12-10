@@ -1226,139 +1226,32 @@ a:visited {
 	text-decoration: none;
 }
 
-/* ================================
+/* ============================================
    SUPERSCRIPT FOOTNOTE LINKS - Theme-Specific
-   ================================ */
+   ============================================ */
 
-/* DRACULA DARK (default) - Bright Pink */
-.passage-text sup a.fn,
-.passage-text .footnote a {
-	color: var(--dracula-pink);
-	/* #FF79C6 */
-	font-weight: 700;
-	text-decoration: none;
-	padding: 0 0.15em;
-	border-radius: 3px;
-	transition: all var(--transition-fast);
-}
-
-.passage-text sup a.fn:hover,
-.passage-text .footnote a:hover {
-	color: var(--dracula-purple);
-	background-color: rgba(255, 121, 198, 0.15);
-	/* Pink glow */
-}
-
-/* STEEL THEME - Bright Ice Blue */
-.steel-theme .passage-text sup a.fn,
-.steel-theme .passage-text .footnote a {
-	color: #6FC8E8;
-	/* Brighter ice blue */
-}
-
-.steel-theme .passage-text sup a.fn:hover,
-.steel-theme .passage-text .footnote a:hover {
-	color: var(--ice);
-	background-color: rgba(111, 200, 232, 0.15);
-}
-
-/* ONYX THEME - Bright Gold */
-.onyx-theme .passage-text sup a.fn,
-.onyx-theme .passage-text .footnote a {
-	color: var(--onyx-gold);
-	/* #D4AF37 */
-}
-
-.onyx-theme .passage-text sup a.fn:hover,
-.onyx-theme .passage-text .footnote a:hover {
-	color: #F5C84C;
-	/* Brighter gold on hover */
-	background-color: rgba(212, 175, 55, 0.15);
-}
-
-/* LIGHT MODE OVERRIDES */
-
-/* Dracula Light (Alucard) - Magenta Pink */
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a {
-	color: #C3356C;
-	/* Alucard pink */
-	font-weight: 700;
-}
-
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn:hover,
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hover {
-	color: #9B2957;
-	/* Darker pink */
-	background-color: rgba(195, 53, 108, 0.1);
-}
-
-/* Steel Light Mode - Deep Blue */
-.steel-theme.light-mode .passage-text sup a.fn,
-.steel-theme.light-mode .passage-text .footnote a {
-	color: #2E5C8A;
-	/* Deep blue */
-	font-weight: 700;
-}
-
-.steel-theme.light-mode .passage-text sup a.fn:hover,
-.steel-theme.light-mode .passage-text .footnote a:hover {
-	color: #1B4469;
-	/* Even deeper */
-	background-color: rgba(46, 92, 138, 0.1);
-}
-
-/* Onyx Light Mode - Dark Gold */
-.onyx-theme.light-mode .passage-text sup a.fn,
-.onyx-theme.light-mode .passage-text .footnote a {
-	color: var(--onyx-dark-gold);
-	/* #8B7500 */
-	font-weight: 700;
-}
-
-.onyx-theme.light-mode .passage-text sup a.fn:hover,
-.onyx-theme.light-mode .passage-text .footnote a:hover {
-	color: #6B5A00;
-	/* Darker gold */
-	background-color: rgba(139, 117, 0, 0.1);
-}
-
-/* Ensure superscript numbers are visible */
+/* Base superscript styling */
 .passage-text sup {
 	font-size: 0.75em;
 	vertical-align: super;
 	line-height: 0;
 }
 
-.passage-text sup a {
-	color: var(--dracula-pink) !important;
-	/* #FF79C6 */
-	font-weight: 700 !important;
-	text-decoration: none !important;
+/* DRACULA DARK (default) - Bright Pink */
+.passage-text sup a,
+.passage-text sup a.fn,
+.passage-text .footnote a,
+.passage-text a.footnote {
+	color: var(--dracula-pink);
+	font-weight: 700;
+	text-decoration: none;
 	padding: 0 0.15em;
 	border-radius: 3px;
 	transition: all var(--transition-fast);
 	cursor: pointer;
 }
 
-.passage-text sup a:hover {
-	color: var(--dracula-purple) !important;
-	background-color: rgba(255, 121, 198, 0.15) !important;
-}
-
-/* Keep specific .fn class targeting for better specificity */
-.passage-text sup a.fn,
-.passage-text .footnote a,
-.passage-text a.footnote {
-	color: var(--dracula-pink);
-	/* #FF79C6 */
-	font-weight: 700;
-	text-decoration: none;
-	padding: 0 0.15em;
-	border-radius: 3px;
-	transition: all var(--transition-fast);
-}
-
+.passage-text sup a:hover,
 .passage-text sup a.fn:hover,
 .passage-text .footnote a:hover,
 .passage-text a.footnote:hover {
@@ -1367,21 +1260,14 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hov
 }
 
 /* STEEL THEME - Bright Ice Blue */
-.steel-theme .passage-text sup a {
-	color: #6FC8E8 !important;
-}
-
-.steel-theme .passage-text sup a:hover {
-	color: var(--ice) !important;
-	background-color: rgba(111, 200, 232, 0.15) !important;
-}
-
+.steel-theme .passage-text sup a,
 .steel-theme .passage-text sup a.fn,
 .steel-theme .passage-text .footnote a,
 .steel-theme .passage-text a.footnote {
 	color: #6FC8E8;
 }
 
+.steel-theme .passage-text sup a:hover,
 .steel-theme .passage-text sup a.fn:hover,
 .steel-theme .passage-text .footnote a:hover,
 .steel-theme .passage-text a.footnote:hover {
@@ -1390,21 +1276,14 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hov
 }
 
 /* ONYX THEME - Bright Gold */
-.onyx-theme .passage-text sup a {
-	color: var(--onyx-gold) !important;
-}
-
-.onyx-theme .passage-text sup a:hover {
-	color: #F5C84C !important;
-	background-color: rgba(212, 175, 55, 0.15) !important;
-}
-
+.onyx-theme .passage-text sup a,
 .onyx-theme .passage-text sup a.fn,
 .onyx-theme .passage-text .footnote a,
 .onyx-theme .passage-text a.footnote {
 	color: var(--onyx-gold);
 }
 
+.onyx-theme .passage-text sup a:hover,
 .onyx-theme .passage-text sup a.fn:hover,
 .onyx-theme .passage-text .footnote a:hover,
 .onyx-theme .passage-text a.footnote:hover {
@@ -1415,23 +1294,14 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hov
 /* LIGHT MODE OVERRIDES */
 
 /* Dracula Light (Alucard) - Magenta Pink */
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a {
-	color: #C3356C !important;
-	font-weight: 700 !important;
-}
-
-body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a:hover {
-	color: #9B2957 !important;
-	background-color: rgba(195, 53, 108, 0.1) !important;
-}
-
+body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote {
 	color: #C3356C;
-	font-weight: 700;
 }
 
+body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a:hover,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text sup a.fn:hover,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text .footnote a:hover,
 body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hover {
@@ -1440,23 +1310,14 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hove
 }
 
 /* Steel Light Mode - Deep Blue */
-.steel-theme.light-mode .passage-text sup a {
-	color: #2E5C8A !important;
-	font-weight: 700 !important;
-}
-
-.steel-theme.light-mode .passage-text sup a:hover {
-	color: #1B4469 !important;
-	background-color: rgba(46, 92, 138, 0.1) !important;
-}
-
+.steel-theme.light-mode .passage-text sup a,
 .steel-theme.light-mode .passage-text sup a.fn,
 .steel-theme.light-mode .passage-text .footnote a,
 .steel-theme.light-mode .passage-text a.footnote {
 	color: #2E5C8A;
-	font-weight: 700;
 }
 
+.steel-theme.light-mode .passage-text sup a:hover,
 .steel-theme.light-mode .passage-text sup a.fn:hover,
 .steel-theme.light-mode .passage-text .footnote a:hover,
 .steel-theme.light-mode .passage-text a.footnote:hover {
@@ -1465,23 +1326,14 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hove
 }
 
 /* Onyx Light Mode - Dark Gold */
-.onyx-theme.light-mode .passage-text sup a {
-	color: var(--onyx-dark-gold) !important;
-	font-weight: 700 !important;
-}
-
-.onyx-theme.light-mode .passage-text sup a:hover {
-	color: #6B5A00 !important;
-	background-color: rgba(139, 117, 0, 0.1) !important;
-}
-
+.onyx-theme.light-mode .passage-text sup a,
 .onyx-theme.light-mode .passage-text sup a.fn,
 .onyx-theme.light-mode .passage-text .footnote a,
 .onyx-theme.light-mode .passage-text a.footnote {
 	color: var(--onyx-dark-gold);
-	font-weight: 700;
 }
 
+.onyx-theme.light-mode .passage-text sup a:hover,
 .onyx-theme.light-mode .passage-text sup a.fn:hover,
 .onyx-theme.light-mode .passage-text .footnote a:hover,
 .onyx-theme.light-mode .passage-text a.footnote:hover {
@@ -1489,12 +1341,13 @@ body.light-mode:not(.steel-theme):not(.onyx-theme) .passage-text a.footnote:hove
 	background-color: rgba(139, 117, 0, 0.1);
 }
 
+
 /* Ensure superscript is visible */
-.passage-text sup {
+/* .passage-text sup {
 	font-size: 0.75em;
 	vertical-align: super;
 	line-height: 0;
-}
+} */
 
 /* ==========================================
    FOOTNOTES AND CROSS-REFERENCES MODAL
@@ -1508,13 +1361,8 @@ sup.footnote {
 sup.footnote:hover {
 	transform: scale(1.2);
 	color: var(--accent-color);
-}
-
-sup.footnote:hover {
 	text-decoration: underline;
-	color: var(--secondary-color);
 }
-
 
 .footnote-item,
 .crossref-item {
@@ -1578,7 +1426,6 @@ sup.footnote:hover {
 	font-style: italic;
 	font-size: 0.85rem;
 }
-
 
 @keyframes slideDown {
 	from {
@@ -1804,31 +1651,6 @@ body.hide-verse-numbers .passage-text .verse-num {
 	text-decoration: underline;
 }
 
-.shortcut-list {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-
-.shortcut-item {
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 0.75rem;
-	background: var(--bg-tertiary);
-	border-radius: 6px;
-}
-
-.shortcut-item kbd {
-	padding: 0.25rem 0.5rem;
-	background: var(--bg-primary);
-	border: 1px solid var(--border-color);
-	border-radius: 4px;
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: var(--primary-color);
-}
-
 /* Hide help button */
 /* #userBtn {
 	display: none;
@@ -2008,4 +1830,23 @@ body.hide-verse-numbers .passage-text .verse-num {
 	font-weight: 600;
 	color: var(--accent-color);
 	margin-bottom: var(--spacing-sm);
+}
+
+/* Add visual drag handle to references modal */
+#referencesModal .modal-header::before {
+	content: '';
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40px;
+	height: 4px;
+	background-color: var(--text-muted);
+	border-radius: 2px;
+	opacity: 0.5;
+}
+
+#referencesModal .modal-header {
+	padding-top: calc(var(--spacing-md) + 12px);
+	position: relative;
 }
