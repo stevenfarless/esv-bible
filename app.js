@@ -523,41 +523,54 @@ class BibleApp {
         return null;
     }
 
-    // ================================
+    // ==========================================
     // Passage Loading
-    // ================================
+    // ==========================================
 
     async loadPassage(book, chapter, restoreScroll = false) {
+        // Save reading position before loading new passage
         if (!restoreScroll) {
             this.saveReadingPosition();
         }
 
+        // Update state
         this.state.currentBook = book;
         this.state.currentChapter = chapter;
-
         this.updateNavigationState();
 
+        // Build reference string
         const reference = `${book} ${chapter}`;
+
+        // Show loading state
         this.passageText.innerHTML = '<p class="loading">Loading passage...</p>';
 
+        // Fetch passage from API
         const data = await this.bibleApi.fetchPassage(reference);
 
-        if (!data) return;
+        if (!data) {
+            return;
+        }
 
+        // Update UI with passage content
         this.passageTitle.textContent = reference;
         this.passageText.innerHTML = data.passages[0];
 
-        // cache original HTML for highlight logic
+        // Cache original HTML for highlight logic
         this.originalPassageHtml = this.passageText.innerHTML;
 
         // Attach click handlers for footnotes and cross-references
         this.attachFootnoteHandlers();
 
-        this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+        // ← NEW: Make footnote superscripts clickable ↓
+        this.makeFootnotesClickable();
+
+        // Update copyright
+        this.copyright.textContent = `Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.`;
 
         // Reset verse selector
         this.currentVerseSpan.textContent = '1';
 
+        // Handle scroll position
         if (restoreScroll) {
             window.scrollTo(0, this.lastScrollPosition || 0);
         } else {
@@ -567,6 +580,7 @@ class BibleApp {
         // Save reading position after loading
         this.saveReadingPosition();
     }
+
 
     // ================================
     // Navigation
@@ -1419,6 +1433,93 @@ class BibleApp {
             this.footnotesSection.style.display = 'block';
         }
     }
+
+    // ==========================================
+    // NEW HELPER FUNCTIONS - Add below
+    // ==========================================
+
+    // Make footnote superscripts clickable
+    makeFootnotesClickable() {
+        const footnoteSupElements = this.passageText.querySelectorAll('sup.footnote');
+
+        footnoteSupElements.forEach((sup) => {
+            // Make it look like a link
+            sup.style.cursor = 'pointer';
+
+            // Add click event
+            sup.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const footnoteNumber = sup.textContent.trim();
+                const verseRef = this.getVerseReferenceForElement(sup);
+
+                // Show footnote modal with this info
+                this.showFootnoteModal(footnoteNumber, verseRef);
+            });
+        });
+    }
+
+    // Helper to find the verse reference for a given element
+    getVerseReferenceForElement(element) {
+        let currentElement = element;
+
+        // Walk backwards through siblings to find verse number
+        while (currentElement) {
+            const verseNum = currentElement.querySelector?.('.verse-num');
+            if (verseNum) {
+                const verseNumber = verseNum.textContent.trim();
+                return `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
+            }
+
+            currentElement = currentElement.previousElementSibling;
+
+            if (!currentElement || currentElement.tagName === 'H2' || currentElement.tagName === 'H3') {
+                break;
+            }
+        }
+
+        // Fallback: try walking up to parent
+        const parent = element.closest('p, div');
+        if (parent) {
+            const verses = parent.querySelectorAll('.verse-num');
+            if (verses.length > 0) {
+                for (let i = verses.length - 1; i >= 0; i--) {
+                    if (parent.contains(verses[i]) &&
+                        verses[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        const verseNumber = verses[i].textContent.trim();
+                        return `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
+                    }
+                }
+            }
+        }
+
+        // Final fallback
+        return `${this.state.currentBook} ${this.state.currentChapter}`;
+    }
+
+    // Show a simple footnote modal
+    showFootnoteModal(footnoteNumber, verseRef) {
+        this.footnotesSection.style.display = 'block';
+        this.crossReferencesSection.style.display = 'none';
+
+        this.footnotesContent.innerHTML = `
+        <div class="footnote-item">
+            <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
+                ${verseRef} [${footnoteNumber}]
+            </div>
+            <div class="footnote-text">
+                Footnote content not available with current API settings. 
+                To view full footnote text, enable "Show footnotes" in Settings.
+            </div>
+        </div>
+    `;
+
+        this.referencesModal.classList.add('active');
+    }
+
+    // ==========================================
+    // END OF NEW FUNCTIONS
+    // ==========================================
 
     loadCrossReferencesFromLink(link) {
         // Try to find cross-references in the title attribute or data attributes
