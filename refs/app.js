@@ -138,27 +138,21 @@ class BibleApp {
 	attachEventListeners() {
 		// Header
 		this.searchToggleBtn.addEventListener('click', () => this.toggleSearch());
-
 		this.helpBtn.addEventListener('click', () => this.openModal(this.helpModal));
-
 		this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
-
 		// Search
 		this.closeSearchBtn.addEventListener('click', () => this.closeSearch());
 		this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
 		this.searchInput.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') this.closeSearch();
 		});
-
 		// Navigation
 		this.prevChapterBtn.addEventListener('click', () => this.navigateChapter(-1));
 		this.nextChapterBtn.addEventListener('click', () => this.navigateChapter(1));
 		this.bookSelector.addEventListener('click', () => this.openBookModal());
 		this.chapterSelector.addEventListener('click', () => this.openChapterModal());
 		this.verseSelector.addEventListener('click', () => this.openVerseModal());
-
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
-
 		// References modal (footnotes and cross-references)
 		this.referencesModal = document.getElementById('referencesModal');
 		this.closeReferencesModal = document.getElementById('closeReferencesModal');
@@ -180,6 +174,62 @@ class BibleApp {
 		this.closeChapterModal.addEventListener('click', () => this.closeModal(this.chapterModal));
 		this.closeHelpModal.addEventListener('click', () => this.closeModal(this.helpModal));
 		this.closeSettingsModal.addEventListener('click', () => this.closeModal(this.settingsModal));
+
+		// References modal drag-to-resize and swipe-to-close
+		const referencesContent = this.referencesModal.querySelector('.modal-content');
+		const referencesHeader = this.referencesModal.querySelector('.modal-header');
+		const referencesBody = this.referencesModal.querySelector('.modal-body');
+
+		let isRefDragging = false;
+		let refStartY = 0;
+		let refStartHeight = 0;
+		let refStartScrollTop = 0;
+
+		const handleRefTouchStart = (e) => {
+			if (!referencesHeader.contains(e.target)) return;
+
+			isRefDragging = true;
+			refStartY = e.touches[0].clientY;
+			refStartHeight = referencesContent.offsetHeight;
+			refStartScrollTop = referencesBody.scrollTop;
+			referencesContent.classList.add('dragging');
+		};
+
+		const handleRefTouchMove = (e) => {
+			if (!isRefDragging) return;
+
+			const currentY = e.touches[0].clientY;
+			const deltaY = refStartY - currentY;
+			let newHeight = refStartHeight + deltaY;
+
+			const minHeight = 200;
+			const maxHeight = window.innerHeight * 0.9;
+			newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+			referencesContent.style.height = `${newHeight}px`;
+			e.preventDefault();
+		};
+
+		const handleRefTouchEnd = (e) => {
+			if (!isRefDragging) return;
+
+			isRefDragging = false;
+			referencesContent.classList.remove('dragging');
+
+			const endY = e.changedTouches[0].clientY;
+			const totalDragDistance = endY - refStartY;
+
+			if (totalDragDistance > 150 && refStartScrollTop === 0) {
+				this.closeModal(this.referencesModal);
+				setTimeout(() => {
+					referencesContent.style.height = '50vh';
+				}, 300);
+			}
+		};
+
+		referencesHeader.addEventListener('touchstart', handleRefTouchStart, { passive: false });
+		document.addEventListener('touchmove', handleRefTouchMove, { passive: false });
+		document.addEventListener('touchend', handleRefTouchEnd, { passive: true });
 
 		// Settings modal drag-to-resize and swipe-to-close
 		const settingsContent = this.settingsModal.querySelector('.modal-content');
@@ -863,7 +913,6 @@ class BibleApp {
 		updateThemeIcon(this.state.lightMode);
 	}
 
-
 	async toggleSetting(setting) {
 		// Map setting names to their toggle element names
 		const toggleMap = {
@@ -1091,6 +1140,7 @@ class BibleApp {
 					showVerseNumbers: true,
 					showHeadings: true,
 					showFootnotes: false,
+					showCrossReferences: false,  // ← ADD THIS
 					verseByVerse: false,
 				},
 				createdAt: Date.now()
@@ -1192,13 +1242,14 @@ class BibleApp {
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter);
 		}
 	}
+
 	// ==========================================
 	// FOOTNOTES AND CROSS-REFERENCES
 	// ==========================================
 
 	attachFootnoteHandlers() {
 		// Handle footnote and cross-reference clicks
-		const links = this.passageText.querySelectorAll('a, sup a');
+		const links = this.passageText.querySelectorAll('a.fn');
 
 		links.forEach(link => {
 			link.addEventListener('click', (e) => {
@@ -1224,9 +1275,6 @@ class BibleApp {
 			this.loadFootnote(footnoteId);
 		}
 
-		// Check for cross-references in the link or nearby
-		this.loadCrossReferencesFromLink(link);
-
 		// Open the modal
 		this.openModal(this.referencesModal);
 	}
@@ -1235,7 +1283,21 @@ class BibleApp {
 		const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
 
 		if (footnoteElement) {
-			const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
+			// Get the parent footnote paragraph
+			const footnotePara = footnoteElement.closest('.footnote');
+			let footnoteText = '';
+
+			if (footnotePara) {
+				// Extract clean text from the footnote
+				const noteElement = footnotePara.querySelector('note');
+				if (noteElement) {
+					footnoteText = this.stripHTML(noteElement.innerHTML);
+				} else {
+					footnoteText = this.stripHTML(footnotePara.innerHTML);
+				}
+			} else {
+				footnoteText = this.stripHTML(footnoteElement.innerHTML);
+			}
 
 			this.footnotesContent.innerHTML = `
             <div class="footnote-item">
@@ -1246,6 +1308,7 @@ class BibleApp {
 			this.footnotesSection.style.display = 'block';
 		}
 	}
+
 
 	loadCrossReferencesFromLink(link) {
 		// Try to find cross-references in the title attribute or data attributes

@@ -1643,3 +1643,108 @@ body.hide-verse-numbers .passage-text .verse-num {
 	background-color: var(--bg-secondary);
 	border-top: 1px solid var(--border-color);
 }
+
+/* References Modal - Bottom Sheet Style */
+.modal-bottom-sheet {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	top: auto;
+	transform: translateY(100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+	border-radius: var(--border-radius) var(--border-radius) 0 0;
+	max-width: 100%;
+	width: 100%;
+	height: 50vh;
+	max-height: 90vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.modal.active .modal-bottom-sheet {
+	transform: translateY(0);
+}
+
+.modal-bottom-sheet .modal-header {
+	cursor: grab;
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.modal-bottom-sheet .modal-header:active {
+	cursor: grabbing;
+}
+
+.modal-bottom-sheet .modal-body {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.modal-bottom-sheet.dragging {
+	transition: none;
+}
+
+/* Footnote and Cross-Reference Styling */
+.footnote-item {
+	padding: var(--spacing-md);
+	background: var(--bg-secondary);
+	border-radius: var(--border-radius);
+	margin-bottom: var(--spacing-sm);
+	border-left: 3px solid var(--accent-color);
+}
+
+.footnote-text {
+	color: var(--text-secondary);
+	line-height: 1.6;
+}
+
+.crossref-item {
+	margin-bottom: var(--spacing-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+}
+
+.crossref-header {
+	padding: var(--spacing-md);
+	background: var(--bg-secondary);
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	transition: background 0.2s;
+}
+
+.crossref-header:hover {
+	background: var(--hover-color);
+}
+
+.crossref-header.expanded {
+	background: var(--hover-color);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.crossref-verse-text {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease;
+}
+
+.crossref-verse-text.visible {
+	max-height: 500px;
+	padding: var(--spacing-md);
+}
+
+.crossref-loading {
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+.crossref-reference {
+	font-weight: 600;
+	color: var(--accent-color);
+	margin-bottom: var(--spacing-sm);
+}
