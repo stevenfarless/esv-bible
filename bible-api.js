@@ -1,5 +1,3 @@
-import { BibleApi } from './bible-api.js';
-
 export class BibleApi {
     constructor(baseUrl, getApiKey, getState) {
         this.baseUrl = baseUrl;
