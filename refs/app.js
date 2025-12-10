@@ -1226,159 +1226,153 @@ class BibleApp {
 // ==========================================
 
 attachFootnoteHandlers() {
-	// Handle footnote and cross-reference clicks
-	const links = this.passageText.querySelectorAll('a, sup a');
-
-	links.forEach(link => {
-		link.addEventListener('click', (e) => {
-			e.preventDefault();
-			this.handleReferenceClick(link);
-		});  // ← closes addEventListener
-	});  // ← ADD THIS: closes forEach
-}  // ← closes attachFootnoteHandlers
-
-
-
-handleReferenceClick(link) {
-	const href = link.getAttribute('href');
-
-	if (!href) return;
-
-	// Reset modal sections
-	this.footnotesSection.style.display = 'none';
-	this.crossReferencesSection.style.display = 'none';
-	this.footnotesContent.innerHTML = '';
-	this.crossReferencesContent.innerHTML = '';
-
-	// Check if it's a footnote (starts with #f)
-	if (href.startsWith('#f')) {
-		const footnoteId = href.substring(1);
-		this.loadFootnote(footnoteId);
-	}
-
-	// Check for cross-references in the link or nearby
-	this.loadCrossReferencesFromLink(link);
-
-	// Open the modal
-	this.openModal(this.referencesModal);
+    // Handle footnote and cross-reference clicks
+    const links = this.passageText.querySelectorAll('a, sup a');
+    
+    links.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleReferenceClick(link);
+        });
+    });
 }
 
-loadFootnote(footnoteId) {
-	const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
+handleReferenceClick(link) {  // ← ADD INDENT (1 tab)
+    const href = link.getAttribute('href');
+    
+    if (!href) return;
+    
+    // Reset modal sections
+    this.footnotesSection.style.display = 'none';
+    this.crossReferencesSection.style.display = 'none';
+    this.footnotesContent.innerHTML = '';
+    this.crossReferencesContent.innerHTML = '';
+    
+    // Check if it's a footnote (starts with #f)
+    if (href.startsWith('#f')) {
+        const footnoteId = href.substring(1);
+        this.loadFootnote(footnoteId);
+    }
+    
+    // Check for cross-references in the link or nearby
+    this.loadCrossReferencesFromLink(link);
+    
+    // Open the modal
+    this.openModal(this.referencesModal);
+}
 
-	if (footnoteElement) {
-		const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
+loadFootnote(footnoteId) {  // ← ADD INDENT (1 tab)
+    const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
+    
+    if (footnoteElement) {
+        const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
+        
+        this.footnotesContent.innerHTML = `
+            <div class="footnote-item">
+                <div class="footnote-text">${footnoteText}</div>
+            </div>
+        `;
+        
+        this.footnotesSection.style.display = 'block';
+    }
+}
 
-		this.footnotesContent.innerHTML = `
-                <div class="footnote-item">
-                    <div class="footnote-text">${footnoteText}</div>
+loadCrossReferencesFromLink(link) {  // ← ADD INDENT (1 tab)
+    // Try to find cross-references in the title attribute or data attributes
+    let crossRefs = link.getAttribute('title') || link.getAttribute('data-cross-refs') || '';
+    
+    // Also check the link text itself
+    const linkText = link.textContent.trim();
+    
+    // Parse references from various formats
+    const references = [];
+    
+    if (crossRefs) {
+        // Split by common delimiters
+        references.push(...crossRefs.split(/[;,]/).map(r => r.trim()).filter(r => r));
+    }
+    
+    // Check if link text looks like a reference (e.g., "Gen. 1:1")
+    if (linkText && linkText.match(/[A-Z][a-z]*\.?\s*\d+:\d+/)) {
+        references.push(linkText);
+    }
+    
+    // Check parent elements for cross-reference data
+    const parent = link.closest('.crossrefs, .cross-references, [class*="cross"]');
+    if (parent) {
+        const parentLinks = parent.querySelectorAll('a');
+        parentLinks.forEach(l => {
+            const ref = l.textContent.trim();
+            if (ref && !references.includes(ref)) {
+                references.push(ref);
+            }
+        });
+    }
+    
+    if (references.length > 0) {
+        this.displayCrossReferences(references);
+    }
+}
+
+displayCrossReferences(references) {  // ← ADD INDENT (1 tab)
+    let content = '';
+    
+    references.forEach((ref, index) => {
+        const safeId = `crossref-${index}-${Date.now()}`;
+        content += `
+            <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
+                <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
+                    <span>${ref}</span>
                 </div>
-            `;
-
-		this.footnotesSection.style.display = 'block';
-	}
-}
-
-loadCrossReferencesFromLink(link) {
-	// Try to find cross-references in the title attribute or data attributes
-	let crossRefs = link.getAttribute('title') || link.getAttribute('data-cross-refs') || '';
-
-	// Also check the link text itself
-	const linkText = link.textContent.trim();
-
-	// Parse references from various formats
-	const references = [];
-
-	if (crossRefs) {
-		// Split by common delimiters
-		references.push(...crossRefs.split(/[;,]/).map(r => r.trim()).filter(r => r));
-	}
-
-	// Check if link text looks like a reference (e.g., "Gen. 1:1")
-	if (linkText && linkText.match(/[A-Z][a-z]*\.?\s*\d+:\d+/)) {
-		references.push(linkText);
-	}
-
-	// Check parent elements for cross-reference data
-	const parent = link.closest('.crossrefs, .cross-references, [class*="cross"]');
-	if (parent) {
-		const parentLinks = parent.querySelectorAll('a');
-		parentLinks.forEach(l => {
-			const ref = l.textContent.trim();
-			if (ref && !references.includes(ref)) {
-				references.push(ref);
-			}
-		});
-	}
-
-	if (references.length > 0) {
-		this.displayCrossReferences(references);
-	}
-}
-
-displayCrossReferences(references) {
-	let content = '';
-
-	references.forEach((ref, index) => {
-		const safeId = `crossref-${index}-${Date.now()}`;
-		content += `
-                <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
-                    <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
-                        <span>${ref}</span>
-                    </div>
-                    <div class="crossref-verse-text" id="${safeId}">
-                        <div class="crossref-loading">Click to load verse...</div>
-                    </div>
+                <div class="crossref-verse-text" id="${safeId}">
+                    <div class="crossref-loading">Click to load verse...</div>
                 </div>
-            `;
-	});
-
-	this.crossReferencesContent.innerHTML = content;
-	this.crossReferencesSection.style.display = 'block';
+            </div>
+        `;
+    });
+    
+    this.crossReferencesContent.innerHTML = content;
+    this.crossReferencesSection.style.display = 'block';
 }
 
-    async toggleCrossReference(elementId) {
-	const verseTextElement = document.getElementById(elementId);
-	const crossrefItem = verseTextElement.closest('.crossref-item');
-	const reference = crossrefItem.getAttribute('data-reference');
-	const header = crossrefItem.querySelector('.crossref-header');
-
-	// Toggle visibility
-	if (verseTextElement.classList.contains('visible')) {
-		verseTextElement.classList.remove('visible');
-		header.classList.remove('expanded');
-	} else {
-		// If not loaded yet, fetch the verse
-		if (verseTextElement.innerHTML.includes('Click to load')) {
-			verseTextElement.innerHTML = '<div class="crossref-loading">Loading...</div>';
-
-			try {
-				const data = await this.bibleApi.fetchPassage(reference);
-				if (data && data.passages && data.passages[0]) {
-					// Strip HTML tags for cleaner display
-					const verseText = this.stripHTML(data.passages[0]);
-					verseTextElement.innerHTML = `<div class="crossref-reference">${reference}</div><div>${verseText}</div>`;
-				} else {
-					verseTextElement.innerHTML = '<div class="crossref-loading">Verse not found.</div>';
-				}
-			} catch (error) {
-				console.error('Error loading cross-reference:', error);
-				verseTextElement.innerHTML = '<div class="crossref-loading">Error loading verse.</div>';
-			}
-		}
-
-		verseTextElement.classList.add('visible');
-		header.classList.add('expanded');
-	}
+async toggleCrossReference(elementId) {  // ← Already has correct indent
+    const verseTextElement = document.getElementById(elementId);
+    const crossrefItem = verseTextElement.closest('.crossref-item');
+    const reference = crossrefItem.getAttribute('data-reference');
+    const header = crossrefItem.querySelector('.crossref-header');
+    
+    // Toggle visibility
+    if (verseTextElement.classList.contains('visible')) {
+        verseTextElement.classList.remove('visible');
+        header.classList.remove('expanded');
+    } else {
+        // If not loaded yet, fetch the verse
+        if (verseTextElement.innerHTML.includes('Click to load')) {
+            verseTextElement.innerHTML = '<div class="crossref-loading">Loading...</div>';
+            
+            try {
+                const data = await this.bibleApi.fetchPassage(reference);
+                if (data && data.passages && data.passages[0]) {
+                    // Strip HTML tags for cleaner display
+                    const verseText = this.stripHTML(data.passages[0]);
+                    verseTextElement.innerHTML = `<div class="crossref-reference">${reference}</div><div>${verseText}</div>`;
+                } else {
+                    verseTextElement.innerHTML = '<div class="crossref-loading">Verse not found.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading cross-reference:', error);
+                verseTextElement.innerHTML = '<div class="crossref-loading">Error loading verse.</div>';
+            }
+        }
+        
+        verseTextElement.classList.add('visible');
+        header.classList.add('expanded');
+    }
 }
-}
+}  // ← Closes BibleApp class
 
-// ================================
 // Initialize App
-// ================================
-
 document.addEventListener('DOMContentLoaded', () => {
-	const app = new BibleApp();
-	// Make app globally accessible for cross-reference toggle
-	window.bibleApp = app;
+    const app = new BibleApp();
+    window.bibleApp = app;
 });
