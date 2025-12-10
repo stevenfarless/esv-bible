@@ -1,5 +1,4 @@
 // ui.js
-
 // Responsibility: DOM caching, theme management
 
 export function cacheElements(app) {
@@ -66,9 +65,18 @@ export function cacheElements(app) {
     app.verseNumbersToggle = document.getElementById('verseNumbersToggle');
     app.headingsToggle = document.getElementById('headingsToggle');
     app.footnotesToggle = document.getElementById('footnotesToggle');
+    app.crossReferencesToggle = document.getElementById('crossReferencesToggle');
     app.verseByVerseToggle = document.getElementById('verseByVerseToggle');
     app.fontSizeSlider = document.getElementById('fontSizeSlider');
     app.fontSizeValue = document.getElementById('fontSizeValue');
+
+    // References modal (footnotes and cross-references)
+    app.referencesModal = document.getElementById('referencesModal');
+    app.closeReferencesModal = document.getElementById('closeReferencesModal');
+    app.footnotesSection = document.getElementById('footnotesSection');
+    app.footnotesContent = document.getElementById('footnotesContent');
+    app.crossReferencesSection = document.getElementById('crossReferencesSection');
+    app.crossReferencesContent = document.getElementById('crossReferencesContent');
 
     // Toast
     app.toast = document.getElementById('toast');

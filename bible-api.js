@@ -18,12 +18,11 @@ export class BibleApi {
             'q': reference,
             'include-headings': state.showHeadings,
             'include-footnotes': state.showFootnotes,
-            'include-cross-references': state.showFootnotes, // Enable cross-refs when footnotes enabled
-            'include-verse-numbers': true, // Always true for selection to work
+            'include-cross-references': state.showCrossReferences,
+            'include-verse-numbers': true,
             'include-short-copyright': false,
             'include-passage-references': false
         });
-
 
         try {
             const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {
