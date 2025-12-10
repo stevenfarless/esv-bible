@@ -1,63 +1,81 @@
-// bible-api.js
-// Responsibility: talking to the ESV API.
-// Use from BibleApp instead of inline methods.
+import { BibleApi } from './bible-api.js';
 
 export class BibleApi {
-    constructor(apiBaseUrl, getApiKey, getState) {
-        this.API_BASE_URL = apiBaseUrl;
-        this.getApiKey = getApiKey;   // () => string
-        this.getState = getState;     // () => current state object
+    constructor(baseUrl, getApiKey, getState) {
+        this.baseUrl = baseUrl;
+        this.getApiKey = getApiKey;
+        this.getState = getState;
     }
 
     async fetchPassage(reference) {
-        const API_KEY = this.getApiKey();
-        const state = this.getState();
-
-        if (!API_KEY) {
-            throw new Error('NO_API_KEY');
+        const apiKey = this.getApiKey();
+        if (!apiKey) {
+            console.error('No API key available');
+            return null;
         }
 
+        const state = this.getState();
+        
         const params = new URLSearchParams({
-            'q': reference,
+            q: reference,
             'include-headings': state.showHeadings,
             'include-footnotes': state.showFootnotes,
-            'include-cross-references': state.showFootnotes, // Enable cross-refs when footnotes enabled
-            'include-verse-numbers': true, // Always true for selection to work
+            'include-verse-numbers': state.showVerseNumbers,
             'include-short-copyright': false,
-            'include-passage-references': false
+            'include-passage-references': false,
+            
+            // ✅ ADD THESE CRITICAL PARAMETERS:
+            'include-footnote-body': false,        // Exclude footnotes at bottom
+            'include-footnotes-links': true,       // Include clickable footnote superscripts
+            'include-cross-references': true,      // Include cross-reference data
+            'include-selahs': true,
+            'indent-poetry': true,
+            'indent-paragraphs': 0,
+            'indent-declares': 0
         });
 
+        try {
+            const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {
+                headers: {
+                    'Authorization': `Token ${apiKey}`
+                }
+            });
 
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
 
-        const response = await fetch(`${this.API_BASE_URL}/passage/html/?${params}`, {
-            headers: { 'Authorization': `Token ${API_KEY}` }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP_${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching passage:', error);
+            return null;
         }
-
-        return response.json();
     }
 
-
     async searchPassages(query) {
-        const API_KEY = this.getApiKey();
-        if (!API_KEY || !query.trim()) return null;
+        const apiKey = this.getApiKey();
+        if (!apiKey) return null;
 
         const params = new URLSearchParams({
             q: query,
             'page-size': 20
         });
 
-        const response = await fetch(`${this.API_BASE_URL}/passage/search/?${params}`, {
-            headers: { 'Authorization': `Token ${API_KEY}` }
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/passage/search/?${params}`, {
+                headers: {
+                    'Authorization': `Token ${apiKey}`
+                }
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP_${response.status}`);
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching passages:', error);
+            return null;
         }
-
-        return response.json();
     }
 }
