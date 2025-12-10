@@ -1218,7 +1218,6 @@ class BibleApp {
 			console.error('Error loading reading position:', error);
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter);
 		}
-	}
 
 	// ==========================================
 	// FOOTNOTES AND CROSS-REFERENCES

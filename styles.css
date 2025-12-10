@@ -1279,17 +1279,13 @@ a:visited {
 .crossref-verse-text {
 	display: none;
 	margin-top: var(--spacing-sm);
-	padding: var(--spacing-md);
-	background-color: var(--bg-secondary);
-	border-radius: 4px;
-	color: var(--text-primary);
-	font-family: var(--font-serif);
-	line-height: 1.7;
-	animation: slideDown 0.2s ease;
+	padding-top: var(--spacing-md);
+	border-top: 1px solid var(--border-color);
 }
 
 .crossref-verse-text.visible {
 	display: block;
+	animation: slideDown 0.2s ease-out;
 }
 
 .crossref-loading {
@@ -1297,6 +1293,7 @@ a:visited {
 	font-style: italic;
 	font-size: 0.85rem;
 }
+
 
 @keyframes slideDown {
 	from {
