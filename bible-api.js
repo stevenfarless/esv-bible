@@ -13,24 +13,17 @@ export class BibleApi {
         }
 
         const state = this.getState();
-        
+
         const params = new URLSearchParams({
-            q: reference,
+            'q': reference,
             'include-headings': state.showHeadings,
             'include-footnotes': state.showFootnotes,
-            'include-verse-numbers': state.showVerseNumbers,
+            'include-cross-references': state.showFootnotes, // Enable cross-refs when footnotes enabled
+            'include-verse-numbers': true, // Always true for selection to work
             'include-short-copyright': false,
-            'include-passage-references': false,
-            
-            // ✅ ADD THESE CRITICAL PARAMETERS:
-            'include-footnote-body': false,        // Exclude footnotes at bottom
-            'include-footnotes-links': true,       // Include clickable footnote superscripts
-            'include-cross-references': true,      // Include cross-reference data
-            'include-selahs': true,
-            'indent-poetry': true,
-            'indent-paragraphs': 0,
-            'indent-declares': 0
+            'include-passage-references': false
         });
+
 
         try {
             const response = await fetch(`${this.baseUrl}/passage/html/?${params}`, {

@@ -10,6 +10,7 @@ export function initializeState() {
         showVerseNumbers: true,
         showHeadings: true,
         showFootnotes: false,
+        showCrossReferences: false,
         verseByVerse: false
     };
 }
