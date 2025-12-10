@@ -194,6 +194,14 @@ class BibleApp {
 
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
+		// References modal (footnotes and cross-references)
+		this.referencesModal = document.getElementById('referencesModal');
+		this.closeReferencesModal = document.getElementById('closeReferencesModal');
+		this.footnotesSection = document.getElementById('footnotesSection');
+		this.footnotesContent = document.getElementById('footnotesContent');
+		this.crossReferencesSection = document.getElementById('crossReferencesSection');
+		this.crossReferencesContent = document.getElementById('crossReferencesContent');
+
 		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal,
 		this.helpModal, this.loginModal, this.signupModal, this.userMenuModal, this.referencesModal]
 			.forEach(modal => {
@@ -201,9 +209,6 @@ class BibleApp {
 					if (e.target === modal) this.closeModal(modal);
 				});
 			});
-
-		// Copy button
-		this.copyBtn.addEventListener('click', () => this.copyPassage());
 
 		// Modals
 		this.closeBookModal.addEventListener('click', () => this.closeModal(this.bookModal));
@@ -395,8 +400,6 @@ class BibleApp {
 		this.footnotesSection = document.getElementById('footnotesSection');
 		this.footnotesContent = document.getElementById('footnotesContent');
 		this.crossReferencesSection = document.getElementById('crossReferencesSection');
-		this.crossReferencesContent = document.getElementById('crossReferencesContent');
-		this.closeReferencesModal.addEventListener('click', () => this.closeModal(this.referencesModal));
 
 		// Track scroll position
 		window.addEventListener('scroll', () => {
