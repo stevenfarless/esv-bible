@@ -1281,9 +1281,9 @@ class BibleApp {
         }
     }
 
-    // ==========================================
+    // =========================================
     // FOOTNOTES AND CROSS-REFERENCES
-    // ==========================================
+    // =========================================
 
     attachFootnoteHandlers() {
         // Handle footnote and cross-reference clicks
