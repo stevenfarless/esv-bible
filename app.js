@@ -1226,16 +1226,17 @@ class BibleApp {
     // ==========================================
 
     attachFootnoteHandlers() {
-        // Handle footnote and cross-reference clicks
-        const links = this.passageText.querySelectorAll('a, sup a');
-        
-        links.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleReferenceClick(link);
-            });
+    // Handle footnote and cross-reference clicks
+    const links = this.passageText.querySelectorAll('a, sup a');
+    
+    links.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleReferenceClick(link);
         });
-    }
+    });
+}
+
 
     handleReferenceClick(link) {
         const href = link.getAttribute('href');
