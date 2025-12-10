@@ -1218,6 +1218,7 @@ class BibleApp {
 			console.error('Error loading reading position:', error);
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter);
 		}
+	}
 
 	// ==========================================
 	// FOOTNOTES AND CROSS-REFERENCES
@@ -1226,7 +1227,7 @@ class BibleApp {
 	attachFootnoteHandlers() {
 		// Handle footnote and cross-reference clicks
 		const links = this.passageText.querySelectorAll('a, sup a');
-		
+
 		links.forEach(link => {
 			link.addEventListener('click', (e) => {
 				e.preventDefault();
@@ -1237,40 +1238,40 @@ class BibleApp {
 
 	handleReferenceClick(link) {
 		const href = link.getAttribute('href');
-		
+
 		if (!href) return;
-		
+
 		// Reset modal sections
 		this.footnotesSection.style.display = 'none';
 		this.crossReferencesSection.style.display = 'none';
 		this.footnotesContent.innerHTML = '';
 		this.crossReferencesContent.innerHTML = '';
-		
+
 		// Check if it's a footnote (starts with #f)
 		if (href.startsWith('#f')) {
 			const footnoteId = href.substring(1);
 			this.loadFootnote(footnoteId);
 		}
-		
+
 		// Check for cross-references in the link or nearby
 		this.loadCrossReferencesFromLink(link);
-		
+
 		// Open the modal
 		this.openModal(this.referencesModal);
 	}
 
 	loadFootnote(footnoteId) {
 		const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
-		
+
 		if (footnoteElement) {
 			const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
-			
+
 			this.footnotesContent.innerHTML = `
 				<div class="footnote-item">
 					<div class="footnote-text">${footnoteText}</div>
 				</div>
 			`;
-			
+
 			this.footnotesSection.style.display = 'block';
 		}
 	}
@@ -1278,23 +1279,23 @@ class BibleApp {
 	loadCrossReferencesFromLink(link) {
 		// Try to find cross-references in the title attribute or data attributes
 		let crossRefs = link.getAttribute('title') || link.getAttribute('data-cross-refs') || '';
-		
+
 		// Also check the link text itself
 		const linkText = link.textContent.trim();
-		
+
 		// Parse references from various formats
 		const references = [];
-		
+
 		if (crossRefs) {
 			// Split by common delimiters
 			references.push(...crossRefs.split(/[;,]/).map(r => r.trim()).filter(r => r));
 		}
-		
+
 		// Check if link text looks like a reference (e.g., "Gen. 1:1")
 		if (linkText && linkText.match(/[A-Z][a-z]*\.?\s*\d+:\d+/)) {
 			references.push(linkText);
 		}
-		
+
 		// Check parent elements for cross-reference data
 		const parent = link.closest('.crossrefs, .cross-references, [class*="cross"]');
 		if (parent) {
@@ -1306,7 +1307,7 @@ class BibleApp {
 				}
 			});
 		}
-		
+
 		if (references.length > 0) {
 			this.displayCrossReferences(references);
 		}
@@ -1314,7 +1315,7 @@ class BibleApp {
 
 	displayCrossReferences(references) {
 		let content = '';
-		
+
 		references.forEach((ref, index) => {
 			const safeId = `crossref-${index}-${Date.now()}`;
 			content += `
@@ -1328,7 +1329,7 @@ class BibleApp {
 				</div>
 			`;
 		});
-		
+
 		this.crossReferencesContent.innerHTML = content;
 		this.crossReferencesSection.style.display = 'block';
 	}
@@ -1338,7 +1339,7 @@ class BibleApp {
 		const crossrefItem = verseTextElement.closest('.crossref-item');
 		const reference = crossrefItem.getAttribute('data-reference');
 		const header = crossrefItem.querySelector('.crossref-header');
-		
+
 		// Toggle visibility
 		if (verseTextElement.classList.contains('visible')) {
 			verseTextElement.classList.remove('visible');
@@ -1347,7 +1348,7 @@ class BibleApp {
 			// If not loaded yet, fetch the verse
 			if (verseTextElement.innerHTML.includes('Click to load')) {
 				verseTextElement.innerHTML = '<div class="crossref-loading">Loading...</div>';
-				
+
 				try {
 					const data = await this.bibleApi.fetchPassage(reference);
 					if (data && data.passages && data.passages[0]) {
@@ -1362,7 +1363,7 @@ class BibleApp {
 					verseTextElement.innerHTML = '<div class="crossref-loading">Error loading verse.</div>';
 				}
 			}
-			
+
 			verseTextElement.classList.add('visible');
 			header.classList.add('expanded');
 		}
