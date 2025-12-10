@@ -187,10 +187,11 @@
 			</div>
 			<div class="modal-body">
 				<!-- Accordion Section 1: Display Options -->
-				<div class="accordion-section" data-section="display">
+				<div class="accordion-section active" data-section="display">
 					<button class="accordion-header" data-target="display">
 						<span class="accordion-title">Display Options</span>
-						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2">
 							<polyline points="6 9 12 15 18 9"></polyline>
 						</svg>
 					</button>
@@ -233,7 +234,8 @@
 				<div class="accordion-section" data-section="theme">
 					<button class="accordion-header" data-target="theme">
 						<span class="accordion-title">Theme</span>
-						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2">
 							<polyline points="6 9 12 15 18 9"></polyline>
 						</svg>
 					</button>
@@ -246,18 +248,13 @@
 									<option value="steel">Steel (Blue/Cool)</option>
 									<option value="onyx">Onyx (Gold/OLED)</option>
 								</select>
-								<small class="help-text">
-									Choose your preferred color scheme.
-								</small>
+								<small class="help-text">Choose your preferred color scheme.</small>
 							</div>
 							<div class="setting-item">
 								<label class="checkbox-label">
 									<input type="checkbox" id="lightModeToggle" />
 									<span>Light Mode</span>
 								</label>
-								<small class="help-text">
-									Switch between light and dark mode
-								</small>
 							</div>
 						</div>
 					</div>
@@ -267,7 +264,8 @@
 				<div class="accordion-section" data-section="api">
 					<button class="accordion-header" data-target="api">
 						<span class="accordion-title">API & Data</span>
-						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2">
 							<polyline points="6 9 12 15 18 9"></polyline>
 						</svg>
 					</button>
@@ -275,9 +273,11 @@
 						<div class="settings-group">
 							<div class="setting-item">
 								<label>ESV API Key</label>
-								<input type="text" id="apiKeyInput" class="input-field" placeholder="Enter your API key" />
+								<input type="text" id="apiKeyInput" class="input-field"
+									placeholder="Enter your API key" />
 								<small class="help-text">
-									Get your free API key at <a href="https://api.esv.org/account" target="_blank">api.esv.org/account</a>.
+									Get your free API key at <a href="https://api.esv.org/account"
+										target="_blank">api.esv.org/account</a>.
 								</small>
 							</div>
 							<button id="saveApiKeyBtn" class="primary-btn">Save API Key</button>
@@ -289,14 +289,16 @@
 				<div class="accordion-section" data-section="account">
 					<button class="accordion-header" data-target="account">
 						<span class="accordion-title">Account</span>
-						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2">
 							<polyline points="6 9 12 15 18 9"></polyline>
 						</svg>
 					</button>
 					<div class="accordion-panel" data-panel="account">
 						<div class="settings-group">
 							<p class="help-text">
-								Account settings (email, theme, reading position) are automatically synced via Firebase when you're signed in.
+								Account settings (email, theme, reading position) are automatically synced via Firebase
+								when you're signed in.
 							</p>
 							<button id="openAccountBtn" class="primary-btn" style="width: 100%; margin-top: 1rem;">
 								Manage Account
@@ -307,6 +309,7 @@
 			</div>
 		</div>
 	</div>
+
 
 	<!-- Help modal (now separate, correct placement) -->
 	<div id="helpModal" class="modal">
@@ -507,5 +510,3 @@
 
 
 </html>
-
-
