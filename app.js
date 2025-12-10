@@ -856,7 +856,6 @@ class BibleApp {
 		this.closeModal(this.settingsModal);
 		this.loadPassage(this.state.currentBook, this.state.currentChapter);
 	}
-}
 
 	loadLocalSettings() {
 		// API key for guests
