@@ -1235,7 +1235,6 @@ class BibleApp {
             this.handleReferenceClick(link);
         });
     });
-}
 
 
     handleReferenceClick(link) {
