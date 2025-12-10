@@ -1219,7 +1219,6 @@ class BibleApp {
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter);
 		}
 	}
-}
 
 	// ==========================================
 	// FOOTNOTES AND CROSS-REFERENCES
