@@ -18,13 +18,16 @@ export class BibleApi {
         }
 
         const params = new URLSearchParams({
-            q: reference,
+            'q': reference,
             'include-headings': state.showHeadings,
             'include-footnotes': state.showFootnotes,
-            'include-verse-numbers': true,  // ← Always true for selection to work
+            'include-cross-references': state.showFootnotes, // Enable cross-refs when footnotes enabled
+            'include-verse-numbers': true, // Always true for selection to work
             'include-short-copyright': false,
             'include-passage-references': false
         });
+
+
 
         const response = await fetch(`${this.API_BASE_URL}/passage/html/?${params}`, {
             headers: { 'Authorization': `Token ${API_KEY}` }

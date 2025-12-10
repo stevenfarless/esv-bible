@@ -1227,6 +1227,96 @@ a:visited {
 	text-decoration: none;
 }
 
+/* ==========================================
+   FOOTNOTES AND CROSS-REFERENCES MODAL
+   ========================================== */
+
+.footnote-item,
+.crossref-item {
+	margin-bottom: var(--spacing-lg);
+	padding: var(--spacing-md);
+	background-color: var(--bg-tertiary);
+	border-left: 3px solid var(--primary-color);
+	border-radius: 6px;
+}
+
+.footnote-header,
+.crossref-header {
+	font-weight: 600;
+	color: var(--primary-color);
+	margin-bottom: var(--spacing-xs);
+	font-size: 0.9rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	user-select: none;
+}
+
+.crossref-header::before {
+	content: '▶';
+	font-size: 0.8rem;
+	transition: transform var(--transition-fast);
+}
+
+.crossref-header.expanded::before {
+	transform: rotate(90deg);
+}
+
+.footnote-text {
+	color: var(--text-secondary);
+	line-height: 1.6;
+	font-size: 0.9rem;
+}
+
+.crossref-reference {
+	color: var(--accent-color);
+	font-weight: 500;
+	margin-bottom: var(--spacing-xs);
+	font-size: 0.95rem;
+}
+
+.crossref-verse-text {
+	display: none;
+	margin-top: var(--spacing-sm);
+	padding: var(--spacing-md);
+	background-color: var(--bg-secondary);
+	border-radius: 4px;
+	color: var(--text-primary);
+	font-family: var(--font-serif);
+	line-height: 1.7;
+	animation: slideDown 0.2s ease;
+}
+
+.crossref-verse-text.visible {
+	display: block;
+}
+
+.crossref-loading {
+	color: var(--text-muted);
+	font-style: italic;
+	font-size: 0.85rem;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Light mode adjustments */
+body.light-mode .footnote-item,
+body.light-mode .crossref-item {
+	background-color: var(--bg-tertiary);
+	border-left-color: var(--primary-color);
+}
+
 
 /* Light mode link colors */
 body.light-mode a {

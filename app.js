@@ -194,7 +194,8 @@ class BibleApp {
 
 		this.closeVerseModal.addEventListener('click', () => this.closeModal(this.verseModal));
 
-		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal, this.helpModal, this.loginModal, this.signupModal, this.userMenuModal]
+		[this.bookModal, this.chapterModal, this.verseModal, this.settingsModal,
+		this.helpModal, this.loginModal, this.signupModal, this.userMenuModal, this.referencesModal]
 			.forEach(modal => {
 				modal.addEventListener('click', (e) => {
 					if (e.target === modal) this.closeModal(modal);
@@ -388,6 +389,15 @@ class BibleApp {
 		this.closeSignupModal.addEventListener('click', () => this.closeModal(this.signupModal));
 		this.closeUserMenuModal.addEventListener('click', () => this.closeModal(this.userMenuModal));
 
+		// References modal (footnotes and cross-references)
+		this.referencesModal = document.getElementById('referencesModal');
+		this.closeReferencesModal = document.getElementById('closeReferencesModal');
+		this.footnotesSection = document.getElementById('footnotesSection');
+		this.footnotesContent = document.getElementById('footnotesContent');
+		this.crossReferencesSection = document.getElementById('crossReferencesSection');
+		this.crossReferencesContent = document.getElementById('crossReferencesContent');
+		this.closeReferencesModal.addEventListener('click', () => this.closeModal(this.referencesModal));
+
 		// Track scroll position
 		window.addEventListener('scroll', () => {
 			clearTimeout(this.scrollTimeout);
@@ -475,6 +485,9 @@ class BibleApp {
 
 		// cache original HTML for highlight logic
 		this.originalPassageHtml = this.passageText.innerHTML;
+
+		// Attach click handlers for footnotes and cross-references
+		this.attachFootnoteHandlers();
 
 		this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
 
@@ -999,6 +1012,10 @@ class BibleApp {
 			if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
 			if (this.searchContainer.classList.contains('active')) this.closeSearch();
 			if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
+			if (this.referencesModal.classList.contains('active')) {
+				this.closeModal(this.referencesModal);
+			}
+
 		}
 
 		// Navigation shortcuts (only when no modal is open and search is closed)
@@ -1204,10 +1221,162 @@ class BibleApp {
 	}
 }
 
+// ==========================================
+    // FOOTNOTES AND CROSS-REFERENCES
+    // ==========================================
+
+    attachFootnoteHandlers() {
+        // Handle footnote and cross-reference clicks
+        const links = this.passageText.querySelectorAll('a, sup a');
+        
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleReferenceClick(link);
+            });
+        });
+    }
+
+    handleReferenceClick(link) {
+        const href = link.getAttribute('href');
+        
+        if (!href) return;
+
+        // Reset modal sections
+        this.footnotesSection.style.display = 'none';
+        this.crossReferencesSection.style.display = 'none';
+        this.footnotesContent.innerHTML = '';
+        this.crossReferencesContent.innerHTML = '';
+
+        // Check if it's a footnote (starts with #f)
+        if (href.startsWith('#f')) {
+            const footnoteId = href.substring(1);
+            this.loadFootnote(footnoteId);
+        }
+        
+        // Check for cross-references in the link or nearby
+        this.loadCrossReferencesFromLink(link);
+        
+        // Open the modal
+        this.openModal(this.referencesModal);
+    }
+
+    loadFootnote(footnoteId) {
+        const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
+        
+        if (footnoteElement) {
+            const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
+            
+            this.footnotesContent.innerHTML = `
+                <div class="footnote-item">
+                    <div class="footnote-text">${footnoteText}</div>
+                </div>
+            `;
+            
+            this.footnotesSection.style.display = 'block';
+        }
+    }
+
+    loadCrossReferencesFromLink(link) {
+        // Try to find cross-references in the title attribute or data attributes
+        let crossRefs = link.getAttribute('title') || link.getAttribute('data-cross-refs') || '';
+        
+        // Also check the link text itself
+        const linkText = link.textContent.trim();
+        
+        // Parse references from various formats
+        const references = [];
+        
+        if (crossRefs) {
+            // Split by common delimiters
+            references.push(...crossRefs.split(/[;,]/).map(r => r.trim()).filter(r => r));
+        }
+        
+        // Check if link text looks like a reference (e.g., "Gen. 1:1")
+        if (linkText && linkText.match(/[A-Z][a-z]*\.?\s*\d+:\d+/)) {
+            references.push(linkText);
+        }
+        
+        // Check parent elements for cross-reference data
+        const parent = link.closest('.crossrefs, .cross-references, [class*="cross"]');
+        if (parent) {
+            const parentLinks = parent.querySelectorAll('a');
+            parentLinks.forEach(l => {
+                const ref = l.textContent.trim();
+                if (ref && !references.includes(ref)) {
+                    references.push(ref);
+                }
+            });
+        }
+        
+        if (references.length > 0) {
+            this.displayCrossReferences(references);
+        }
+    }
+
+    displayCrossReferences(references) {
+        let content = '';
+        
+        references.forEach((ref, index) => {
+            const safeId = `crossref-${index}-${Date.now()}`;
+            content += `
+                <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
+                    <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
+                        <span>${ref}</span>
+                    </div>
+                    <div class="crossref-verse-text" id="${safeId}">
+                        <div class="crossref-loading">Click to load verse...</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        this.crossReferencesContent.innerHTML = content;
+        this.crossReferencesSection.style.display = 'block';
+    }
+
+    async toggleCrossReference(elementId) {
+        const verseTextElement = document.getElementById(elementId);
+        const crossrefItem = verseTextElement.closest('.crossref-item');
+        const reference = crossrefItem.getAttribute('data-reference');
+        const header = crossrefItem.querySelector('.crossref-header');
+        
+        // Toggle visibility
+        if (verseTextElement.classList.contains('visible')) {
+            verseTextElement.classList.remove('visible');
+            header.classList.remove('expanded');
+        } else {
+            // If not loaded yet, fetch the verse
+            if (verseTextElement.innerHTML.includes('Click to load')) {
+                verseTextElement.innerHTML = '<div class="crossref-loading">Loading...</div>';
+                
+                try {
+                    const data = await this.bibleApi.fetchPassage(reference);
+                    if (data && data.passages && data.passages[0]) {
+                        // Strip HTML tags for cleaner display
+                        const verseText = this.stripHTML(data.passages[0]);
+                        verseTextElement.innerHTML = `<div class="crossref-reference">${reference}</div><div>${verseText}</div>`;
+                    } else {
+                        verseTextElement.innerHTML = '<div class="crossref-loading">Verse not found.</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading cross-reference:', error);
+                    verseTextElement.innerHTML = '<div class="crossref-loading">Error loading verse.</div>';
+                }
+            }
+            
+            verseTextElement.classList.add('visible');
+            header.classList.add('expanded');
+        }
+    }
+}
+
 // ================================
 // Initialize App
 // ================================
 
 document.addEventListener('DOMContentLoaded', () => {
-	const app = new BibleApp();
+    const app = new BibleApp();
+    // Make app globally accessible for cross-reference toggle
+    window.bibleApp = app;
 });
