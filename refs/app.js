@@ -832,12 +832,14 @@ class BibleApp {
 		this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
 		this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
 		this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+		this.state.showCrossReferences = localStorage.getItem('showCrossReferences') === 'true';
 		this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
 
 		// Theme: read but do not apply yet
 		this.state.colorTheme = localStorage.getItem('colorTheme') || 'dracula';
 		this.state.lightMode = localStorage.getItem('lightMode') === 'true';
 	}
+
 
 	applySettings() {
 		// API key input, toggles, font size etc...
@@ -867,7 +869,8 @@ class BibleApp {
 		const toggleMap = {
 			'showVerseNumbers': 'verseNumbersToggle',
 			'showHeadings': 'headingsToggle',
-			'showFootnotes': 'footnotesToggle'
+			'showFootnotes': 'footnotesToggle',
+			'showCrossReferences': 'crossReferencesToggle'
 		};
 
 		const toggleElement = this[toggleMap[setting]];
@@ -893,10 +896,11 @@ class BibleApp {
 			// Save current scroll position BEFORE reloading
 			this.lastScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
 
-			// Reload passage for headings/footnotes
+			// Reload passage for headings/footnotes/cross-references
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
 		}
 	}
+
 
 
 	async toggleVerseByVerse() {
@@ -1137,10 +1141,12 @@ class BibleApp {
 		this.state.showVerseNumbers = s.showVerseNumbers;
 		this.state.showHeadings = s.showHeadings;
 		this.state.showFootnotes = s.showFootnotes;
+		this.state.showCrossReferences = s.showCrossReferences || false;
 		this.state.verseByVerse = s.verseByVerse;
 		this.state.colorTheme = s.colorTheme || 'dracula';
 		this.state.lightMode = typeof s.lightMode === 'boolean' ? s.lightMode : false;
 	}
+
 
 	// ================================
 	// Reading Position Persistence
@@ -1186,7 +1192,6 @@ class BibleApp {
 			await this.loadPassage(this.state.currentBook, this.state.currentChapter);
 		}
 	}
-
 	// ==========================================
 	// FOOTNOTES AND CROSS-REFERENCES
 	// ==========================================
@@ -1205,7 +1210,6 @@ class BibleApp {
 
 	handleReferenceClick(link) {
 		const href = link.getAttribute('href');
-
 		if (!href) return;
 
 		// Reset modal sections
@@ -1216,7 +1220,7 @@ class BibleApp {
 
 		// Check if it's a footnote (starts with #f)
 		if (href.startsWith('#f')) {
-			const footnoteId = href.substring(1);
+			const footnoteId = href.substring(1); // Remove the #
 			this.loadFootnote(footnoteId);
 		}
 
@@ -1234,10 +1238,10 @@ class BibleApp {
 			const footnoteText = footnoteElement.textContent || footnoteElement.innerText;
 
 			this.footnotesContent.innerHTML = `
-				<div class="footnote-item">
-					<div class="footnote-text">${footnoteText}</div>
-				</div>
-			`;
+            <div class="footnote-item">
+                <div class="footnote-text">${footnoteText}</div>
+            </div>
+        `;
 
 			this.footnotesSection.style.display = 'block';
 		}
@@ -1286,15 +1290,15 @@ class BibleApp {
 		references.forEach((ref, index) => {
 			const safeId = `crossref-${index}-${Date.now()}`;
 			content += `
-				<div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
-					<div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
-						<span>${ref}</span>
-					</div>
-					<div class="crossref-verse-text" id="${safeId}">
-						<div class="crossref-loading">Click to load verse...</div>
-					</div>
-				</div>
-			`;
+            <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
+                <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
+                    <span>${ref}</span>
+                </div>
+                <div class="crossref-verse-text" id="${safeId}">
+                    <div class="crossref-loading">Click to load verse...</div>
+                </div>
+            </div>
+        `;
 		});
 
 		this.crossReferencesContent.innerHTML = content;
@@ -1318,10 +1322,14 @@ class BibleApp {
 
 				try {
 					const data = await this.bibleApi.fetchPassage(reference);
+
 					if (data && data.passages && data.passages[0]) {
 						// Strip HTML tags for cleaner display
 						const verseText = this.stripHTML(data.passages[0]);
-						verseTextElement.innerHTML = `<div class="crossref-reference">${reference}</div><div>${verseText}</div>`;
+						verseTextElement.innerHTML = `
+                        <div class="crossref-reference">${reference}</div>
+                        <div>${verseText}</div>
+                    `;
 					} else {
 						verseTextElement.innerHTML = '<div class="crossref-loading">Verse not found.</div>';
 					}
@@ -1335,9 +1343,12 @@ class BibleApp {
 			header.classList.add('expanded');
 		}
 	}
-}
 
-// Initialize App
+} // ← End of BibleApp class
+
+// ==========================================
+// INITIALIZE APP
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 	const app = new BibleApp();
 	window.bibleApp = app;
