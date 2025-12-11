@@ -1210,9 +1210,8 @@ a:visited {
 	line-height: 0;
 }
 
-/* Style the .footnote class directly (no anchor tag) */
+/* Style the .footnote class and its anchor */
 .passage-text sup.footnote {
-	color: var(--primary-color);
 	font-weight: 700;
 	padding: 0 0.2em;
 	border-radius: 3px;
@@ -1220,8 +1219,16 @@ a:visited {
 	cursor: pointer;
 }
 
-.passage-text sup.footnote:hover {
+.passage-text sup.footnote a {
+	color: var(--primary-color);
+	text-decoration: none;
+}
+
+.passage-text sup.footnote:hover a {
 	color: var(--primary-light);
+}
+
+.passage-text sup.footnote:hover {
 	transform: scale(1.15);
 }
 
@@ -1234,18 +1241,20 @@ body:not(.steel-theme):not(.onyx-theme) .passage-text sup.footnote:hover {
 	background-color: rgba(189, 147, 249, 0.15);
 }
 
-/* Onyx theme - force bright gold with !important */
-.onyx-theme .passage-text sup.footnote {
+/* Onyx theme - target the anchor tag specifically */
+.onyx-theme .passage-text sup.footnote a {
 	color: #ffd700 !important;
 	/* Pure bright gold */
 }
 
-.onyx-theme .passage-text sup.footnote:hover {
+.onyx-theme .passage-text sup.footnote:hover a {
 	color: #ffed4e !important;
 	/* Even brighter on hover */
-	background-color: rgba(255, 215, 0, 0.25) !important;
 }
 
+.onyx-theme .passage-text sup.footnote:hover {
+	background-color: rgba(255, 215, 0, 0.25) !important;
+}
 
 /* ==========================================
    FOOTNOTES AND CROSS-REFERENCES MODAL
