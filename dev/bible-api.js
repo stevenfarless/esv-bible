@@ -21,7 +21,7 @@ export class BibleApi {
             'include-short-copyright': false,
             'include-passage-references': false,
             'include-footnotes': state.showFootnotes,
-            'include-footnote-body': false,
+            'include-footnote-body': state.showFootnotes,  // This must match showFootnotes to get footnote text!
             'include-cross-references': state.showCrossReferences || false,
             'include-selahs': true,
             'indent-poetry': true,
