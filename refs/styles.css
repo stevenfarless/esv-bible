@@ -1213,7 +1213,6 @@ a:visited {
 /* Style the .footnote class directly (no anchor tag) */
 .passage-text sup.footnote {
 	color: var(--primary-color);
-	/* Gold for Onyx, Purple for Dracula, Blue for Steel */
 	font-weight: 700;
 	padding: 0 0.2em;
 	border-radius: 3px;
@@ -1233,13 +1232,20 @@ a:visited {
 
 body:not(.steel-theme):not(.onyx-theme) .passage-text sup.footnote:hover {
 	background-color: rgba(189, 147, 249, 0.15);
-	/* Dracula purple */
+}
+
+/* Onyx theme - force bright gold with !important */
+.onyx-theme .passage-text sup.footnote {
+	color: #ffd700 !important;
+	/* Pure bright gold */
 }
 
 .onyx-theme .passage-text sup.footnote:hover {
-	background-color: rgba(212, 175, 55, 0.2);
-	/* Gold glow */
+	color: #ffed4e !important;
+	/* Even brighter on hover */
+	background-color: rgba(255, 215, 0, 0.25) !important;
 }
+
 
 /* ==========================================
    FOOTNOTES AND CROSS-REFERENCES MODAL
