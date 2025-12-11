@@ -1478,28 +1478,40 @@ class BibleApp {
     }
 
     // Show a simple footnote modal
-    // In app.js, replace showFootnoteModal with this version
     showFootnoteModal(footnoteNumber, verseRef) {
-        // Try to find matching bottom-of-page footnote span (same as loadFootnote does)
-        const allFootnotes = this.passageText.querySelectorAll('.footnote');
+        // Find the matching <sup class="footnote"> that has this number
+        const allSups = this.passageText.querySelectorAll('sup.footnote');
         let footnoteText = '';
 
-        allFootnotes.forEach(span => {
-            const ref = span.querySelector('.footnote-ref');
-            if (!ref) return;
-            const refText = ref.textContent.trim();
-            if (refText === footnoteNumber || refText.endsWith(`[${footnoteNumber}]`)) {
-                // Collect text after the ref inside this span
-                const clone = span.cloneNode(true);
-                const toRemove = clone.querySelector('.footnote-ref');
-                if (toRemove) toRemove.remove();
-                footnoteText = clone.textContent.trim();
+        allSups.forEach(sup => {
+            const link = sup.querySelector('a.fn');
+            if (!link) return;
+
+            const linkText = link.textContent.trim();
+            if (linkText === footnoteNumber) {
+                // Get the title attribute which contains the HTML-encoded note
+                const title = link.getAttribute('title');
+                if (title) {
+                    // Decode HTML entities
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = title;
+                    const decoded = tempDiv.textContent || tempDiv.innerText || '';
+
+                    // Extract text from <note>...</note> wrapper
+                    const noteMatch = decoded.match(/<note[^>]*>(.*?)<\/note>/s);
+                    if (noteMatch) {
+                        // Parse the inner HTML to preserve formatting like <i>
+                        tempDiv.innerHTML = noteMatch[1];
+                        footnoteText = tempDiv.innerHTML;
+                    } else {
+                        footnoteText = decoded;
+                    }
+                }
             }
         });
 
         if (!footnoteText) {
-            footnoteText =
-                'Footnote content not available with current API settings. To view full footnote text, enable "Show footnotes" in Settings.';
+            footnoteText = 'Footnote content not available with current API settings. To view full footnote text, enable "Show footnotes" in Settings.';
         }
 
         this.footnotesSection.style.display = 'block';
@@ -1516,6 +1528,7 @@ class BibleApp {
   `;
         this.referencesModal.classList.add('active');
     }
+
 
 
     // ==========================================
