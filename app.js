@@ -6,6 +6,7 @@ import { BibleApi } from './bible-api.js';
 import { initializeState, navigateChapter as navChapter, scrollToVerse as scrollVerse, applyVerseGlow as glowVerse } from './reading-state.js';
 import { loadUserData as loadUserDataFromFirebase } from './firebase-config.js';
 import { cacheElements, loadTheme, toggleTheme, updateThemeIcon, changeColorTheme } from './ui.js';
+
 class BibleApp {
     constructor() {
         // Configuration
@@ -403,6 +404,12 @@ class BibleApp {
             this.crossReferencesToggle.addEventListener('change', () => this.toggleSetting('showCrossReferences'));
         }
 
+        // NEW: Translation selector
+        this.translationSelector = document.getElementById('translationSelector');
+        if (this.translationSelector) {
+            this.translationSelector.addEventListener('change', () => this.changeTranslation());
+        }
+
         this.verseByVerseToggle.addEventListener('change', () => this.toggleVerseByVerse());
         this.fontSizeSlider.addEventListener('input', (e) => this.updateFontSize(e.target.value));
 
@@ -573,8 +580,12 @@ class BibleApp {
         // ← NEW: Make footnote superscripts clickable ↓
         this.makeFootnotesClickable();
 
-        // Update copyright
-        this.copyright.textContent = `Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.`;
+        // Update copyright based on translation
+        if (this.state.translation === 'KJV') {
+            this.copyright.textContent = 'King James Version (KJV) - Public Domain';
+        } else {
+            this.copyright.textContent = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.';
+        }
 
         // Reset verse selector
         this.currentVerseSpan.textContent = '1';
@@ -589,7 +600,6 @@ class BibleApp {
         // Save reading position after loading
         this.saveReadingPosition();
     }
-
 
     // ================================
     // Navigation
@@ -685,6 +695,12 @@ class BibleApp {
     }
 
     async performKeywordSearch(query) {
+        // Check if KJV is selected
+        if (this.state.translation === 'KJV') {
+            this.searchResults.innerHTML = '<div class="search-no-results">Keyword search is only available for ESV translation.</div>';
+            return;
+        }
+
         this.searchResults.innerHTML = '<div class="loading" style="min-height: 100px">Searching...</div>';
 
         const data = await this.bibleApi.searchPassages(query);
@@ -903,10 +919,14 @@ class BibleApp {
     // ================================
 
     checkApiKey() {
+        // KJV doesn't require an API key
+        if (this.state.translation === 'KJV') {
+            return;
+        }
+
         if (!this.API_KEY) {
             setTimeout(() => {
-                this.showToast('Welcome! Please sign in to start reading.');
-                // Open login modal instead of signup
+                this.showToast('Welcome! Please sign in or add an ESV API key to start reading.');
                 this.openModal(this.loginModal);
             }, 500);
         }
@@ -953,6 +973,7 @@ class BibleApp {
         this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
         this.state.showCrossReferences = localStorage.getItem('showCrossReferences') === 'true';
         this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+        this.state.translation = localStorage.getItem('translation') || 'ESV'; // NEW
 
         // Theme: read but do not apply yet
         this.state.colorTheme = localStorage.getItem('colorTheme') || 'dracula';
@@ -964,6 +985,11 @@ class BibleApp {
         const themeSelector = document.getElementById('themeSelector');
         if (themeSelector && this.state.colorTheme) {
             themeSelector.value = this.state.colorTheme;
+        }
+
+        // NEW: Translation selector UI
+        if (this.translationSelector && this.state.translation) {
+            this.translationSelector.value = this.state.translation;
         }
 
         // Apply color theme class
@@ -1034,6 +1060,32 @@ class BibleApp {
         }
     }
 
+    async changeTranslation() {
+        const newTranslation = this.translationSelector.value;
+        this.state.translation = newTranslation;
+
+        // Save to Firebase or localStorage
+        if (this.currentUser) {
+            await this.database.ref(`users/${this.currentUser.uid}/settings/translation`).set(newTranslation);
+        } else {
+            localStorage.setItem('translation', newTranslation);
+        }
+
+        // Show appropriate message based on translation
+        if (newTranslation === 'KJV') {
+            this.showToast('Switched to KJV - No API key required!');
+        } else if (newTranslation === 'ESV' && !this.API_KEY) {
+            this.showToast('ESV requires an API key - Please add one in settings');
+            return;
+        } else {
+            this.showToast(`Switched to ${newTranslation}`);
+        }
+
+        // Reload current passage with new translation
+        this.lastScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
+    }
+
     async updateFontSize(size) {
         this.state.fontSize = parseInt(size);
         this.fontSizeValue.textContent = `${size}px`;
@@ -1065,7 +1117,6 @@ class BibleApp {
                 this.showToast('Failed to copy passage');
             });
     }
-
     showError(message) {
         this.passageText.innerHTML = `<div class="error">${message}</div>`;
     }
@@ -1096,14 +1147,12 @@ class BibleApp {
             if (this.userMenuModal.classList.contains('active')) this.closeModal(this.userMenuModal);
             if (this.searchContainer.classList.contains('active')) this.closeSearch();
             if (this.verseModal.classList.contains('active')) this.closeModal(this.verseModal);
-            if (this.referencesModal.classList.contains('active')) {
-                this.closeModal(this.referencesModal);
-            }
+            if (this.referencesModal.classList.contains('active')) this.closeModal(this.referencesModal);
         }
 
         // Navigation shortcuts (only when no modal is open and search is closed)
         if (!document.querySelector('.modal.active') && !this.searchContainer.classList.contains('active')) {
-            // Chapter navigation: Arrow Left/Right or H/L
+            // Chapter navigation (Arrow Left/Right or H/L)
             if (e.key === 'ArrowLeft' || e.key === 'h') {
                 e.preventDefault();
                 this.navigateChapter(-1);
@@ -1111,8 +1160,7 @@ class BibleApp {
                 e.preventDefault();
                 this.navigateChapter(1);
             }
-
-            // Verse navigation: Arrow Up/Down or K/J
+            // Verse navigation (Arrow Up/Down or K/J)
             else if (e.key === 'ArrowUp' || e.key === 'k') {
                 e.preventDefault();
                 this.navigateToPreviousVerse();
@@ -1131,8 +1179,10 @@ class BibleApp {
         if (this.currentUser) {
             // Show user menu
             document.getElementById('userEmail').textContent = this.currentUser.email;
-            const theme = document.body.classList.contains('light-mode') ? 'Alucard (Light)' : 'Dracula (Dark)';
-            document.getElementById('userTheme').textContent = theme;
+            const colorTheme = this.state.colorTheme.charAt(0).toUpperCase() + this.state.colorTheme.slice(1);
+            const themeMode = document.body.classList.contains('light-mode') ? 'Light' : 'Dark';
+            document.getElementById('userTheme').textContent = `${colorTheme} ${themeMode}`;
+            document.getElementById('userTranslation').textContent = this.state.translation; // NEW
             this.openModal(this.userMenuModal);
         } else {
             // Show login modal
@@ -1168,7 +1218,7 @@ class BibleApp {
             } else if (error.code === 'auth/wrong-password') {
                 this.showToast('Incorrect password');
             } else {
-                this.showToast(`Login failed: ${error.message}`);
+                this.showToast('Login failed: ' + error.message);
             }
         }
     }
@@ -1204,6 +1254,7 @@ class BibleApp {
                     showFootnotes: false,
                     showCrossReferences: false,
                     verseByVerse: false,
+                    translation: 'ESV' // NEW
                 },
                 createdAt: Date.now()
             });
@@ -1220,7 +1271,7 @@ class BibleApp {
             if (error.code === 'auth/email-already-in-use') {
                 this.showToast('Account already exists. Please sign in.');
             } else {
-                this.showToast(`Signup failed: ${error.message}`);
+                this.showToast('Signup failed: ' + error.message);
             }
         }
     }
@@ -1248,7 +1299,6 @@ class BibleApp {
 
         this.API_KEY = data.apiKey;
         const s = data.settings;
-
         this.state.fontSize = s.fontSize;
         this.state.showVerseNumbers = s.showVerseNumbers;
         this.state.showHeadings = s.showHeadings;
@@ -1257,6 +1307,7 @@ class BibleApp {
         this.state.verseByVerse = s.verseByVerse;
         this.state.colorTheme = s.colorTheme || 'dracula';
         this.state.lightMode = typeof s.lightMode === 'boolean' ? s.lightMode : false;
+        this.state.translation = s.translation || 'ESV'; // NEW
     }
 
     // ================================
@@ -1304,14 +1355,13 @@ class BibleApp {
         }
     }
 
-    // =========================================
+    // ==========================================
     // FOOTNOTES AND CROSS-REFERENCES
-    // =========================================
+    // ==========================================
 
     attachFootnoteHandlers() {
         // Handle footnote and cross-reference clicks
         const links = this.passageText.querySelectorAll('a.fn');
-
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1330,14 +1380,13 @@ class BibleApp {
         this.footnotesContent.innerHTML = '';
         this.crossReferencesContent.innerHTML = '';
 
-        // Check if it's a footnote (starts with #f)
+        // Check if it's a footnote (starts with '#f')
         if (href.startsWith('#f')) {
-            const footnoteId = href.substring(1); // Remove the #
-            this.loadFootnote(footnoteId, link); // ← Pass the link!
+            const footnoteId = href.substring(1); // Remove the '#'
+            this.loadFootnote(footnoteId, link); // Pass the link!
+            // Open the modal
+            this.openModal(this.referencesModal);
         }
-
-        // Open the modal
-        this.openModal(this.referencesModal);
     }
 
     loadFootnote(footnoteId, clickedLink) {
@@ -1350,6 +1399,7 @@ class BibleApp {
         if (footnoteElement) {
             // The footnote anchor is inside a span.footnote, get its parent
             const footnoteSpan = footnoteElement.closest('.footnote');
+
             if (!footnoteSpan) {
                 this.showFootnoteError(verseRef);
                 return;
@@ -1361,14 +1411,10 @@ class BibleApp {
 
             while (currentNode) {
                 // Stop if we hit a BR (end of this footnote) or another .footnote span
-                if (currentNode.nodeName === 'BR') {
-                    break;
-                }
-                if (currentNode.nodeType === 1 && currentNode.classList && currentNode.classList.contains('footnote')) {
-                    break;
-                }
+                if (currentNode.nodeName === 'BR') break;
+                if (currentNode.nodeType === 1 && currentNode.classList && currentNode.classList.contains('footnote')) break;
 
-                // Skip the verse reference span (e.g., "1:6")
+                // Skip the verse reference span (e.g., "1:6 ")
                 if (currentNode.nodeType === 1 && currentNode.classList && currentNode.classList.contains('footnote-ref')) {
                     currentNode = currentNode.nextSibling;
                     continue;
@@ -1393,11 +1439,12 @@ class BibleApp {
             // Display the footnote
             this.footnotesContent.innerHTML = `
                 <div class="footnote-item">
-                    <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
+                    <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
+                        ${verseRef}
+                    </div>
                     <div class="footnote-text">${footnoteText || 'Footnote text not found.'}</div>
                 </div>
             `;
-
             this.footnotesSection.style.display = 'block';
         } else {
             this.showFootnoteError(verseRef);
@@ -1407,7 +1454,9 @@ class BibleApp {
     showFootnoteError(verseRef) {
         this.footnotesContent.innerHTML = `
             <div class="footnote-item">
-                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
+                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
+                    ${verseRef}
+                </div>
                 <div class="footnote-text">Footnote not found. Make sure "Show footnotes" is enabled in Settings, then reload this passage.</div>
             </div>
         `;
@@ -1415,14 +1464,14 @@ class BibleApp {
     }
 
     // ==========================================
-    // NEW HELPER FUNCTIONS 
+    // NEW HELPER FUNCTIONS
     // ==========================================
 
     // Make footnote superscripts clickable
     makeFootnotesClickable() {
         const footnoteSupElements = this.passageText.querySelectorAll('sup.footnote');
 
-        footnoteSupElements.forEach((sup) => {
+        footnoteSupElements.forEach(sup => {
             // Make it look like a link
             sup.style.cursor = 'pointer';
 
@@ -1450,7 +1499,6 @@ class BibleApp {
                 const verseNumber = verseNum.textContent.trim();
                 return `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
             }
-
             currentElement = currentElement.previousElementSibling;
 
             if (!currentElement || currentElement.tagName === 'H2' || currentElement.tagName === 'H3') {
@@ -1463,9 +1511,9 @@ class BibleApp {
         if (parent) {
             const verses = parent.querySelectorAll('.verse-num');
             if (verses.length > 0) {
+                // Find the verse before this element
                 for (let i = verses.length - 1; i >= 0; i--) {
-                    if (parent.contains(verses[i]) &&
-                        verses[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                    if (parent.contains(verses[i]) && verses[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) {
                         const verseNumber = verses[i].textContent.trim();
                         return `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
                     }
@@ -1516,23 +1564,22 @@ class BibleApp {
 
         this.footnotesSection.style.display = 'block';
         this.crossReferencesSection.style.display = 'none';
+
         this.footnotesContent.innerHTML = `
-    <div class="footnote-item">
-      <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
-        ${verseRef} [${footnoteNumber}]
-      </div>
-      <div class="footnote-text">
-        ${footnoteText}
-      </div>
-    </div>
-  `;
+            <div class="footnote-item">
+                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
+                    ${verseRef} [${footnoteNumber}]
+                </div>
+                <div class="footnote-text">
+                    ${footnoteText}
+                </div>
+            </div>
+        `;
+
         this.referencesModal.classList.add('active');
     }
 
-
-    // ==========================================
     // END OF NEW FUNCTIONS
-    // ==========================================
 
     loadCrossReferencesFromLink(link) {
         // Try to find cross-references in the title attribute or data attributes
@@ -1543,19 +1590,18 @@ class BibleApp {
 
         // Parse references from various formats
         const references = [];
-
         if (crossRefs) {
             // Split by common delimiters
-            references.push(...crossRefs.split(/[;,]/).map(r => r.trim()).filter(r => r));
+            references.push(...crossRefs.split(/[,;]/).map(r => r.trim()).filter(r => r));
         }
 
         // Check if link text looks like a reference (e.g., "Gen. 1:1")
-        if (linkText && linkText.match(/[A-Z][a-z]*\.?\s*\d+:\d+/)) {
+        if (linkText && linkText.match(/[A-Za-z]+\.?\s+\d+/)) {
             references.push(linkText);
         }
 
         // Check parent elements for cross-reference data
-        const parent = link.closest('.crossrefs, .cross-references, [class*="cross"]');
+        const parent = link.closest('.crossrefs, .cross-references, [class*=cross]');
         if (parent) {
             const parentLinks = parent.querySelectorAll('a');
             parentLinks.forEach(l => {
@@ -1577,15 +1623,15 @@ class BibleApp {
         references.forEach((ref, index) => {
             const safeId = `crossref-${index}-${Date.now()}`;
             content += `
-            <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
-                <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
-                    <span>${ref}</span>
+                <div class="crossref-item" data-reference="${ref}" data-id="${safeId}">
+                    <div class="crossref-header" onclick="window.bibleApp.toggleCrossReference('${safeId}')">
+                        <span>${ref}</span>
+                    </div>
+                    <div class="crossref-verse-text" id="${safeId}">
+                        <div class="crossref-loading">Click to load verse...</div>
+                    </div>
                 </div>
-                <div class="crossref-verse-text" id="${safeId}">
-                    <div class="crossref-loading">Click to load verse...</div>
-                </div>
-            </div>
-        `;
+            `;
         });
 
         this.crossReferencesContent.innerHTML = content;
@@ -1614,9 +1660,9 @@ class BibleApp {
                         // Strip HTML tags for cleaner display
                         const verseText = this.stripHTML(data.passages[0]);
                         verseTextElement.innerHTML = `
-                        <div class="crossref-reference">${reference}</div>
-                        <div>${verseText}</div>
-                    `;
+                            <div class="crossref-reference">${reference}</div>
+                            <div>${verseText}</div>
+                        `;
                     } else {
                         verseTextElement.innerHTML = '<div class="crossref-loading">Verse not found.</div>';
                     }
@@ -1630,13 +1676,23 @@ class BibleApp {
             header.classList.add('expanded');
         }
     }
+}
 
-} // ← End of BibleApp class
+// ================================
+// Initialize App
+// ================================
 
-// ==========================================
-// INITIALIZE APP
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const app = new BibleApp();
-    window.bibleApp = app;
-});
+// Make app globally accessible (needed for onclick handlers)
+window.bibleApp = null;
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.bibleApp = new BibleApp();
+    });
+} else {
+    window.bibleApp = new BibleApp();
+}
+
+// Export for module usage
+export default BibleApp;

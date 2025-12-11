@@ -10,13 +10,13 @@ export function initializeState() {
         showVerseNumbers: true,
         showHeadings: true,
         showFootnotes: false,
-        showCrossReferences: false,  // ← ADD THIS
+        showCrossReferences: false,
         verseByVerse: false,
         colorTheme: 'dracula',
-        lightMode: false
+        lightMode: false,
+        translation: 'ESV' // NEW: Default translation
     };
 }
-
 
 export function navigateChapter(app, direction) {
     let newChapter = app.state.currentChapter + direction;

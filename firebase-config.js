@@ -60,6 +60,8 @@ export async function loadUserData(userId) {
         userData.settings ? userData.settings.showHeadings !== false : true,
       showFootnotes:
         userData.settings ? userData.settings.showFootnotes === true : false,
+      showCrossReferences:
+        userData.settings ? userData.settings.showCrossReferences === true : false,
       verseByVerse:
         userData.settings ? userData.settings.verseByVerse === true : false,
       colorTheme:
@@ -70,7 +72,11 @@ export async function loadUserData(userId) {
         userData.settings && typeof userData.settings.lightMode === "boolean"
           ? userData.settings.lightMode
           : false,
-    };;
+      translation:
+        userData.settings && userData.settings.translation
+          ? userData.settings.translation
+          : "ESV", // NEW: Default to ESV if not set
+    };
 
     return { apiKey, settings };
   } catch (error) {
