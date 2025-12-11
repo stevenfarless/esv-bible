@@ -1212,6 +1212,7 @@ a:visited {
 
 /* Style the .footnote class and its anchor */
 .passage-text sup.footnote {
+	font-style: italic;
 	font-weight: 700;
 	padding: 0 0.2em;
 	border-radius: 3px;
