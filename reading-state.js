@@ -3,16 +3,20 @@
 
 export function initializeState() {
     return {
-        currentBook: 'Genesis',
+        currentBook: 'John',
         currentChapter: 1,
         selectedVerse: null,
         fontSize: 18,
         showVerseNumbers: true,
         showHeadings: true,
         showFootnotes: false,
-        verseByVerse: false
+        showCrossReferences: false,  // ← ADD THIS
+        verseByVerse: false,
+        colorTheme: 'dracula',
+        lightMode: false
     };
 }
+
 
 export function navigateChapter(app, direction) {
     let newChapter = app.state.currentChapter + direction;

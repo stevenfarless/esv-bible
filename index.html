@@ -187,7 +187,7 @@
 			</div>
 			<div class="modal-body">
 				<!-- Accordion Section 1: Display Options -->
-				<div class="accordion-section active" data-section="display">
+				<div class="accordion-section" data-section="display">
 					<button class="accordion-header" data-target="display">
 						<span class="accordion-title">Display Options</span>
 						<svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -213,6 +213,12 @@
 								<label class="checkbox-label">
 									<input type="checkbox" id="footnotesToggle" />
 									<span>Show footnotes</span>
+								</label>
+							</div>
+							<div class="setting-item">
+								<label class="checkbox-label">
+									<input type="checkbox" id="crossReferencesToggle" />
+									<span>Show cross-references</span>
 								</label>
 							</div>
 							<div class="setting-item">
@@ -309,7 +315,6 @@
 			</div>
 		</div>
 	</div>
-
 
 	<!-- Help modal (now separate, correct placement) -->
 	<div id="helpModal" class="modal">
@@ -495,17 +500,40 @@
 		</div>
 	</div>
 
+	<!-- Footnotes and Cross-References Modal (Bottom Sheet) -->
+	<div id="referencesModal" class="modal">
+		<div class="modal-content modal-bottom-sheet">
+			<div class="modal-header">
+				<h3><!-- Footnotes & Cross-References --></h3>
+				<button class="close-btn" id="closeReferencesModal">×</button>
+			</div>
+			<div class="modal-body">
+				<!-- Footnotes Section -->
+				<div id="footnotesSection" style="display: none;">
+					<h4 style="color: var(--secondary-color); margin-bottom: var(--spacing-md);">Footnotes</h4>
+					<div id="footnotesContent"></div>
+				</div>
+
+				<!-- Cross-References Section -->
+				<div id="crossReferencesSection" style="display: none;">
+					<h4
+						style="color: var(--secondary-color); margin-bottom: var(--spacing-md); margin-top: var(--spacing-lg);">
+						Cross-References
+					</h4>
+					<div id="crossReferencesContent"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
 	<!-- Toast notification -->
 	<div id="toast" class="toast"></div>
-
 	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
 	<script type="module" src="firebase-config.js"></script>
-
 	<script type="module" src="app.js"></script>
-
 </body>
 
 
