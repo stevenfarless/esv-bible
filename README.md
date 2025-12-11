@@ -4,7 +4,7 @@ A single-page ESV Bible reader focused on speed, readability, and a distraction-
 
 ## Live Site
 
-- **Production:** https://stevenfarless.github.io/esv-bible/
+- https://stevenfarless.github.io/esv-bible/
 
 ## Features
 

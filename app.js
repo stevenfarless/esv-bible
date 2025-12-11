@@ -6,7 +6,6 @@ import { BibleApi } from './bible-api.js';
 import { initializeState, navigateChapter as navChapter, scrollToVerse as scrollVerse, applyVerseGlow as glowVerse } from './reading-state.js';
 import { loadUserData as loadUserDataFromFirebase } from './firebase-config.js';
 import { cacheElements, loadTheme, toggleTheme, updateThemeIcon, changeColorTheme } from './ui.js';
-
 class BibleApp {
     constructor() {
         // Configuration
@@ -554,6 +553,16 @@ class BibleApp {
         // Update UI with passage content
         this.passageTitle.textContent = reference;
         this.passageText.innerHTML = data.passages[0];
+
+        // debug
+        console.log('=== DEBUGGING FOOTNOTES ===');
+        console.log('showFootnotes setting:', this.state.showFootnotes);
+        console.log('All .footnote elements:', this.passageText.querySelectorAll('.footnote'));
+        const footnotes = this.passageText.querySelectorAll('.footnote');
+        footnotes.forEach((fn, i) => {
+            console.log(`Footnote ${i}:`, fn.outerHTML);
+        });
+        console.log('=== END DEBUG ===');
 
         // Cache original HTML for highlight logic
         this.originalPassageHtml = this.passageText.innerHTML;
@@ -1333,109 +1342,80 @@ class BibleApp {
 
     loadFootnote(footnoteId, clickedLink) {
         // Extract the verse reference from the clicked link's context
-        let verseRef = '';
+        let verseRef = this.getVerseReferenceForElement(clickedLink);
 
-        // Try to find the verse number that precedes this footnote link
-        if (clickedLink) {
-            // Look for the closest verse-num span before this link
-            let currentElement = clickedLink;
-
-            // Walk backwards through siblings to find verse number
-            while (currentElement) {
-                // Check if this element or any child contains a verse-num
-                const verseNum = currentElement.querySelector('.verse-num');
-                if (verseNum) {
-                    const verseNumber = verseNum.textContent.trim();
-                    verseRef = `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
-                    break;
-                }
-
-                // Check previous sibling
-                currentElement = currentElement.previousElementSibling;
-
-                // If we've walked back too far (past multiple elements), stop
-                if (!currentElement || currentElement.tagName === 'H2' || currentElement.tagName === 'H3') {
-                    break;
-                }
-            }
-
-            // Fallback: try walking up to parent and check its children
-            if (!verseRef) {
-                const parent = clickedLink.closest('p, div');
-                if (parent) {
-                    const verses = parent.querySelectorAll('.verse-num');
-                    if (verses.length > 0) {
-                        // Find the verse number closest before the link
-                        for (let i = verses.length - 1; i >= 0; i--) {
-                            if (parent.contains(verses[i]) &&
-                                verses[i].compareDocumentPosition(clickedLink) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                                const verseNumber = verses[i].textContent.trim();
-                                verseRef = `${this.state.currentBook} ${this.state.currentChapter}:${verseNumber}`;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Fallback if we couldn't find verse reference
-        if (!verseRef) {
-            verseRef = `${this.state.currentBook} ${this.state.currentChapter}`;
-        }
-
-        // Find the footnote at the bottom of the passage (even though it's hidden now)
+        // Find the footnote at the bottom of the passage
         const footnoteElement = this.passageText.querySelector(`#${footnoteId}`);
 
         if (footnoteElement) {
-            // Get the parent <p> element that contains the full footnote
-            const footnotePara = footnoteElement.closest('p');
+            // The footnote anchor is inside a span.footnote, get its parent
+            const footnoteSpan = footnoteElement.closest('.footnote');
+            if (!footnoteSpan) {
+                this.showFootnoteError(verseRef);
+                return;
+            }
 
-            if (footnotePara) {
-                // Extract the actual note content
-                const noteElement = footnotePara.querySelector('note');
-                let footnoteText = '';
+            // Collect all nodes from this footnote until the next <br> or next .footnote
+            let footnoteText = '';
+            let currentNode = footnoteSpan.nextSibling;
 
-                if (noteElement) {
-                    // Get text content from the note element
-                    footnoteText = noteElement.textContent || noteElement.innerText || '';
-                } else {
-                    // Fallback: get all text after the footnote reference
-                    const clone = footnotePara.cloneNode(true);
-                    // Remove the footnote number link
-                    const fnLink = clone.querySelector('.footnote');
-                    if (fnLink) fnLink.remove();
-                    // Remove the verse reference
-                    const refSpan = clone.querySelector('.footnote-ref');
-                    if (refSpan) refSpan.remove();
-
-                    footnoteText = clone.textContent.trim();
+            while (currentNode) {
+                // Stop if we hit a BR (end of this footnote) or another .footnote span
+                if (currentNode.nodeName === 'BR') {
+                    break;
+                }
+                if (currentNode.nodeType === 1 && currentNode.classList && currentNode.classList.contains('footnote')) {
+                    break;
                 }
 
-                // Display the footnote
-                this.footnotesContent.innerHTML = `
+                // Skip the verse reference span (e.g., "1:6")
+                if (currentNode.nodeType === 1 && currentNode.classList && currentNode.classList.contains('footnote-ref')) {
+                    currentNode = currentNode.nextSibling;
+                    continue;
+                }
+
+                // Collect text from <note> elements
+                if (currentNode.nodeType === 1 && currentNode.tagName === 'NOTE') {
+                    footnoteText += currentNode.textContent.trim();
+                    break; // Usually the note is the last element before <br>
+                }
+
+                // Collect text nodes
+                if (currentNode.nodeType === 3) { // Text node
+                    footnoteText += currentNode.textContent;
+                }
+
+                currentNode = currentNode.nextSibling;
+            }
+
+            footnoteText = footnoteText.trim();
+
+            // Display the footnote
+            this.footnotesContent.innerHTML = `
                 <div class="footnote-item">
                     <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
-                    <div class="footnote-text">${footnoteText}</div>
+                    <div class="footnote-text">${footnoteText || 'Footnote text not found.'}</div>
                 </div>
             `;
 
-                this.footnotesSection.style.display = 'block';
-            }
-        } else {
-            // Fallback if footnote not found
-            this.footnotesContent.innerHTML = `
-            <div class="footnote-item">
-                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
-                <div class="footnote-text">Footnote content not available.</div>
-            </div>
-        `;
             this.footnotesSection.style.display = 'block';
+        } else {
+            this.showFootnoteError(verseRef);
         }
     }
 
+    showFootnoteError(verseRef) {
+        this.footnotesContent.innerHTML = `
+            <div class="footnote-item">
+                <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">${verseRef}</div>
+                <div class="footnote-text">Footnote not found. Make sure "Show footnotes" is enabled in Settings, then reload this passage.</div>
+            </div>
+        `;
+        this.footnotesSection.style.display = 'block';
+    }
+
     // ==========================================
-    // NEW HELPER FUNCTIONS - Add below
+    // NEW HELPER FUNCTIONS 
     // ==========================================
 
     // Make footnote superscripts clickable
@@ -1499,23 +1479,56 @@ class BibleApp {
 
     // Show a simple footnote modal
     showFootnoteModal(footnoteNumber, verseRef) {
+        // Find the matching <sup class="footnote"> that has this number
+        const allSups = this.passageText.querySelectorAll('sup.footnote');
+        let footnoteText = '';
+
+        allSups.forEach(sup => {
+            const link = sup.querySelector('a.fn');
+            if (!link) return;
+
+            const linkText = link.textContent.trim();
+            if (linkText === footnoteNumber) {
+                // Get the title attribute which contains the HTML-encoded note
+                const title = link.getAttribute('title');
+                if (title) {
+                    // Decode HTML entities
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = title;
+                    const decoded = tempDiv.textContent || tempDiv.innerText || '';
+
+                    // Extract text from <note>...</note> wrapper
+                    const noteMatch = decoded.match(/<note[^>]*>(.*?)<\/note>/s);
+                    if (noteMatch) {
+                        // Parse the inner HTML to preserve formatting like <i>
+                        tempDiv.innerHTML = noteMatch[1];
+                        footnoteText = tempDiv.innerHTML;
+                    } else {
+                        footnoteText = decoded;
+                    }
+                }
+            }
+        });
+
+        if (!footnoteText) {
+            footnoteText = 'Footnote content not available with current API settings. To view full footnote text, enable "Show footnotes" in Settings.';
+        }
+
         this.footnotesSection.style.display = 'block';
         this.crossReferencesSection.style.display = 'none';
-
         this.footnotesContent.innerHTML = `
-        <div class="footnote-item">
-            <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
-                ${verseRef} [${footnoteNumber}]
-            </div>
-            <div class="footnote-text">
-                Footnote content not available with current API settings. 
-                To view full footnote text, enable "Show footnotes" in Settings.
-            </div>
-        </div>
-    `;
-
+    <div class="footnote-item">
+      <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
+        ${verseRef} [${footnoteNumber}]
+      </div>
+      <div class="footnote-text">
+        ${footnoteText}
+      </div>
+    </div>
+  `;
         this.referencesModal.classList.add('active');
     }
+
 
     // ==========================================
     // END OF NEW FUNCTIONS
