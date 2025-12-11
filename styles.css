@@ -1213,7 +1213,6 @@ a:visited {
 /* Style the .footnote class directly (no anchor tag) */
 .passage-text sup.footnote {
 	color: var(--primary-color);
-	/* Gold for Onyx, Purple for Dracula, Blue for Steel */
 	font-weight: 700;
 	padding: 0 0.2em;
 	border-radius: 3px;
@@ -1236,9 +1235,15 @@ body:not(.steel-theme):not(.onyx-theme) .passage-text sup.footnote:hover {
 	/* Dracula purple */
 }
 
+.onyx-theme .passage-text sup.footnote {
+	color: #ffd700;
+	/* Pure bright gold */
+}
+
 .onyx-theme .passage-text sup.footnote:hover {
-	background-color: rgba(212, 175, 55, 0.2);
-	/* Gold glow */
+	color: #ffed4e;
+	/* Even brighter on hover */
+	background-color: rgba(255, 215, 0, 0.25);
 }
 
 /* ==========================================
