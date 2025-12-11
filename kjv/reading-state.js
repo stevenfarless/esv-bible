@@ -12,9 +12,9 @@ export function initializeState() {
         showFootnotes: false,
         showCrossReferences: false,
         verseByVerse: false,
-        colorTheme: 'dracula',
+        colorTheme: 'onyx',
         lightMode: false,
-        translation: 'ESV' // NEW: Default translation
+        translation: 'KJV'
     };
 }
 

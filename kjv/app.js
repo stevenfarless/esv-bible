@@ -964,21 +964,22 @@ class BibleApp {
     }
 
     loadLocalSettings() {
-        // API key for guests
-        this.API_KEY = localStorage.getItem('esvApiKey') || '';
+    // API key for guests
+    this.API_KEY = localStorage.getItem('esvApiKey') || '';
 
-        this.state.fontSize = parseInt(localStorage.getItem('fontSize') || '18', 10);
-        this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
-        this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
-        this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
-        this.state.showCrossReferences = localStorage.getItem('showCrossReferences') === 'true';
-        this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
-        this.state.translation = localStorage.getItem('translation') || 'ESV'; // NEW
+    this.state.fontSize = parseInt(localStorage.getItem('fontSize') || '18', 10);
+    this.state.showVerseNumbers = localStorage.getItem('showVerseNumbers') !== 'false';
+    this.state.showHeadings = localStorage.getItem('showHeadings') !== 'false';
+    this.state.showFootnotes = localStorage.getItem('showFootnotes') === 'true';
+    this.state.showCrossReferences = localStorage.getItem('showCrossReferences') === 'true';
+    this.state.verseByVerse = localStorage.getItem('verseByVerse') === 'true';
+    this.state.translation = localStorage.getItem('translation') || 'KJV'; // Changed from 'ESV' to 'KJV'
 
-        // Theme: read but do not apply yet
-        this.state.colorTheme = localStorage.getItem('colorTheme') || 'dracula';
-        this.state.lightMode = localStorage.getItem('lightMode') === 'true';
-    }
+    // Theme: read but do not apply yet
+    this.state.colorTheme = localStorage.getItem('colorTheme') || 'dracula';
+    this.state.lightMode = localStorage.getItem('lightMode') === 'true';
+}
+
 
     applySettings() {
         // Theme selector UI
@@ -1071,9 +1072,23 @@ class BibleApp {
             localStorage.setItem('translation', newTranslation);
         }
 
+        // Automatically enable verse-by-verse mode for KJV
+        if (newTranslation === 'KJV') {
+            this.state.verseByVerse = true;
+            this.verseByVerseToggle.checked = true;
+            this.passageText.classList.add('verse-by-verse');
+
+            // Save verse-by-verse setting
+            if (this.currentUser) {
+                await this.database.ref(`users/${this.currentUser.uid}/settings/verseByVerse`).set(true);
+            } else {
+                localStorage.setItem('verseByVerse', 'true');
+            }
+        }
+
         // Show appropriate message based on translation
         if (newTranslation === 'KJV') {
-            this.showToast('Switched to KJV - No API key required!');
+            this.showToast('Switched to KJV - Verse-by-verse mode enabled');
         } else if (newTranslation === 'ESV' && !this.API_KEY) {
             this.showToast('ESV requires an API key - Please add one in settings');
             return;
@@ -1085,6 +1100,7 @@ class BibleApp {
         this.lastScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
         await this.loadPassage(this.state.currentBook, this.state.currentChapter, true);
     }
+
 
     async updateFontSize(size) {
         this.state.fontSize = parseInt(size);
@@ -1224,57 +1240,61 @@ class BibleApp {
     }
 
     async handleSignup() {
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const apiKey = document.getElementById('signupApiKey').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const apiKey = document.getElementById('signupApiKey').value;
 
-        if (!email || !password || !apiKey) {
-            this.showToast('Please fill in all fields');
-            return;
-        }
+    if (!email || !password) {
+        this.showToast('Please fill in email and password');
+        return;
+    }
 
-        if (password.length < 6) {
-            this.showToast('Password must be at least 6 characters');
-            return;
-        }
+    if (password.length < 6) {
+        this.showToast('Password must be at least 6 characters');
+        return;
+    }
 
-        try {
-            // Create Firebase user
-            const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
+    try {
+        // Create Firebase user
+        const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-            // Save API key (encrypted) and initial settings to database
-            const encrypted = window.encryptionHelper.encrypt(apiKey);
-            await this.database.ref(`users/${user.uid}`).set({
-                apiKey: encrypted,
-                settings: {
-                    fontSize: 18,
-                    showVerseNumbers: true,
-                    showHeadings: true,
-                    showFootnotes: false,
-                    showCrossReferences: false,
-                    verseByVerse: false,
-                    translation: 'ESV' // NEW
-                },
-                createdAt: Date.now()
-            });
+        // Determine translation based on API key
+        const translation = apiKey ? 'ESV' : 'KJV';
 
-            this.showToast('Account created successfully!');
-            this.closeModal(this.signupModal);
+        // Save API key (encrypted) and initial settings to database
+        const encrypted = apiKey ? window.encryptionHelper.encrypt(apiKey) : '';
+        await this.database.ref(`users/${user.uid}`).set({
+            apiKey: encrypted,
+            settings: {
+                fontSize: 18,
+                showVerseNumbers: true,
+                showHeadings: true,
+                showFootnotes: false,
+                showCrossReferences: false,
+                verseByVerse: translation === 'KJV', // Auto-enable verse-by-verse for KJV
+                translation: translation
+            },
+            createdAt: Date.now()
+        });
 
-            // Clear form
-            document.getElementById('signupEmail').value = '';
-            document.getElementById('signupPassword').value = '';
-            document.getElementById('signupApiKey').value = '';
-        } catch (error) {
-            console.error('Signup error:', error);
-            if (error.code === 'auth/email-already-in-use') {
-                this.showToast('Account already exists. Please sign in.');
-            } else {
-                this.showToast('Signup failed: ' + error.message);
-            }
+        this.showToast('Account created successfully!');
+        this.closeModal(this.signupModal);
+
+        // Clear form
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupApiKey').value = '';
+    } catch (error) {
+        console.error('Signup error:', error);
+        if (error.code === 'auth/email-already-in-use') {
+            this.showToast('Account already exists. Please sign in.');
+        } else {
+            this.showToast('Signup failed: ' + error.message);
         }
     }
+}
+
 
     async handleLogout() {
         try {
