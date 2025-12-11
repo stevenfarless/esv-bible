@@ -1232,19 +1232,20 @@ a:visited {
 
 body:not(.steel-theme):not(.onyx-theme) .passage-text sup.footnote:hover {
 	background-color: rgba(189, 147, 249, 0.15);
-	/* Dracula purple */
 }
 
+/* Onyx theme - force bright gold with !important */
 .onyx-theme .passage-text sup.footnote {
-	color: #ffd700;
+	color: #ffd700 !important;
 	/* Pure bright gold */
 }
 
 .onyx-theme .passage-text sup.footnote:hover {
-	color: #ffed4e;
+	color: #ffed4e !important;
 	/* Even brighter on hover */
-	background-color: rgba(255, 215, 0, 0.25);
+	background-color: rgba(255, 215, 0, 0.25) !important;
 }
+
 
 /* ==========================================
    FOOTNOTES AND CROSS-REFERENCES MODAL
