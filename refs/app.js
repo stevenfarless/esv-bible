@@ -554,6 +554,16 @@ class BibleApp {
         this.passageTitle.textContent = reference;
         this.passageText.innerHTML = data.passages[0];
 
+        // debug
+        console.log('=== DEBUGGING FOOTNOTES ===');
+        console.log('showFootnotes setting:', this.state.showFootnotes);
+        console.log('All .footnote elements:', this.passageText.querySelectorAll('.footnote'));
+        const footnotes = this.passageText.querySelectorAll('.footnote');
+        footnotes.forEach((fn, i) => {
+            console.log(`Footnote ${i}:`, fn.outerHTML);
+        });
+        console.log('=== END DEBUG ===');
+
         // Cache original HTML for highlight logic
         this.originalPassageHtml = this.passageText.innerHTML;
 
@@ -1469,32 +1479,32 @@ class BibleApp {
 
     // Show a simple footnote modal
     // In app.js, replace showFootnoteModal with this version
-showFootnoteModal(footnoteNumber, verseRef) {
-  // Try to find matching bottom-of-page footnote span (same as loadFootnote does)
-  const allFootnotes = this.passageText.querySelectorAll('.footnote');
-  let footnoteText = '';
+    showFootnoteModal(footnoteNumber, verseRef) {
+        // Try to find matching bottom-of-page footnote span (same as loadFootnote does)
+        const allFootnotes = this.passageText.querySelectorAll('.footnote');
+        let footnoteText = '';
 
-  allFootnotes.forEach(span => {
-    const ref = span.querySelector('.footnote-ref');
-    if (!ref) return;
-    const refText = ref.textContent.trim();
-    if (refText === footnoteNumber || refText.endsWith(`[${footnoteNumber}]`)) {
-      // Collect text after the ref inside this span
-      const clone = span.cloneNode(true);
-      const toRemove = clone.querySelector('.footnote-ref');
-      if (toRemove) toRemove.remove();
-      footnoteText = clone.textContent.trim();
-    }
-  });
+        allFootnotes.forEach(span => {
+            const ref = span.querySelector('.footnote-ref');
+            if (!ref) return;
+            const refText = ref.textContent.trim();
+            if (refText === footnoteNumber || refText.endsWith(`[${footnoteNumber}]`)) {
+                // Collect text after the ref inside this span
+                const clone = span.cloneNode(true);
+                const toRemove = clone.querySelector('.footnote-ref');
+                if (toRemove) toRemove.remove();
+                footnoteText = clone.textContent.trim();
+            }
+        });
 
-  if (!footnoteText) {
-    footnoteText =
-      'Footnote content not available with current API settings. To view full footnote text, enable "Show footnotes" in Settings.';
-  }
+        if (!footnoteText) {
+            footnoteText =
+                'Footnote content not available with current API settings. To view full footnote text, enable "Show footnotes" in Settings.';
+        }
 
-  this.footnotesSection.style.display = 'block';
-  this.crossReferencesSection.style.display = 'none';
-  this.footnotesContent.innerHTML = `
+        this.footnotesSection.style.display = 'block';
+        this.crossReferencesSection.style.display = 'none';
+        this.footnotesContent.innerHTML = `
     <div class="footnote-item">
       <div class="footnote-ref-display" style="color: var(--secondary-color); font-size: 0.9em; margin-bottom: 0.5rem; font-weight: 600;">
         ${verseRef} [${footnoteNumber}]
@@ -1504,8 +1514,8 @@ showFootnoteModal(footnoteNumber, verseRef) {
       </div>
     </div>
   `;
-  this.referencesModal.classList.add('active');
-}
+        this.referencesModal.classList.add('active');
+    }
 
 
     // ==========================================
